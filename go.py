@@ -17,6 +17,7 @@ logging.basicConfig(
     format='%(asctime)s|%(levelname)s|%(name)s|%(message)s',
     datefmt='%Y-%m-%d %H:%M:%S')
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
 
 """Just to adjust the internal representation of color at a single location,
@@ -88,7 +89,8 @@ class GO_game():
             if (len(self.play_history) > 2 and
                     self.play_history[-2].split(':')[1] == ''):
                 logger.info('Game finished!')
-            return self.evaluate_points()
+                return self.evaluate_points()   # Game ended!
+            return                              # There is nothing to do
 
         # 3. Play the stone
         # Transform the 'ef' type location to a matrix index (row, col)
@@ -283,8 +285,13 @@ class GO_game():
                 elif not black_neighbor and white_neighbor:
                     white_score += len(chain)
 
-        black_score += self.black_player_captured
-        white_score += self.white_player_captured
+        logger.debug(f'White territory: {white_score}')
+        logger.debug(f'Black territory: {black_score}')
+        logger.debug(f'White captured: {self.white_player_captured}')
+        logger.debug(f'Black captured: {self.black_player_captured}')
+
+        black_score -= self.white_player_captured
+        white_score -= self.black_player_captured
         white_score += self.komi
 
         print(f'White: {white_score}\nBlack: {black_score}')
