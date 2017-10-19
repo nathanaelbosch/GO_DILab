@@ -375,11 +375,16 @@ class GO_game():
             except InvalidMove_Error as e:
                 pass
 
-        move = rn.choice(valid_moves)
+        if len(valid_moves) == 0:
+            move = ''
+        else:
+            move = rn.choice(valid_moves)
+
         if apply:
             self._play(move, own_color)
         if show_board:
             print(self)
+
         return move
 
 
