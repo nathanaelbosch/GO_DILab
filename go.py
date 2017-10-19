@@ -64,7 +64,7 @@ class GO_game():
         self.black_rank = int(setup.get('BR', 0))
 
         self.play_history = []
-        self.board_history = []
+        self.board_history = set()
         if 'AB' in setup.keys():
             for loc in setup['AB']:
                 self.board[self._str2index(loc)] = BLACK
@@ -156,7 +156,7 @@ class GO_game():
             raise InvalidMove_Error('No suicides')
         # 4b. No board state twice! (Depends on rules, yes, TODO)
         if (len(self.board_history) > 0 and
-                any((h == self.board).all() for h in self.board_history)):
+                self._board_to_number(self.board) in self.board_history):
             self.board[loc] = color
             raise InvalidMove_Error(
                 'Same constellation can only appear once')
@@ -165,7 +165,7 @@ class GO_game():
         # If we were testing just revert everything, else append to history
         if not testing:
             # Append move and board to histories
-            self.board_history.append(self.board.copy())
+            self.board_history.add(self._board_to_number(self.board.copy()))
             self.play_history.append(player+':'+move)
         else:
             # Revert changes
@@ -386,6 +386,24 @@ class GO_game():
             print(self)
 
         return move
+
+    def _board_to_number(self, board):
+        """Basically just create a unique representation for a board
+
+        I do this because performence gets bad once the board history is
+        large
+        """
+        number = 0
+        i = 0
+        for entry in np.nditer(board):
+            if entry == WHITE:
+                number += 1 * 10**i
+            elif entry == BLACK:
+                number += 2 * 10**i
+            else:
+                number += 3 * 10**i
+            i += 1
+        return number
 
 
 if __name__ == '__main__':

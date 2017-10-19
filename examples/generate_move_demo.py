@@ -12,7 +12,7 @@ def main():
     game = go.GO_game()
     while True:
         game.generate_move()
-        time.sleep(0.1)
+        # time.sleep(0.1)
 
 
 if __name__ == '__main__':
