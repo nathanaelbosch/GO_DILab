@@ -10,6 +10,7 @@ does not affect the code in any way during the runtime (afaik).
 """
 from typing import Dict, Tuple, List
 import numpy as np
+import random as rn
 import logging
 logging.basicConfig(
     # filename='logs/go_game.log',
@@ -28,6 +29,10 @@ BLACK = 1
 
 
 class GO_Error(Exception):
+    pass
+
+
+class InvalidMove_Error(GO_Error):
     pass
 
 
@@ -81,33 +86,46 @@ class GO_game():
         if show_board or self.show_each_turn:
             print(self)
 
-    def _play(self, loc: str, player: {'w', 'b'}):
-        """Play at a location, and check for all the rules"""
+    def _play(self, move: str, player: {'w', 'b'}, testing=False):
+        """Play at a location, and check for all the rules
 
-        # 1. First things first: Append move to play_history
-        self.play_history.append(player+':'+loc)
+        Parameters
+        ----------
+        move: str
+            Location using the sgf notation, e.g. 'ef'
+        player: {'w', 'b'}
+            Char designation the player
+        testing: bool
+            I Introduced this so that `_play` is also a function that tests
+            for validity. If we're in "testing-mode", just revert the state
+            Also we assume noone would call this using `''` (pass)
+        """
+        # 0. Save board to be able to revert it after
+        _starting_board = self.board.copy()
 
-        # 2. Check if the player is passing and if this ends the game
-        if loc == '':
+        # 1. Check if the player is passing and if this ends the game
+        if move == '':
+            self.play_history.append(player+':'+move)
+            # Append the move to the move_history
             if (len(self.play_history) > 2 and
                     self.play_history[-2].split(':')[1] == ''):
                 logger.info('Game finished!')
                 return self.evaluate_points()   # Game ended!
             return                              # There is nothing to do
 
-        # 3. Play the stone
+        # 2. Play the stone
         # Transform the 'ef' type location to a matrix index (row, col)
-        loc = self._str2index(loc)
+        loc = self._str2index(move)
         # Use the numerical player representation (-1 or 1 so far)
-        player = WHITE if player == 'w' else BLACK
+        color = WHITE if player == 'w' else BLACK
         # Check if the location is empty
         if self.board[loc] != 0:
-            raise GO_Error('Invalid Move! ' +
-                           'There is already a stone at that location!')
+            raise InvalidMove_Error(
+                'There is already a stone at that location')
         # "Play the stone" at the location
-        self.board[loc] = player
+        self.board[loc] = color
 
-        # 4. Check if this kills a group of stones and remove them
+        # 3. Check if this kills a group of stones and remove them
         # How this is done:
         #   1. Get all neighbors
         #   1b. Only look at those with the enemy color
@@ -117,14 +135,14 @@ class GO_game():
         neighbors = self._get_adjacent_coords(loc)
         groups = []
         for n in neighbors:
-            if self.board[n] == -player:
+            if self.board[n] == -color:
                 groups.append(self._get_chain(n))
         for g in groups:
             if self._check_dead(g):
                 # Capture the stones!
-                if player == BLACK:
+                if color == BLACK:
                     self.black_player_captured += len(g)
-                if player == WHITE:
+                if color == WHITE:
                     self.white_player_captured += len(g)
                 for c in g:
                     self.board[c] = 0
@@ -134,17 +152,24 @@ class GO_game():
         own_chain = self._get_chain(loc)
         if self._check_dead(own_chain):
             # This play is actually a suicide! Revert changes and raise Error
-            self.board[loc] = player
-            raise GO_Error('Invalid Play! No suicides!')
+            self.board[loc] = color
+            raise InvalidMove_Error('No suicides')
         # 4b. No board state twice! (Depends on rules, yes, TODO)
         if (len(self.board_history) > 0 and
                 any((h == self.board).all() for h in self.board_history)):
-            raise GO_Error('Invalid Play! ' +
-                           'Same constellation can only appear once!')
+            self.board[loc] = color
+            raise InvalidMove_Error(
+                'Same constellation can only appear once')
 
         # 5. Everything is valid :)
-        # Append board to board_history
-        self.board_history.append(self.board.copy())
+        # If we were testing just revert everything, else append to history
+        if not testing:
+            # Append move and board to histories
+            self.board_history.append(self.board.copy())
+            self.play_history.append(player+':'+move)
+        else:
+            # Revert changes
+            self.board = _starting_board
 
     def _str2index(self, loc: str) -> Tuple[int, int]:
         """Convert the sgf location format to a usable matrix index
@@ -157,6 +182,18 @@ class GO_game():
         col = self._chr2ord(loc[0])
         row = self._chr2ord(loc[1])
         return (row, col)
+
+    def _index2str(self, index: Tuple[int, int]) -> str:
+        """Convert the sgf location format to a usable matrix index
+
+        Examples
+        --------
+        >>> g = GO_game(); g._str2index('ef')
+        (5, 4)
+        """
+        col = self._ord2chr(index[1])
+        row = self._ord2chr(index[0])
+        return col+row
 
     def __repr__(self):
         """String representation of the board!
@@ -308,6 +345,42 @@ class GO_game():
             white_score += self.komi
 
             print(f'White: {white_score}\nBlack: {black_score}')
+        if black_score == white_score:
+            print('Same score: Draw!')
+            return
+        winner = 'Black' if black_score > white_score else 'White'
+        print(f'{winner} won by {abs(black_score - white_score)} points!')
+
+    def generate_move(self, apply=True, show_board=True):
+        """Generate a valid move - ANY valid move
+
+        This is just a proof of concept, no need for it to be smart right now.
+        """
+        # 0. Which player am I?
+        if len(self.play_history) > 0:
+            own_color = 'w' if self.play_history[-1].startswith('b') else 'b'
+        else:
+            own_color = 'b'
+
+        # 1. Get free locations on the board
+        empty_locations = np.argwhere(self.board == 0)
+        empty_locations = [(l[0], l[1]) for l in empty_locations]
+
+        valid_moves = []
+        for location in empty_locations:
+            move = self._index2str(location)
+            try:
+                self._play(move, own_color, testing=True)
+                valid_moves.append(move)
+            except InvalidMove_Error as e:
+                pass
+
+        move = rn.choice(valid_moves)
+        if apply:
+            self._play(move, own_color)
+        if show_board:
+            print(self)
+        return move
 
 
 if __name__ == '__main__':
