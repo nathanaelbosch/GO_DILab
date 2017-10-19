@@ -1,3 +1,7 @@
+data
+
+##################################################################
+# All the rest here is the preset python .gitignore from github ;)
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
