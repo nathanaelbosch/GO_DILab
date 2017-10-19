@@ -1,2 +1,2 @@
-# GO_DILab
-A machine learning how to play GO - DataInnovation-Lab - WS20172018
+# A machine learning how to play GO
+DataInnovation-Lab - WS20172018
