@@ -53,7 +53,8 @@ class Game():
     """
     def __init__(self, setup={}, show_each_turn=False):
         # Dict returned by sgf has values as lists
-        setup = {k: v[0] for k, v in setup.items()}
+        setup = {k: (v[0] if isinstance(v, list) else v)
+                 for k, v in setup.items()}
 
         self.komi = float(setup.get('KM', 7))
         self.size = int(setup.get('SZ', 9))
@@ -154,12 +155,12 @@ class Game():
         own_chain = self._get_chain(loc)
         if self._check_dead(own_chain):
             # This play is actually a suicide! Revert changes and raise Error
-            self.board[loc] = color
+            self.board[loc] = 0
             raise InvalidMove_Error('No suicides')
         # 4b. No board state twice! (Depends on rules, yes, TODO)
         if (len(self.board_history) > 0 and
                 self._board_to_number(self.board) in self.board_history):
-            self.board[loc] = color
+            self.board[loc] = 0
             raise InvalidMove_Error(
                 'Same constellation can only appear once')
 
@@ -171,7 +172,7 @@ class Game():
             self.play_history.append(player+':'+move)
         else:
             # Revert changes
-            self.board = _starting_board
+            self.board = _starting_board.copy()
 
     def _str2index(self, loc: str) -> Tuple[int, int]:
         """Convert the sgf location format to a usable matrix index
@@ -208,8 +209,8 @@ class Game():
         b[b == WHITE] = 3
 
         matrix_repr = str(b)
-        matrix_repr = matrix_repr.replace('2', 'B')
-        matrix_repr = matrix_repr.replace('3', 'W')
+        matrix_repr = matrix_repr.replace('2', 'X')
+        matrix_repr = matrix_repr.replace('3', 'O')
         matrix_repr = matrix_repr.replace('0', '·')
         matrix_repr = matrix_repr.replace('[[', ' [')
         matrix_repr = matrix_repr.replace(']]', ']')
