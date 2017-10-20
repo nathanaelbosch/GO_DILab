@@ -229,7 +229,11 @@ class Game():
         >>> g = GO_game(); g._chr2ord('f')
         5
         """
-        return ord(c) - ord('a')
+        idx = ord(c) - ord('a')
+        if idx < 0 or idx >= self.size:
+            raise InvalidMove_Error(c + '=' + str(idx) + ' is an invalid row/column index, board size is '
+                                    + str(self.size))
+        return idx
 
     def _ord2chr(self, o: int) -> str:
         """Small helper function - number to letter
