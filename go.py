@@ -249,11 +249,11 @@ class Game():
         neighbors = []
         if loc[0] > 0:
             neighbors.append((loc[0]-1, loc[1]))
-        if loc[0] < 8:
+        if loc[0] < self.size-1:
             neighbors.append((loc[0]+1, loc[1]))
         if loc[1] > 0:
             neighbors.append((loc[0], loc[1]-1))
-        if loc[1] < 8:
+        if loc[1] < self.size-1:
             neighbors.append((loc[0], loc[1]+1))
         return neighbors
 
