@@ -9,7 +9,7 @@ import go
 
 
 def main():
-    game = go.GO_game()
+    game = go.Game()
     while True:
         game.generate_move()
         # time.sleep(0.1)

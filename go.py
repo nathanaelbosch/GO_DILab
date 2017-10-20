@@ -8,14 +8,15 @@ I did my best on the docstrings, and I used some type-annotation from time to
 time! Python supports that since 3.?, but it's just used by linters and it
 does not affect the code in any way during the runtime (afaik).
 """
-from typing import Dict, Tuple, List
 import numpy as np
 import random as rn
+from typing import Tuple, List
 import logging
 logging.basicConfig(
     # filename='logs/go_game.log',
     level=logging.INFO,
-    format='%(asctime)s|%(levelname)s|%(name)s|%(message)s',
+    # format='%(asctime)s|%(levelname)s|%(name)s|%(message)s',
+    format='%(levelname)s:%(name)s:%(message)s',
     datefmt='%Y-%m-%d %H:%M:%S')
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -36,7 +37,7 @@ class InvalidMove_Error(GO_Error):
     pass
 
 
-class GO_game():
+class Game():
     """Class that contains a game of go
 
     Saves the board as a numpy matrix, using 1 for white and -1 for black.
@@ -345,7 +346,8 @@ class GO_game():
             white_score += len(white_locations)
             white_score += self.komi
 
-            print(f'White: {white_score}\nBlack: {black_score}')
+            logger.debug(f'White: {white_score}')
+            logger.debug(f'Black: {black_score}')
         if black_score == white_score:
             print('Same score: Draw!')
             return
