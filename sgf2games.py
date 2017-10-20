@@ -26,7 +26,7 @@ for file in filepaths:
     if os.path.isfile(myfilepath):
         os.remove(myfilepath)
 
-    engine = GO_game(n_0.properties)
+    engine = GO_game(n_0.properties, show_each_turn=True)
     game = []
     for n in game_tree.nodes[1:]:
         props = n.properties
