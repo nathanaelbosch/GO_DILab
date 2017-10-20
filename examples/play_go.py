@@ -6,7 +6,7 @@ sys.path.append('.')
 from go import Game, InvalidMove_Error
 
 
-game = Game({'SZ': 3})
+game = Game({'SZ': 5})
 while True:
     print(game)
     print('Your move:')
