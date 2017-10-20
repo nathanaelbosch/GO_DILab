@@ -57,6 +57,7 @@ class GO_game():
         self.komi = float(setup.get('KM', 7))
         self.size = int(setup.get('SZ', 9))
         self.rules = setup.get('RU', 'japanese').lower()
+        self.result = setup.get('RE')
         self.time = int(setup.get('TM', 0))
         self.show_each_turn = show_each_turn
         self.board = np.matrix([[0]*self.size]*self.size)
@@ -350,6 +351,8 @@ class GO_game():
             return
         winner = 'Black' if black_score > white_score else 'White'
         print(f'{winner} won by {abs(black_score - white_score)} points!')
+        if self.result:
+            logger.debug(f'Result according to the sgf: {self.result}')
 
     def generate_move(self, apply=True, show_board=True):
         """Generate a valid move - ANY valid move
