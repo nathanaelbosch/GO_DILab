@@ -1,6 +1,6 @@
 """Some first steps towards the GO bot
 
-GO_game is a class that represents a match of GO, including the current board,
+Game is a class that represents a match of GO, including the current board,
 a history of all boards and moves, and checking of validity of moves.
 It also evaluates the area/territory, according to japanese or chinese rules.
 
@@ -13,7 +13,7 @@ import random as rn
 from typing import Tuple, List
 import logging
 logging.basicConfig(
-    # filename='logs/go_game.log',
+    # filename='logs/Game.log',
     level=logging.INFO,
     # format='%(asctime)s|%(levelname)s|%(name)s|%(message)s',
     format='%(levelname)s:%(name)s:%(message)s',
@@ -41,7 +41,7 @@ class Game():
     """Class that contains a game of go
 
     Saves the board as a numpy matrix, using 1 for white and -1 for black.
-    The repr is actually quite cool! Try `g=GO_game();print(g)` :)
+    The repr is actually quite cool! Try `g=Game();print(g)` :)
     Saves the played history
     Checks if groups die and removes them
 
@@ -178,7 +178,7 @@ class Game():
 
         Examples
         --------
-        >>> g = GO_game(); g._str2index('ef')
+        >>> g = Game(); g._str2index('ef')
         (5, 4)
         """
         col = self._chr2ord(loc[0])
@@ -190,7 +190,7 @@ class Game():
 
         Examples
         --------
-        >>> g = GO_game(); g._str2index('ef')
+        >>> g = Game(); g._str2index('ef')
         (5, 4)
         """
         col = self._ord2chr(index[1])
@@ -226,7 +226,7 @@ class Game():
 
         Examples
         --------
-        >>> g = GO_game(); g._chr2ord('f')
+        >>> g = Game(); g._chr2ord('f')
         5
         """
         idx = ord(c) - ord('a')
@@ -240,7 +240,7 @@ class Game():
 
         Examples
         --------
-        >>> g = GO_game(); g._ord2chr(5)
+        >>> g = Game(); g._ord2chr(5)
         'f'
         """
         return chr(o + ord('a'))
@@ -417,5 +417,5 @@ class Game():
 
 if __name__ == '__main__':
     import doctest
-    # doctest.testmod(extraglobs={'g': GO_game()})
+    # doctest.testmod(extraglobs={'g': Game()})
     doctest.testmod()
