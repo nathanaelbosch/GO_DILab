@@ -232,8 +232,10 @@ class Game():
         """
         idx = ord(c) - ord('a')
         if idx < 0 or idx >= self.size:
-            raise InvalidMove_Error(c + '=' + str(idx) + ' is an invalid row/column index, board size is '
-                                    + str(self.size))
+            raise InvalidMove_Error(
+                c + '=' + str(idx) +
+                ' is an invalid row/column index, board size is ' +
+                str(self.size))
         return idx
 
     def _ord2chr(self, o: int) -> str:
