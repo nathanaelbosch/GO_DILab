@@ -6,7 +6,7 @@ sys.path.append('.')
 from go import Game
 
 
-file = 'data/unpacked/2017/09/08/338554.sgf'
+file = 'example_data/some_game.sgf'
 with open(file, 'r') as f:
     content = f.read()
     collection = sgf.parse(content)
@@ -22,3 +22,4 @@ for node in game_tree.nodes[1:]:
         game.w(node.properties['W'][0])
     if 'B' in node.properties.keys():
         game.b(node.properties['B'][0])
+game.evaluate_points()
