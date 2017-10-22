@@ -52,6 +52,7 @@ class Game:
     Checking if someone kills himself (not too bad, noone should do that)
     """
     def __init__(self, setup={}, show_each_turn=False):
+        self.is_running = False
         # Dict returned by sgf has values as lists
         setup = {k: (v[0] if isinstance(v, list) else v)
                  for k, v in setup.items()}
@@ -76,6 +77,9 @@ class Game:
                 self.board[self._str2index(loc)] = WHITE
         self.black_player_captured = 0
         self.white_player_captured = 0
+
+    def start(self):
+        self.is_running = True
 
     def w(self, loc: str, show_board=False):
         """White plays"""
@@ -113,6 +117,7 @@ class Game:
             if (len(self.play_history) > 2 and
                     self.play_history[-2].split(':')[1] == ''):
                 logger.info('Game finished!')
+                self.is_running = False
                 return self.evaluate_points()   # Game ended!
             return                              # There is nothing to do
 
