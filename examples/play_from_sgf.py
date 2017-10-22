@@ -1,12 +1,11 @@
 """Read a single SGF file and recreate the game"""
 import sgf
 import sys
+from src import Game
 
 sys.path.append('.')
-from go import Game
 
-
-file = 'example_data/some_game.sgf'
+file = '../example_data/some_game.sgf'
 with open(file, 'r') as f:
     content = f.read()
     collection = sgf.parse(content)
@@ -14,7 +13,7 @@ with open(file, 'r') as f:
 # Assume the sgf file contains one game
 game_tree = collection.children[0]
 n_0 = game_tree.nodes[0]
-n_0.properties      # Contains the initial game setup
+# n_0.properties contains the initial game setup
 
 game = Game(n_0.properties, show_each_turn=True)
 for node in game_tree.nodes[1:]:

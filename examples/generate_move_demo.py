@@ -2,14 +2,13 @@
 
 Yes, I know, that's not how one should import. I need to learn that :/"""
 import sys
-import time
+from src import Game
 
 sys.path.append('.')
-import go
 
 
 def main():
-    game = go.Game()
+    game = Game()
     last_move = 'something'
     while True:
         move = game.generate_move()
