@@ -1,3 +1,5 @@
+from src.model.Game import InvalidMove_Error
+
 
 class GameController:
 
@@ -24,5 +26,12 @@ class GameController:
         while self.game.is_running:
             self.next_turn()
             self.view.show_player_turn_start(self.current_player.name)
-            self.current_player.make_move()
+            # loop until a move is valid
+            # (can lead to inf-loops when bots fail to produce valid moves)
+            while True:
+                try:
+                    self.current_player.make_move()
+                    break
+                except InvalidMove_Error as e:
+                    self.view.show_error(' '.join(e.args))
             self.view.show_player_turn_end(self.current_player.name)

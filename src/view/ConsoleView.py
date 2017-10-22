@@ -34,3 +34,6 @@ class ConsoleView(View):
         board_repr = col_index + '\n' + board_repr
 
         print(board_repr)
+
+    def show_error(self, msg):
+        print(msg)

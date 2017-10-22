@@ -14,3 +14,7 @@ class View(ABC):
     @abstractmethod
     def show_player_turn_end(self, name):
         pass
+
+    @abstractmethod
+    def show_error(self, msg):
+        pass
