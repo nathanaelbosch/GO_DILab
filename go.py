@@ -326,13 +326,13 @@ class Game():
                         black_neighbor = True
                     if self.board[n] == WHITE:
                         white_neighbor = True
-                if black_neighbor and white_neighbor:
-                    # Neutral territory
-                    pass
-                elif black_neighbor and not white_neighbor:
-                    black_score += len(chain)
-                elif not black_neighbor and white_neighbor:
-                    white_score += len(chain)
+            if black_neighbor and white_neighbor:
+                # Neutral territory
+                pass
+            elif black_neighbor and not white_neighbor:
+                black_score += len(chain)
+            elif not black_neighbor and white_neighbor:
+                white_score += len(chain)
 
         logger.debug(f'White territory: {white_score}')
         logger.debug(f'Black territory: {black_score}')
