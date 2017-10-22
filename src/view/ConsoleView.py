@@ -9,7 +9,10 @@ class ConsoleView(View):
     def __init__(self, game):
         View.__init__(self, game)
 
-    def update_view(self):
+    def show_player_turn_start(self, name):
+        print('Its player ' + name + '\'s turn. Submit your desired location...')
+
+    def show_player_turn_end(self, name):
         # Just a simple ascii output, quite cool but the code is a bit messy"""
         b = self.game.board.copy()
         # You might wonder why I do the following, but its so that numpy

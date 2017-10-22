@@ -8,5 +8,9 @@ class View(ABC):
         self.game = game
 
     @abstractmethod
-    def update_view(self):
+    def show_player_turn_start(self, name):
+        pass
+
+    @abstractmethod
+    def show_player_turn_end(self, name):
         pass

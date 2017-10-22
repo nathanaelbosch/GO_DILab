@@ -23,5 +23,6 @@ class GameController:
         self.game.start()
         while self.game.is_running:
             self.next_player()
+            self.view.show_player_turn_start(self.current_player.name)
             self.current_player.make_move()
-            self.view.update_view()
+            self.view.show_player_turn_end(self.current_player.name)
