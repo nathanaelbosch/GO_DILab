@@ -378,7 +378,8 @@ class Game():
         empty_locations = np.argwhere(self.board == 0)
         empty_locations = [(l[0], l[1]) for l in empty_locations]
 
-        valid_moves = []
+        # Passing is always a valid move
+        valid_moves = ['']
         for location in empty_locations:
             move = self._index2str(location)
             try:

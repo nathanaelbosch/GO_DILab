@@ -10,8 +10,14 @@ import go
 
 def main():
     game = go.Game()
+    last_move = 'something'
     while True:
-        game.generate_move()
+        move = game.generate_move()
+        print(move)
+        if last_move == '' and move == '':
+            # Game Finished!
+            break
+        last_move = move
         # time.sleep(0.1)
 
 
