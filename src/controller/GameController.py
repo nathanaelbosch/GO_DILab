@@ -8,7 +8,7 @@ class GameController:
         self.player2 = player2
         self.current_player = None
 
-    def next_player(self):
+    def next_turn(self):
         # start with player1 if not otherwise defined
         if self.current_player is None:
             self.current_player = self.player1
@@ -22,7 +22,7 @@ class GameController:
     def start(self):
         self.game.start()
         while self.game.is_running:
-            self.next_player()
+            self.next_turn()
             self.view.show_player_turn_start(self.current_player.name)
             self.current_player.make_move()
             self.view.show_player_turn_end(self.current_player.name)
