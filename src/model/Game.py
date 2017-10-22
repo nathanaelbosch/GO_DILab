@@ -368,6 +368,19 @@ class Game:
         if self.result:
             logger.debug(f'Result according to the sgf: {self.result}')
 
+    def get_playable_locations(self, color) -> []:
+        empty_locations = np.argwhere(self.board == 0)
+        empty_locations = [(l[0], l[1]) for l in empty_locations]
+        valid_moves = ['']  # passing is always a valid move
+        for location in empty_locations:
+            move = self._index2str(location)
+            try:
+                self.play(move, color, testing=True)
+                valid_moves.append(move)
+            except InvalidMove_Error as e:
+                pass
+        return valid_moves
+
     def generate_move(self, apply=True, show_board=True):
         """Generate a valid move - ANY valid move
 
