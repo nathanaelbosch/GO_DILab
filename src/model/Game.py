@@ -83,17 +83,17 @@ class Game:
 
     def w(self, loc: str, show_board=False):
         """White plays"""
-        self._play(loc, 'w')
+        self.play(loc, 'w')
         if show_board or self.show_each_turn:
             print(self)
 
     def b(self, loc: str, show_board=False):
         """Black plays"""
-        self._play(loc, 'b')
+        self.play(loc, 'b')
         if show_board or self.show_each_turn:
             print(self)
 
-    def _play(self, move: str, player: {'w', 'b'}, testing=False):
+    def play(self, move: str, player: {'w', 'b'}, testing=False):
         """Play at a location, and check for all the rules
 
         Parameters
@@ -388,7 +388,7 @@ class Game:
         for location in empty_locations:
             move = self._index2str(location)
             try:
-                self._play(move, own_color, testing=True)
+                self.play(move, own_color, testing=True)
                 valid_moves.append(move)
             except InvalidMove_Error as e:
                 pass
@@ -399,7 +399,7 @@ class Game:
             move = rn.choice(valid_moves)
 
         if apply:
-            self._play(move, own_color)
+            self.play(move, own_color)
         if show_board:
             print(self)
 
