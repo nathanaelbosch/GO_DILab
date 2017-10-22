@@ -1,10 +1,9 @@
-"""Play agains the random bot as a human!"""
+"""Play against the random bot as a human!"""
 import sys
-import time
+from src import Game
+from src.model.Game import InvalidMove_Error
 
 sys.path.append('.')
-from go import Game, InvalidMove_Error
-
 
 game = Game({'SZ': 5})
 while True:

@@ -37,7 +37,7 @@ class InvalidMove_Error(GO_Error):
     pass
 
 
-class Game():
+class Game:
     """Class that contains a game of go
 
     Saves the board as a numpy matrix, using 1 for white and -1 for black.
@@ -52,6 +52,7 @@ class Game():
     Checking if someone kills himself (not too bad, noone should do that)
     """
     def __init__(self, setup={}, show_each_turn=False):
+        self.is_running = False
         # Dict returned by sgf has values as lists
         setup = {k: (v[0] if isinstance(v, list) else v)
                  for k, v in setup.items()}
@@ -77,19 +78,22 @@ class Game():
         self.black_player_captured = 0
         self.white_player_captured = 0
 
+    def start(self):
+        self.is_running = True
+
     def w(self, loc: str, show_board=False):
         """White plays"""
-        self._play(loc, 'w')
+        self.play(loc, 'w')
         if show_board or self.show_each_turn:
             print(self)
 
     def b(self, loc: str, show_board=False):
         """Black plays"""
-        self._play(loc, 'b')
+        self.play(loc, 'b')
         if show_board or self.show_each_turn:
             print(self)
 
-    def _play(self, move: str, player: {'w', 'b'}, testing=False):
+    def play(self, move: str, player: {'w', 'b'}, testing=False):
         """Play at a location, and check for all the rules
 
         Parameters
@@ -113,6 +117,7 @@ class Game():
             if (len(self.play_history) > 2 and
                     self.play_history[-2].split(':')[1] == ''):
                 logger.info('Game finished!')
+                self.is_running = False
                 return self.evaluate_points()   # Game ended!
             return                              # There is nothing to do
 
@@ -363,6 +368,19 @@ class Game():
         if self.result:
             logger.debug(f'Result according to the sgf: {self.result}')
 
+    def get_playable_locations(self, color) -> []:
+        empty_locations = np.argwhere(self.board == 0)
+        empty_locations = [(l[0], l[1]) for l in empty_locations]
+        valid_moves = ['']  # passing is always a valid move
+        for location in empty_locations:
+            move = self._index2str(location)
+            try:
+                self.play(move, color, testing=True)
+                valid_moves.append(move)
+            except InvalidMove_Error as e:
+                pass
+        return valid_moves
+
     def generate_move(self, apply=True, show_board=True):
         """Generate a valid move - ANY valid move
 
@@ -383,7 +401,7 @@ class Game():
         for location in empty_locations:
             move = self._index2str(location)
             try:
-                self._play(move, own_color, testing=True)
+                self.play(move, own_color, testing=True)
                 valid_moves.append(move)
             except InvalidMove_Error as e:
                 pass
@@ -394,7 +412,7 @@ class Game():
             move = rn.choice(valid_moves)
 
         if apply:
-            self._play(move, own_color)
+            self.play(move, own_color)
         if show_board:
             print(self)
 
