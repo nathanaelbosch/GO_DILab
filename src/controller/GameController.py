@@ -35,3 +35,7 @@ class GameController:
                 except InvalidMove_Error as e:
                     self.view.show_error(' '.join(e.args))
             self.view.show_player_turn_end(self.current_player.name)
+
+        # TODO
+        # relieve the Game-class from the task to print end-of-game
+        # things, view must do this: self.view.show_game_ended()
