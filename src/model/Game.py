@@ -37,7 +37,7 @@ class InvalidMove_Error(GO_Error):
     pass
 
 
-class Game():
+class Game:
     """Class that contains a game of go
 
     Saves the board as a numpy matrix, using 1 for white and -1 for black.

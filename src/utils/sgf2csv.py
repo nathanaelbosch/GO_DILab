@@ -1,5 +1,5 @@
 import sgf
-from go import Game
+from src.model.Game import Game
 import os
 import re
 
