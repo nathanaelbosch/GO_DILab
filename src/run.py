@@ -5,8 +5,8 @@ def main():
     game = Game()
     view = ConsoleView(game)
     player1 = HumanConsolePlayer("PersonA", "w", game)
-    # player2 = HumanConsolePlayer("PersonB", "b", game)
-    player2 = RandomBotPlayer("RandomBot", "b", game)
+    player2 = HumanConsolePlayer("PersonB", "b", game)
+    #player2 = RandomBotPlayer("RandomBot", "b", game)
     game_controller = GameController(game, view, player1, player2)
     game_controller.start()
 
