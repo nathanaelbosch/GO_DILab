@@ -1,9 +1,12 @@
+import threading
+
 from src.model.Game import InvalidMove_Error
 
 
-class GameController:
+class GameController(threading.Thread):
 
     def __init__(self, game, view, player1, player2):
+        threading.Thread.__init__(self)
         self.game = game
         self.view = view
         self.player1 = player1
@@ -21,7 +24,7 @@ class GameController:
         else:
             self.current_player = self.player1
 
-    def start(self):
+    def run(self):
         self.game.start()
         while self.game.is_running:
             self.next_turn()
