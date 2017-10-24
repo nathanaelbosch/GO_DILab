@@ -1,4 +1,4 @@
-from src import Game, ConsoleView, HumanConsolePlayer, RandomBotPlayer, GameController
+from src import Game, ConsoleView, SimplePlottingView, HumanConsolePlayer, RandomBotPlayer, GameController
 
 
 def main():
@@ -8,7 +8,7 @@ def main():
     # player1 = HumanConsolePlayer("PersonA", "w", self.game)
     # player2 = HumanConsolePlayer("PersonB", "b", self.game)
 
-    view = ConsoleView(game)
+    view = SimplePlottingView(game)
     game_controller = GameController(game, view, player1, player2)
     view.open(game_controller)
 
