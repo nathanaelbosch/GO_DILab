@@ -1,14 +1,13 @@
-from typing import Tuple
 from src.model.Game import InvalidMove_Error
-
-# TODO
-# use these to map location strings to coordinates in HumanConsolePlayer instead of passing string-location to game
+from src.utils.Move import Move
 
 
-def str2index(loc: str, board_size) -> Tuple[int, int]:
+def str2move(loc: str, board_size) -> Move:
+    if not str:
+        return Move(is_pass=True)
     col = _chr2ord(loc[0], board_size)
     row = _chr2ord(loc[1], board_size)
-    return row, col
+    return Move(row, col)
 
 
 def _chr2ord(c: str, board_size) -> int:

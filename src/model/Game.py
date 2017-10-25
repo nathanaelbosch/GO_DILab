@@ -12,6 +12,9 @@ import numpy as np
 import random as rn
 from typing import Tuple, List
 import logging
+
+from src.utils import Move
+
 logging.basicConfig(
     # filename='logs/Game.log',
     level=logging.INFO,
@@ -93,7 +96,9 @@ class Game:
         if show_board or self.show_each_turn:
             print(self)
 
-    def play(self, move: str, player: {'w', 'b'}, testing=False):
+    def play(self, move: Move, player: {'w', 'b'}, testing=False):
+        # TODO change implementation to use Move object instead of str
+
         """Play at a location, and check for all the rules
 
         Parameters

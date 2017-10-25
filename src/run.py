@@ -4,11 +4,11 @@ from src import Game, ConsoleView, SimplePlottingView, HumanConsolePlayer, Rando
 def main():
     game = Game()
     player1 = RandomBotPlayer("RandomBot", "w", game)
-    player2 = RandomBotPlayer("RandomBot", "b", game)
-    # player1 = HumanConsolePlayer("PersonA", "w", self.game)
-    # player2 = HumanConsolePlayer("PersonB", "b", self.game)
+    #player2 = RandomBotPlayer("RandomBot", "b", game)
+    # player1 = HumanConsolePlayer("PersonA", "w", game)
+    player2 = HumanConsolePlayer("PersonB", "b", game)
 
-    view = SimplePlottingView(game)
+    view = ConsoleView(game)
     game_controller = GameController(game, view, player1, player2)
     view.open(game_controller)
 
