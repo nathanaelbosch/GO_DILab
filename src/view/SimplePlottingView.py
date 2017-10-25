@@ -4,6 +4,7 @@ import numpy as np
 import tkinter  # Python's standard GUI
 
 from src.view import View
+from src.view import Move
 from src.model.Game import BLACK
 from src.model.Game import WHITE
 
@@ -17,6 +18,7 @@ class SimplePlottingView(View):
         self.root = tkinter.Tk()
 
     def open(self, game_controller):
+        self.game_controller = game_controller
         self.root.wm_title("Go")
 
         n = self.game.size
@@ -44,7 +46,7 @@ class SimplePlottingView(View):
         canvas.show()
         canvas.get_tk_widget().pack()
 
-        pass_btn = tkinter.Button(master=self.root, text='Pass', command=self.pass_btn_clicked())
+        pass_btn = tkinter.Button(master=self.root, text='Pass', command=self.pass_btn_clicked)
         pass_btn.pack(side=tkinter.BOTTOM)
 
         canvas.mpl_connect('button_release_event', self.handle_mouse_event)
@@ -57,14 +59,17 @@ class SimplePlottingView(View):
         # accept only left-clicks in canvas area
         if (event.inaxes is None) or (event.button != 1):
             return
-        # TODO
+        col = int(round(event.xdata))
+        row = int(round(event.ydata))
+        if 0 <= col < self.game.size and 0 <= row < self.game.size:
+            self.game_controller.current_player.receive_next_move_from_gui(Move(col, row))
 
     def quit(self):
         self.root.quit()
         self.root.destroy()
 
     def pass_btn_clicked(self):
-        pass
+        self.game_controller.current_player.receive_gui_event(Move(is_pass=True))
 
     def show_player_turn_start(self, name):
         pass
