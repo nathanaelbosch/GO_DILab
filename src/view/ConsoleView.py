@@ -4,6 +4,7 @@ from src.model.Game import BLACK
 from src.model.Game import WHITE
 
 
+
 class ConsoleView(View):
 
     def __init__(self, game):
@@ -12,6 +13,7 @@ class ConsoleView(View):
     def show_player_turn_start(self, name):
         print('Its player ' + name + '\'s turn. Submit your desired location...')
 
+
     def show_player_turn_end(self, name):
         # Just a simple ascii output, quite cool but the code is a bit messy"""
         b = self.game.board.copy()
@@ -19,7 +21,6 @@ class ConsoleView(View):
         # formats the str representation using a single space
         b[b == BLACK] = 2
         b[b == WHITE] = 3
-
         matrix_repr = str(b)
         matrix_repr = matrix_repr.replace('2', 'X')
         matrix_repr = matrix_repr.replace('3', 'O')

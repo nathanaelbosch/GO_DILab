@@ -3,9 +3,10 @@ from src.model.Game import InvalidMove_Error
 
 class GameController:
 
-    def __init__(self, game, view, player1, player2):
+    def __init__(self, game, view, player1, player2, guiview):
         self.game = game
         self.view = view
+        self.guiview = guiview
         self.player1 = player1
         self.player2 = player2
         self.current_player = None
@@ -35,6 +36,7 @@ class GameController:
                 except InvalidMove_Error as e:
                     self.view.show_error(' '.join(e.args))
             self.view.show_player_turn_end(self.current_player.name)
+            self.guiview.show_player_turn_end(self.current_player.name)
 
         # TODO
         # relieve the Game-class from the task to print end-of-game
