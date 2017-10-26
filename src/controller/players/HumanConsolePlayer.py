@@ -9,5 +9,5 @@ class HumanConsolePlayer(Player):
 
     def make_move(self):
         loc_str = input()
-        move = str2move(loc_str, self.game.size)
+        move = str2move(loc_str.lower(), self.game.size)
         self.game.play(move, self.color)
