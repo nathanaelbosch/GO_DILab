@@ -6,8 +6,8 @@ class Move:
         self.row = row
         self.is_pass = is_pass
 
-    def get_loc(self):
-        return self.col, self.row
+    def get_loc_as_matrix_coords(self):
+        return self.row, self.col  # row/col instead of col/row
 
     def __repr__(self):
         if self.is_pass:

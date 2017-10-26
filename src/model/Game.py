@@ -111,7 +111,7 @@ class Game:
             return  # There is nothing to do
 
         # 2. Play the stone
-        loc = move.get_loc()
+        loc = move.get_loc_as_matrix_coords()
         # Use the numerical player representation (-1 or 1 so far)
         color = WHITE if player == 'w' else BLACK
         # Check if the location is empty
