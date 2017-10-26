@@ -1,12 +1,12 @@
-from src.view import View
 import numpy as np
+import pygame
+from src.view import View
 from src.model.Game import BLACK
 from src.model.Game import WHITE
 
-import pygame
-
 
 class GUIView(View):
+
     def __init__(self, game):
         View.__init__(self, game)
         pygame.init()
@@ -25,23 +25,21 @@ class GUIView(View):
         pygame.display.flip()
 
     def show_player_turn_start(self, name):
-        # Once GUI is completely implemented, this will become unnecessary
-        print('Its player ' + name + '\'s turn. Submit your desired location...')
+        pass # TODO
 
     def show_player_turn_end(self, name):
         b = self.game.board.copy()
         b[b == BLACK] = 2
         b[b == WHITE] = 3
         black_rows, black_cols = np.where(b == 2)
-        white_rows, white_cols = np.where(b==3)
-        #This method does not really make sense because it draws circles over previously existing ones.
+        white_rows, white_cols = np.where(b == 3)
+        # This method does not really make sense because it draws circles over previously existing ones.
         # Will update once I get the hang of the code.
         for i in range(0, len(black_rows)):
-            pygame.draw.circle(self.screen, (0, 0, 0),( 50 + 50*black_cols[i],50 + black_rows[i]*50),20, 0)
-        for i in range(0,len(white_rows)):
-            pygame.draw.circle(self.screen,(255,255,255),(50 + 50*white_cols[i],50 + 50*white_rows[i]),20,0)
+            pygame.draw.circle(self.screen, (0, 0, 0), (50 + 50 * black_cols[i], 50 + black_rows[i] * 50), 20, 0)
+        for i in range(0, len(white_rows)):
+            pygame.draw.circle(self.screen, (255, 255, 255), (50 + 50 * white_cols[i], 50 + 50 * white_rows[i]), 20, 0)
         pygame.display.flip()
-
 
     def show_error(self, msg):
         pass
