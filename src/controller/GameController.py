@@ -1,6 +1,7 @@
 import threading
 
 from src.model.Game import InvalidMove_Error
+from src.utils.Utils import call_method_on_each
 
 
 class GameController(threading.Thread):
@@ -24,15 +25,12 @@ class GameController(threading.Thread):
         else:
             self.current_player = self.player1
 
-    def call_views(self, method, *args):  # via stackoverflow.com/a/2682075/2474159
-        for view in self.views:
-            getattr(view, method)(*args)
-
     def run(self):
         self.game.start()
         while self.game.is_running:
             self.next_turn()
-            self.call_views('show_player_turn_start', self.current_player.name)
+
+            call_method_on_each(self.views, 'show_player_turn_start', self.current_player.name)
             # loop until a move is valid
             # (can lead to inf-loops when bots fail to produce valid moves)
             while True:
@@ -40,8 +38,8 @@ class GameController(threading.Thread):
                     self.current_player.make_move()
                     break
                 except InvalidMove_Error as e:
-                    self.call_views('show_error', ' '.join(e.args))
-            self.call_views('show_player_turn_end', self.current_player.name)
+                    call_method_on_each(self.views, 'show_error', ' '.join(e.args))
+            call_method_on_each(self.views, 'show_player_turn_end', self.current_player.name)
 
         # TODO
         # relieve the Game-class from the task to print end-of-game
