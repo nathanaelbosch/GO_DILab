@@ -4,7 +4,6 @@ from src.model.Game import BLACK
 from src.model.Game import WHITE
 
 
-
 class ConsoleView(View):
 
     def __init__(self, game):
@@ -15,7 +14,6 @@ class ConsoleView(View):
 
     def show_player_turn_start(self, name):
         print('Its player ' + name + '\'s turn. Submit your desired location...')
-
 
     def show_player_turn_end(self, name):
         # Just a simple ascii output, quite cool but the code is a bit messy"""
@@ -36,7 +34,6 @@ class ConsoleView(View):
         for i in zip(row_index, matrix_repr.splitlines()):
             board_repr += i[0] + i[1] + '\n'
         board_repr = col_index + '\n' + board_repr
-
         print(board_repr)
 
     def show_error(self, msg):
