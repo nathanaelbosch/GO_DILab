@@ -1,6 +1,6 @@
 from src.model.Game import Game
 from src.view.ConsoleView import ConsoleView
-from src.view.SimplePlottingView import SimplePlottingView
+from src.view.TkinterPlotGuiView import TkinterPlotGuiView
 from src.view.PygameGuiView import PygameGuiView
 from src.controller.GameController import GameController
 from src.controller.players.Player import Player

@@ -11,7 +11,7 @@ from src.model.Game import WHITE
 GAME_CONTROLLER_START_DELAY = 500  # ms
 
 
-class SimplePlottingView(View):
+class TkinterPlotGuiView(View):
 
     def __init__(self, game):
         View.__init__(self, game)
