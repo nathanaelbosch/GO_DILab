@@ -7,7 +7,7 @@ def str2move(loc: str, board_size) -> Move:
         return Move(is_pass=True)
     col = _chr2ord(loc[0], board_size)
     row = _chr2ord(loc[1], board_size)
-    return Move(row, col)
+    return Move(col, row)
 
 
 def _chr2ord(c: str, board_size) -> int:

@@ -1,10 +1,10 @@
 
 class Move:
 
-    def __init__(self, row=None, col=None, is_pass=True):
-        self.row = row
+    def __init__(self, col=None, row=None, is_pass=True):
         self.col = col
+        self.row = row
         self.is_pass = is_pass
 
     def __repr__(self):
-        return '(row=' + str(self.row) + ' / col=' + str(self.col) + ')'
+        return '(col=' + str(self.col) + ' / row=' + str(self.row) + ')'

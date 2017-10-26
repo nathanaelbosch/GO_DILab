@@ -62,7 +62,7 @@ class SimplePlottingView(View):
         col = int(round(event.xdata))
         row = int(round(event.ydata))
         if 0 <= col < self.game.size and 0 <= row < self.game.size:
-            self.game_controller.current_player.receive_next_move_from_gui(Move(row, col))
+            self.game_controller.current_player.receive_next_move_from_gui(Move(col, row))
 
     def quit(self):
         self.root.quit()
