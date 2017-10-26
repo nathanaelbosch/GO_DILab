@@ -13,7 +13,7 @@ import random as rn
 from typing import Tuple, List
 import logging
 
-from src.utils import Move
+from src.utils.Move import Move
 
 logging.basicConfig(
     # filename='logs/Game.log',
@@ -86,19 +86,89 @@ class Game:
 
     def w(self, loc: str, show_board=False):
         """White plays"""
-        self.play(loc, 'w')
+        self.play_str(loc, 'w')
         if show_board or self.show_each_turn:
             print(self)
 
     def b(self, loc: str, show_board=False):
         """Black plays"""
-        self.play(loc, 'b')
+        self.play_str(loc, 'b')
         if show_board or self.show_each_turn:
             print(self)
 
     def play(self, move: Move, player: {'w', 'b'}, testing=False):
-        # TODO change implementation to use Move object instead of str
+        _starting_board = self.board.copy()
 
+        # 1. Check if the player is passing and if this ends the game
+        if move.is_pass:
+            self.play_history.append(player + ':' + str(move))
+            # Append the move to the move_history
+            if (len(self.play_history) > 2 and
+                        self.play_history[-2].split(':')[1] == ''):
+                logger.info('Game finished!')
+                self.is_running = False
+                return self.evaluate_points()  # Game ended!
+            return  # There is nothing to do
+
+        # 2. Play the stone
+        loc = move.get_loc()
+        # Use the numerical player representation (-1 or 1 so far)
+        color = WHITE if player == 'w' else BLACK
+        # Check if the location is empty
+        if self.board[loc] != 0:
+            raise InvalidMove_Error(
+                'There is already a stone at that location')
+        # "Play the stone" at the location
+        self.board[loc] = color
+
+        # 3. Check if this kills a group of stones and remove them
+        # How this is done:
+        #   1. Get all neighbors
+        #   1b. Only look at those with the enemy color
+        #   2. For each of them, get the respective chain
+        #   3. For each neighbor of each stone in the chain, check if it is 0
+        #   4. If one of them (or more) is 0 they live, else they die
+        neighbors = self._get_adjacent_coords(loc)
+        groups = []
+        for n in neighbors:
+            if self.board[n] == -color:
+                groups.append(self._get_chain(n))
+        for g in groups:
+            if self._check_dead(g):
+                # Capture the stones!
+                if color == BLACK:
+                    self.black_player_captured += len(g)
+                if color == WHITE:
+                    self.white_player_captured += len(g)
+                for c in g:
+                    self.board[c] = 0
+
+        # 4. Validity Checks
+        # 4a. No suicides!
+        own_chain = self._get_chain(loc)
+        if self._check_dead(own_chain):
+            # This play is actually a suicide! Revert changes and raise Error
+            self.board[loc] = 0
+            raise InvalidMove_Error('No suicides')
+        # 4b. No board state twice! (Depends on rules, yes, TODO)
+        if (len(self.board_history) > 0 and
+                    self._board_to_number(self.board) in self.board_history):
+            self.board[loc] = 0
+            raise InvalidMove_Error(
+                'Same constellation can only appear once')
+
+        # 5. Everything is valid :)
+        # If we were testing just revert everything, else append to history
+        if not testing:
+            # Append move and board to histories
+            self.board_history.add(self._board_to_number(self.board.copy()))
+            self.play_history.append(player + ':' + str(move))
+        else:
+            # Revert changes
+            self.board = _starting_board.copy()
+
+    # deprecated TODO remove
+    def play_str(self, move: str, player: {'w', 'b'}, testing=False):
         """Play at a location, and check for all the rules
 
         Parameters
@@ -376,9 +446,9 @@ class Game:
     def get_playable_locations(self, color) -> []:
         empty_locations = np.argwhere(self.board == 0)
         empty_locations = [(l[0], l[1]) for l in empty_locations]
-        valid_moves = ['']  # passing is always a valid move
+        valid_moves = [Move(is_pass=True)]  # passing is always a valid move
         for location in empty_locations:
-            move = self._index2str(location)
+            move = Move(location[0], location[1])
             try:
                 self.play(move, color, testing=True)
                 valid_moves.append(move)
