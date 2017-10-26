@@ -10,6 +10,9 @@ class PygameGuiView(View):
 
     def __init__(self, game):
         View.__init__(self, game)
+        self.running = False
+
+    def open(self, game_controller):
         pygame.init()
         self.running = True
         black = (0, 0, 0)
@@ -53,7 +56,4 @@ class PygameGuiView(View):
             pygame.draw.circle(self.screen, (255, 255, 255), (50 + 50 * white_cols[i], 50 + 50 * white_rows[i]), 20, 0)
 
     def show_error(self, msg):
-        pass
-
-    def open(self, game_controller):
         pass
