@@ -1,7 +1,9 @@
 import numpy as np
 import pygame
 import sys
+
 from src.view import View
+from src.view import Move
 from src.model.Game import BLACK
 from src.model.Game import WHITE
 
@@ -26,22 +28,26 @@ class PygameGuiView(View):
         self.running = True
         self.screen = pygame.display.set_mode(size)
         pygame.display.set_caption('Go')
+        self.render()
+
         while self.running:
-            for event in pygame.event.get():
-                if event.type == pygame.MOUSEBUTTONUP:
-                    print(pygame.mouse.get_pos())
-                if event.type == pygame.QUIT:
-                    self.running = False
-            self.render()
+            event = pygame.event.poll()
+            if event.type == pygame.MOUSEBUTTONUP:
+                x, y = event.pos  # TODO this is super unreliable! why?!
+                col = (x - offset) / self.cell_size
+                row = (y - offset) / self.cell_size
+                # game_controller.current_player.receive_next_move_from_gui(Move(col, row))
+            if event.type == pygame.QUIT:
+                self.running = False
 
         pygame.quit()
         sys.exit(0)  # kinda brutal, I failed to close the pygame window properly though
 
     def show_player_turn_start(self, name):
-        pass  # TODO
+        pass
 
     def show_player_turn_end(self, name):
-        pass
+        self.render()
 
     def render(self):
         # board
