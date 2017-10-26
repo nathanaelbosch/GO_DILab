@@ -1,4 +1,4 @@
-from src import Game, ConsoleView, HumanConsolePlayer, RandomBotPlayer, GameController, GUIView
+from src import Game, ConsoleView, SimplePlottingView, GUIView, HumanConsolePlayer, RandomBotPlayer, GameController
 
 
 def main():
@@ -10,6 +10,9 @@ def main():
     player2 = RandomBotPlayer("RandomBot", "b", game)
     game_controller = GameController(game, view, player1, player2,view2)
     game_controller.start()
+
+    # game_controller = GameController(game, view, player1, player2)
+    # view.open(game_controller)
 
 if __name__ == '__main__':
     main()

@@ -45,3 +45,6 @@ class GUIView(View):
 
     def show_error(self, msg):
         pass
+
+    def open(self, game_controller):
+        pass

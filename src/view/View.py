@@ -8,6 +8,10 @@ class View(ABC):
         self.game = game
 
     @abstractmethod
+    def open(self, game_controller):
+        pass
+
+    @abstractmethod
     def show_player_turn_start(self, name):
         pass
 
