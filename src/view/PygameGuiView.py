@@ -5,7 +5,7 @@ from src.model.Game import BLACK
 from src.model.Game import WHITE
 
 
-class GUIView(View):
+class PygameGuiView(View):
 
     def __init__(self, game):
         View.__init__(self, game)
@@ -25,7 +25,7 @@ class GUIView(View):
         pygame.display.flip()
 
     def show_player_turn_start(self, name):
-        pass # TODO
+        pass  # TODO
 
     def show_player_turn_end(self, name):
         b = self.game.board.copy()
