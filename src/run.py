@@ -1,4 +1,4 @@
-from src import Game, ConsoleView, TkinterPlotGuiView, PygameGuiView, HumanConsolePlayer, RandomBotPlayer, GameController
+from src import Game, ConsoleView, PygameGuiView, HumanConsolePlayer, RandomBotPlayer, GameController
 from src.utils.Utils import call_method_on_each
 
 
