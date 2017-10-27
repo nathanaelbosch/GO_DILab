@@ -11,8 +11,8 @@ def main():
         PygameGuiView(game)
     ]
 
-    player1 = HumanConsolePlayer("PersonA", "w", game)
-    player2 = RandomBotPlayer("RandomBot", "b", game)
+    player1 = HumanConsolePlayer("PersonA", "b", game)
+    player2 = RandomBotPlayer("RandomBot", "w", game)
 
     game_controller = GameController(game, views, player1, player2)
     call_method_on_each(views, "open", game_controller)
