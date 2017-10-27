@@ -33,10 +33,10 @@ class PygameGuiView(View):
         while self.running:
             event = pygame.event.poll()
             if event.type == pygame.MOUSEBUTTONUP:
-                x, y = event.pos  # TODO this is super unreliable! why?!
-                col = (x - offset) / self.cell_size
-                row = (y - offset) / self.cell_size
                 # game_controller.current_player.receive_next_move_from_gui(Move(col, row))
+                x, y = event.pos  # TODO this is super unreliable on macOS but seems fine on Windows?!
+                col = int(round((x - offset) / self.cell_size))
+                row = int(round((y - offset) / self.cell_size))
             if event.type == pygame.QUIT:
                 self.running = False
 
