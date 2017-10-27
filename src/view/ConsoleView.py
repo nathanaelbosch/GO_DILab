@@ -10,7 +10,7 @@ class ConsoleView(View):
         View.__init__(self, game)
 
     def open(self, game_controller):
-        game_controller.start()
+        self.is_ready = True
 
     def show_player_turn_start(self, name):
         print('Its player ' + name + '\'s turn.')

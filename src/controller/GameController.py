@@ -1,5 +1,5 @@
 import threading
-
+import time
 from src.model.Game import InvalidMove_Error
 from src.utils.Utils import call_method_on_each
 
@@ -27,6 +27,16 @@ class GameController(threading.Thread):
 
     def run(self):
         self.game.start()
+
+        all_views_ready = False
+        while not all_views_ready:  # is there a more elegant way to find out if all all_ready booleans are True?
+            # this is unsatisfying that this is necessary (a print-statement also works), fix this race-condition TODO
+            time.sleep(0.1)
+            tmp = True
+            for view in self.views:
+                tmp = tmp and view.is_ready
+            all_views_ready = tmp
+
         while self.game.is_running:
             self.next_turn()
 
