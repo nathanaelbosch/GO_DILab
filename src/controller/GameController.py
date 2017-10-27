@@ -35,8 +35,10 @@ class GameController(threading.Thread):
             # (can lead to inf-loops when bots fail to produce valid moves)
             while True:
                 try:
-                    self.current_player.make_move()
-                    break
+                    move = self.current_player.get_move()
+                    if move is not None:
+                        self.game.play(move, self.current_player.color)
+                        break
                 except InvalidMove_Error as e:
                     call_method_on_each(self.views, 'show_error', ' '.join(e.args))
             call_method_on_each(self.views, 'show_player_turn_end', self.current_player.name)

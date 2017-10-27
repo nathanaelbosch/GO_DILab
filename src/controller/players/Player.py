@@ -14,5 +14,5 @@ class Player(ABC):
     # And then ConverterController passes the location as coordinates
     # (not as string) to Game. str2index is prepared in Utils
     @abstractmethod
-    def make_move(self):
+    def get_move(self):
         pass
