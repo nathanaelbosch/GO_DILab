@@ -9,5 +9,6 @@ class HumanConsolePlayer(Player):
 
     def make_move(self):
         loc_str = input()
+        print('Submit your desired location...')
         move = str2move(loc_str.lower(), self.game.size)
         self.game.play(move, self.color)

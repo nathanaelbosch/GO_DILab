@@ -13,7 +13,7 @@ class ConsoleView(View):
         game_controller.start()
 
     def show_player_turn_start(self, name):
-        print('Its player ' + name + '\'s turn. Submit your desired location...')
+        print('Its player ' + name + '\'s turn.')
 
     def show_player_turn_end(self, name):
         # Just a simple ascii output, quite cool but the code is a bit messy"""
