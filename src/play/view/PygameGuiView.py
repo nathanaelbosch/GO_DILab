@@ -1,5 +1,6 @@
 import numpy as np
 import pygame
+from pygame import gfxdraw
 import sys
 from src.play import ConsoleView
 from src.play.view import View
@@ -79,9 +80,11 @@ class PygameGuiView(View):
         pygame.display.flip()  # update the screen
 
     def draw_stone(self, indices, col):
-        pos = (int(offset + self.cell_size * indices[0]), int(offset + indices[1] * self.cell_size))
-        # make the circles look nicer -> antialiasing, see stackoverflow.com/a/26774279/2474159 TODO
-        pygame.draw.circle(self.screen, col, pos, stone_radius, 0)
+        x = int(offset + self.cell_size * indices[0])
+        y = int(offset + indices[1] * self.cell_size)
+        # antialiasing via stackoverflow.com/a/26774279/2474159
+        pygame.gfxdraw.aacircle(self.screen, x, y, stone_radius, col)
+        pygame.gfxdraw.filled_circle(self.screen, x, y, stone_radius, col)
 
     def show_error(self, msg):
         self.console_view.show_error(msg)
