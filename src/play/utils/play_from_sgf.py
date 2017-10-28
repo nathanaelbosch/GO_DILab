@@ -1,4 +1,5 @@
 """Read a single SGF file and recreate the game"""
+# TODO think about if/how to integrate this into the GUI-workflow as importer
 import sgf
 import sys
 from src.play import Game
