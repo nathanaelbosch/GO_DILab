@@ -3,6 +3,7 @@ import pygame
 import sys
 import time
 
+from src import ConsoleView
 from src.view import View
 from src.view import Move
 from src.model.Game import BLACK
@@ -21,6 +22,7 @@ class PygameGuiView(View):
 
     def __init__(self, game):
         View.__init__(self, game)
+        self.console_view = ConsoleView(game)
         self.running = False
         self.cell_size = board_size / (self.game.size - 1)
 
@@ -47,9 +49,10 @@ class PygameGuiView(View):
         sys.exit(0)  # kinda brutal, I failed to close the pygame window properly though
 
     def show_player_turn_start(self, name):
-        pass
+        self.console_view.show_player_turn_start(name)
 
     def show_player_turn_end(self, name):
+        self.console_view.show_player_turn_end(name)
         self.render()
 
     def render(self):
@@ -83,4 +86,4 @@ class PygameGuiView(View):
         pygame.draw.circle(self.screen, col, pos, stone_radius, 0)
 
     def show_error(self, msg):
-        pass
+        self.console_view.show_error(msg)
