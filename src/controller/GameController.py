@@ -11,13 +11,9 @@ class GameController(threading.Thread):
         self.view = view
         self.player1 = player1
         self.player2 = player2
-        self.current_player = None
+        self.current_player = player1
 
     def next_turn(self):
-        # start with player1 if not otherwise defined
-        if self.current_player is None:
-            self.current_player = self.player1
-            return
         # swap player1 and player2
         if self.current_player == self.player1:
             self.current_player = self.player2
