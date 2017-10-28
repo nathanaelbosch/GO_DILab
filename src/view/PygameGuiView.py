@@ -33,6 +33,7 @@ class PygameGuiView(View):
         pygame.display.set_caption('Go')
         self.render()
 
+        self.console_view.print_board()
         self.is_ready = True
 
         while self.running:

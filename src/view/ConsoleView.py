@@ -16,6 +16,9 @@ class ConsoleView(View):
         print('Its player ' + name + '\'s turn.')
 
     def show_player_turn_end(self, name):
+        self.print_board()
+
+    def print_board(self):
         # Just a simple ascii output, quite cool but the code is a bit messy"""
         b = self.game.board.copy()
         # You might wonder why I do the following, but its so that numpy
