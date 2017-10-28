@@ -11,7 +11,9 @@ from src.play.model.Game import WHITE
 brown = (165, 42, 42)
 black = (0, 0, 0)
 white = (255, 255, 255)
-size = (500, 500)
+yellow = (255, 255, 0)
+orange = (255, 165, 0)
+size = (500, 550)
 board_size = 400
 offset = 50
 stone_radius = 20
@@ -24,12 +26,15 @@ class PygameGuiView(View):
         self.console_view = ConsoleView(game)
         self.running = False
         self.cell_size = board_size / (self.game.size - 1)
+        self.buttons = []
 
     def open(self, game_controller):
+        self.game_controller = game_controller
         pygame.init()
         self.running = True
         self.screen = pygame.display.set_mode(size)
         pygame.display.set_caption('Go')
+        self.buttons.append(Button(210, 480, 80, 40, 'Pass', self.screen, self.send_pass_move))
         self.console_view.print_board()
         self.render()
 
@@ -40,9 +45,14 @@ class PygameGuiView(View):
                 col = int(round((x - offset) / self.cell_size))
                 row = int(round((y - offset) / self.cell_size))
                 if 0 < col < self.game.size and 0 < row < self.game.size:
-                    game_controller.current_player.receive_next_move_from_gui(Move(col, row))
+                    self.game_controller.current_player.receive_next_move_from_gui(Move(col, row))
+                for btn in self.buttons:
+                    btn.check_mouse_released()
             if event.type == pygame.QUIT:
                 self.running = False
+            for btn in self.buttons:
+                btn.is_mouse_over_btn()
+            self.render()
 
         # this exiting mechanism doesn't work (on macOS at least), causes a freeze TODO
         pygame.quit()
@@ -53,7 +63,9 @@ class PygameGuiView(View):
 
     def show_player_turn_end(self, name):
         self.console_view.show_player_turn_end(name)
-        self.render()
+
+    def send_pass_move(self):
+        self.game_controller.current_player.receive_next_move_from_gui(Move(is_pass=True))
 
     def render(self):
         # board
@@ -77,7 +89,8 @@ class PygameGuiView(View):
         for i in range(0, len(white_rows)):
             indices = white_cols[i], white_rows[i]
             self.draw_stone(indices, white)
-
+        for btn in self.buttons:
+            btn.draw()
         pygame.display.flip()  # update the screen
 
     def draw_stone(self, indices, col):
@@ -89,3 +102,39 @@ class PygameGuiView(View):
 
     def show_error(self, msg):
         self.console_view.show_error(msg)
+
+
+class Button:  # adapted from gamedev.net/forums/topic/686666-pygame-buttons/?do=findComment&comment=5333411
+
+    def __init__(self, x, y, w, h, text, screen, on_click):
+        self.x = x
+        self.y = y
+        self.w = w
+        self.h = h
+        self.rect = (self.x, self.y, self.w, self.h)
+        pygame.font.init()
+        self.font = pygame.font.Font(None, 25)
+        self.text = text
+        self.mouse_is_over_btn = False
+        self.screen = screen
+        self.on_click = on_click
+
+    def draw(self):
+        if self.mouse_is_over_btn:
+            bg = yellow
+        else:
+            bg = orange
+        surf = self.font.render(self.text, True, black, bg)
+        xo = self.x + (self.w - surf.get_width()) / 2
+        yo = self.y + (self.h - surf.get_height()) / 2
+        self.screen.fill(bg, self.rect)
+        pygame.draw.rect(self.screen, black, self.rect, 1)
+        self.screen.blit(surf, (xo, yo))
+
+    def is_mouse_over_btn(self):
+        pos = pygame.mouse.get_pos()
+        self.mouse_is_over_btn = self.x <= pos[0] < self.x + self.w and self.y <= pos[1] < self.y + self.h
+
+    def check_mouse_released(self):
+        if self.mouse_is_over_btn:
+            self.on_click()
