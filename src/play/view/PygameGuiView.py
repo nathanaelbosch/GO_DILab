@@ -44,7 +44,7 @@ class PygameGuiView(View):
                 x, y = event.pos
                 col = int(round((x - offset) / self.cell_size))
                 row = int(round((y - offset) / self.cell_size))
-                if 0 < col < self.game.size and 0 < row < self.game.size:
+                if 0 <= col < self.game.size and 0 <= row < self.game.size:
                     self.game_controller.current_player.receive_next_move_from_gui(Move(col, row))
                 for btn in self.buttons:
                     btn.check_mouse_released()
