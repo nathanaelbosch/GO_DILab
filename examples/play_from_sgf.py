@@ -1,7 +1,8 @@
 """Read a single SGF file and recreate the game"""
 import sgf
 import sys
-from src import Game
+from src.play import Game
+from src.play.utils.Utils import str2move
 
 sys.path.append('.')
 
@@ -14,11 +15,13 @@ with open(file, 'r') as f:
 game_tree = collection.children[0]
 n_0 = game_tree.nodes[0]
 # n_0.properties contains the initial game setup
+board_size = int(n_0.properties['SZ'][0])
 
 game = Game(n_0.properties, show_each_turn=True)
 for node in game_tree.nodes[1:]:
-    if 'W' in node.properties.keys():
-        game.w(node.properties['W'][0])
-    if 'B' in node.properties.keys():
-        game.b(node.properties['B'][0])
+    player_color = list(node.properties.keys())[0]
+    move_str = str(node.properties[player_color][0])
+    move = str2move(move_str, board_size)
+    game.play(move, player_color.lower())
+
 game.evaluate_points()
