@@ -30,10 +30,8 @@ class PygameGuiView(View):
         self.running = True
         self.screen = pygame.display.set_mode(size)
         pygame.display.set_caption('Go')
-        self.render()
-
         self.console_view.print_board()
-        self.is_ready = True
+        self.render()
 
         while self.running:
             event = pygame.event.poll()

@@ -6,7 +6,6 @@ class View(ABC):
 
     def __init__(self, game):
         self.game = game
-        self.is_ready = False
 
     @abstractmethod
     def open(self, game_controller):

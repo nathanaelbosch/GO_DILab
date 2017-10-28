@@ -27,10 +27,6 @@ class GameController(threading.Thread):
     def run(self):
         self.game.start()
 
-        while not self.view.is_ready:  # is there a more elegant way to find out if all all_ready booleans are True?
-            # this is unsatisfying that this is necessary (a print-statement also works), fix this race-condition TODO
-            time.sleep(0.1)
-
         while self.game.is_running:
             self.next_turn()
 
