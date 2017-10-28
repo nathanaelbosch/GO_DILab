@@ -1,15 +1,14 @@
 import threading
 import time
 from src.model.Game import InvalidMove_Error
-from src.utils.Utils import call_method_on_each
 
 
 class GameController(threading.Thread):
 
-    def __init__(self, game, views, player1, player2):
+    def __init__(self, game, view, player1, player2):
         threading.Thread.__init__(self)
         self.game = game
-        self.views = views
+        self.view = view
         self.player1 = player1
         self.player2 = player2
         self.current_player = None
@@ -28,19 +27,14 @@ class GameController(threading.Thread):
     def run(self):
         self.game.start()
 
-        all_views_ready = False
-        while not all_views_ready:  # is there a more elegant way to find out if all all_ready booleans are True?
+        while not self.view.is_ready:  # is there a more elegant way to find out if all all_ready booleans are True?
             # this is unsatisfying that this is necessary (a print-statement also works), fix this race-condition TODO
             time.sleep(0.1)
-            tmp = True
-            for view in self.views:
-                tmp = tmp and view.is_ready
-            all_views_ready = tmp
 
         while self.game.is_running:
             self.next_turn()
 
-            call_method_on_each(self.views, 'show_player_turn_start', self.current_player.name)
+            self.view.show_player_turn_start(self.current_player.name)
             # loop until a move is valid
             # (can lead to inf-loops when bots fail to produce valid moves)
             while True:
@@ -50,8 +44,8 @@ class GameController(threading.Thread):
                         self.game.play(move, self.current_player.color)
                         break
                 except InvalidMove_Error as e:
-                    call_method_on_each(self.views, 'show_error', ' '.join(e.args))
-            call_method_on_each(self.views, 'show_player_turn_end', self.current_player.name)
+                    self.view.show_error(' '.join(e.args))
+            self.view.show_player_turn_end(self.current_player.name)
 
         # TODO
         # relieve the Game-class from the task to print end-of-game
