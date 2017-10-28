@@ -1,12 +1,11 @@
 import numpy as np
 import pygame
 import sys
-
-from src import ConsoleView
-from src.view import View
-from src.view import Move
-from src.model.Game import BLACK
-from src.model.Game import WHITE
+from src.play import ConsoleView
+from src.play.view import View
+from src.play.view import Move
+from src.play.model.Game import BLACK
+from src.play.model.Game import WHITE
 
 brown = (165, 42, 42)
 black = (0, 0, 0)

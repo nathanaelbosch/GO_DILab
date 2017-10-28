@@ -1,7 +1,7 @@
-from src.view import View
+from src.play.view import View
 
-from src.model.Game import BLACK
-from src.model.Game import WHITE
+from src.play.model.Game import BLACK
+from src.play.model.Game import WHITE
 
 
 class ConsoleView(View):

@@ -1,4 +1,4 @@
-from src import Player
+from src.play import Player
 import random as rn
 
 

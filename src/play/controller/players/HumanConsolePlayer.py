@@ -1,5 +1,5 @@
-from src import Player
-from src.utils.Utils import str2move
+from src.play import Player
+from src.play.utils.Utils import str2move
 
 
 class HumanConsolePlayer(Player):

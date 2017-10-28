@@ -13,7 +13,7 @@ import random as rn
 from typing import Tuple, List
 import logging
 
-from src.utils.Move import Move
+from src.play.utils.Move import Move
 
 logging.basicConfig(
     # filename='logs/Game.log',

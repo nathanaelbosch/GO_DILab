@@ -1,8 +1,8 @@
 import sys
 from os.path import dirname, abspath
 # set GO_DILab as PYTHONPATH, therewith the script can be run from anywhere
-sys.path.append(dirname(dirname(abspath(__file__))))
-from src import Game, PygameGuiView, HumanConsolePlayer, HumanGuiPlayer, RandomBotPlayer, GameController
+sys.path.append(dirname(dirname(dirname(abspath(__file__)))))  # each dirname is one level up
+from src.play import Game, PygameGuiView, HumanConsolePlayer, HumanGuiPlayer, RandomBotPlayer, GameController
 
 
 def main():

@@ -1,5 +1,5 @@
 import sgf
-from src.model.Game import Game
+from src.play.model.Game import Game
 import os
 import re
 
