@@ -43,8 +43,9 @@ class PygameGuiView(View):
             if event.type == pygame.QUIT:
                 self.running = False
 
+        # this exiting mechanism doesn't work (on macOS at least), causes a freeze TODO
         pygame.quit()
-        sys.exit(0)  # kinda brutal, I failed to close the pygame window properly though
+        sys.exit(0)
 
     def show_player_turn_start(self, name):
         self.console_view.show_player_turn_start(name)
