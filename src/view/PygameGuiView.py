@@ -1,7 +1,6 @@
 import numpy as np
 import pygame
 import sys
-import time
 
 from src import ConsoleView
 from src.view import View
@@ -39,7 +38,7 @@ class PygameGuiView(View):
         while self.running:
             event = pygame.event.poll()
             if event.type == pygame.MOUSEBUTTONUP:
-                x, y = event.pos  # TODO this is super unreliable on macOS but seems fine on Windows?!
+                x, y = event.pos
                 col = int(round((x - offset) / self.cell_size))
                 row = int(round((y - offset) / self.cell_size))
                 game_controller.current_player.receive_next_move_from_gui(Move(col, row))
