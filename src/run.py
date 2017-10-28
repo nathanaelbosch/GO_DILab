@@ -1,4 +1,4 @@
-from src import Game, ConsoleView, PygameGuiView, HumanConsolePlayer, HumanGuiPlayer, RandomBotPlayer, GameController
+from src import Game, PygameGuiView, HumanConsolePlayer, HumanGuiPlayer, RandomBotPlayer, GameController
 
 
 def main():

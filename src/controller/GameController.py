@@ -1,5 +1,4 @@
 import threading
-import time
 from src.model.Game import InvalidMove_Error
 
 
@@ -24,8 +23,6 @@ class GameController(threading.Thread):
         self.game.start()
 
         while self.game.is_running:
-            self.next_turn()
-
             self.view.show_player_turn_start(self.current_player.name)
             # loop until a move is valid
             # (can lead to inf-loops when bots fail to produce valid moves)
@@ -38,6 +35,7 @@ class GameController(threading.Thread):
                 except InvalidMove_Error as e:
                     self.view.show_error(' '.join(e.args))
             self.view.show_player_turn_end(self.current_player.name)
+            self.next_turn()
 
         # TODO
         # relieve the Game-class from the task to print end-of-game
