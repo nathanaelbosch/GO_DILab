@@ -12,8 +12,8 @@ def main():
 
     view = PygameGuiView(game)
 
-    player1 = HumanGuiPlayer("PersonA", "b", game)
-    player2 = RandomBotPlayer("RandomBot", "w", game)
+    player1 = HumanGuiPlayer("Max", "b", game)
+    player2 = RandomBotPlayer("Robo", "w", game)
 
     game_controller = GameController(game, view, player1, player2)
     game_controller.start()

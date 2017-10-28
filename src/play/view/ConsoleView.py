@@ -13,7 +13,7 @@ class ConsoleView(View):
         pass
 
     def show_player_turn_start(self, name):
-        print('Its player ' + name + '\'s turn.')
+        print('It\'s player ' + name + '\'s turn')
 
     def show_player_turn_end(self, name):
         self.print_board()
@@ -37,7 +37,7 @@ class ConsoleView(View):
         for i in zip(row_index, matrix_repr.splitlines()):
             board_repr += i[0] + i[1] + '\n'
         board_repr = col_index + '\n' + board_repr
-        print(board_repr)
+        print('\n' + board_repr)
 
     def show_error(self, msg):
         print(msg)

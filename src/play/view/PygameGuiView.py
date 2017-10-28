@@ -26,6 +26,7 @@ class PygameGuiView(View):
     def __init__(self, game):
         View.__init__(self, game)
         self.console_view = ConsoleView(game)
+        self.console_view.print_board()
         self.running = False
         self.cell_size = board_size / (self.game.size - 1)
         self.buttons = []
@@ -39,7 +40,6 @@ class PygameGuiView(View):
         pygame.display.set_caption('Go')
         self.buttons.append(Button(210, 530, 80, 40, 'Pass', self.screen, self.send_pass_move))
         self.labels.append(Label(100, 30, 300, 40, self.get_turn_label_text, self.screen))
-        self.console_view.print_board()
         self.render()
 
         while self.running:
@@ -72,7 +72,7 @@ class PygameGuiView(View):
         self.game_controller.current_player.receive_next_move_from_gui(Move(is_pass=True))
 
     def get_turn_label_text(self):
-        return 'It\'s ' + self.game_controller.current_player.name + ' turn'
+        return 'It\'s ' + self.game_controller.current_player.name + '\'s turn'
 
     def render(self):
         # board
