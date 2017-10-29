@@ -2,6 +2,7 @@ import numpy as np
 import pygame
 from pygame import gfxdraw
 import sys
+import time
 from src.play import ConsoleView
 from src.play.view import View
 from src.play.view import Move
@@ -56,6 +57,7 @@ class PygameGuiView(View):
                 self.running = False
             for btn in self.buttons:
                 btn.is_mouse_over_btn()
+            time.sleep(0.025)  # this avoids the brief flashing of stones, not a good solution though TODO
             self.render()
 
         # this exiting mechanism doesn't work (on macOS at least), causes a freeze TODO
