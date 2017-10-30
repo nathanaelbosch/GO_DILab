@@ -5,7 +5,7 @@ from src.play.model.Game import Game
 
 # root_dir = 'data/unpacked'
 
-root_dir = os.path.abspath('../../../example_data')
+root_dir = os.path.abspath('../../example_data')
 sgf_files = []
 for root, sub_dirs, files in os.walk(root_dir):
     for file in files:
