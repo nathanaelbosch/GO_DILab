@@ -15,10 +15,10 @@ white = (255, 255, 255)
 yellow = (255, 255, 0)
 orange = (255, 165, 0)
 blue = (0, 0, 255)
-size = (500, 600)
+
+window_size = (500, 600)
+board_top_left_coord = (50, 100)  # coordinate of the boards top left point
 board_size = 400
-x_offset = 50
-y_offset = 100
 stone_radius = 20
 
 
@@ -37,7 +37,7 @@ class PygameGuiView(View):
         self.game_controller = game_controller
         pygame.init()
         self.running = True
-        self.screen = pygame.display.set_mode(size)
+        self.screen = pygame.display.set_mode(window_size)
         pygame.display.set_caption('Go')
         self.buttons.append(Button(210, 530, 80, 40, 'Pass', self.screen, self.send_pass_move))
         self.labels.append(Label(100, 30, 300, 40, self.get_turn_label_text, self.screen))
@@ -47,8 +47,8 @@ class PygameGuiView(View):
             event = pygame.event.poll()
             if event.type == pygame.MOUSEBUTTONUP:
                 x, y = event.pos
-                col = int(round((x - x_offset) / self.cell_size))
-                row = int(round((y - y_offset) / self.cell_size))
+                col = int(round((x - board_top_left_coord[0]) / self.cell_size))
+                row = int(round((y - board_top_left_coord[1]) / self.cell_size))
                 if 0 <= col < self.game.size and 0 <= row < self.game.size:
                     self.game_controller.current_player.receive_next_move_from_gui(Move(col, row))
                 for btn in self.buttons:
@@ -81,11 +81,11 @@ class PygameGuiView(View):
         self.screen.fill(brown)
         for i in range(0, self.game.size):
             # horizontals
-            pygame.draw.line(self.screen, black, [x_offset, y_offset + i * self.cell_size],
-                             [x_offset + board_size, y_offset + i * self.cell_size], 1)
+            pygame.draw.line(self.screen, black, [board_top_left_coord[0], board_top_left_coord[1] + i * self.cell_size],
+                             [board_top_left_coord[0] + board_size, board_top_left_coord[1] + i * self.cell_size], 1)
             # verticals
-            pygame.draw.line(self.screen, black, [x_offset + i * self.cell_size, y_offset],
-                             [x_offset + i * self.cell_size, y_offset + board_size], 1)
+            pygame.draw.line(self.screen, black, [board_top_left_coord[0] + i * self.cell_size, board_top_left_coord[1]],
+                             [board_top_left_coord[0] + i * self.cell_size, board_top_left_coord[1] + board_size], 1)
         # stones
         b = self.game.board.copy()  # is it necessary to copy it?
         b[b == BLACK] = 2
@@ -105,8 +105,8 @@ class PygameGuiView(View):
         pygame.display.flip()  # update the screen
 
     def draw_stone(self, indices, col):
-        x = int(x_offset + self.cell_size * indices[0])
-        y = int(y_offset + indices[1] * self.cell_size)
+        x = int(board_top_left_coord[0] + self.cell_size * indices[0])
+        y = int(board_top_left_coord[1] + indices[1] * self.cell_size)
         # antialiasing via stackoverflow.com/a/26774279/2474159
         pygame.gfxdraw.aacircle(self.screen, x, y, stone_radius, col)
         pygame.gfxdraw.filled_circle(self.screen, x, y, stone_radius, col)
