@@ -1,38 +1,45 @@
-import sgf
-from src.play.model.Game import Game
 import os
-import re
+import sgf
+from src.play.utils.Utils import str2move
+from src.play.model.Game import Game
+
+# root_dir = 'data/unpacked'
+
+root_dir = os.path.abspath('../../../example_data')
+sgf_files = []
+for root, sub_dirs, files in os.walk(root_dir):
+    for file in files:
+        path = os.path.join(root, file)
+        name, extension = os.path.splitext(path)
+        if extension == '.sgf':
+            sgf_files.append(path)
 
 
-rootdir = 'data/unpacked'
-filepaths = []
-for root, subdirs, files in os.walk(rootdir):
-    filepaths += [os.path.join(root, f) for f in files]
-
-for file in filepaths:
-    # file = 'data/unpacked/2017/09/08/338554.sgf'
-    print(file)
-    filename = re.findall('/([^/]*?).sgf', file)[0]
+for file in sgf_files:
     with open(file, 'r') as f:
         content = f.read()
-        collection = sgf.parse(content)
+        try:
+            collection = sgf.parse(content)
+        except Exception as e:
+            print('Failed to parse ' + file + ' as sgf-collection')
+            continue
 
     # Assume the sgf file contains one game
     game_tree = collection.children[0]
     n_0 = game_tree.nodes[0]
     # n_0.properties contains the initial game setup
     game_id = n_0.properties['GN'][0]
-    myfilepath = 'data/myformat/'+game_id+'.csv'
-    if os.path.isfile(myfilepath):
-        os.remove(myfilepath)
+    out_file = os.path.join(root_dir, game_id + '.csv')
+    if os.path.isfile(out_file):
+        os.remove(out_file)
 
-    engine = Game(n_0.properties, show_each_turn=True)
+    # very similar to play_from_sgf.py, unify these parts TODO
+    board_size = int(n_0.properties['SZ'][0])
+    game = Game(n_0.properties, show_each_turn=True)
     for n in game_tree.nodes[1:]:
-        props = n.properties
-        # print(props)
-        if 'W' in props.keys():
-            engine.w(props['W'][0])
-        if 'B' in props.keys():
-            engine.b(props['B'][0])
-        # print(engine)
-        engine.board2file(myfilepath, 'a')
+        player_color = list(n.properties.keys())[0]
+        move_str = str(n.properties[player_color][0])
+        move = str2move(move_str, board_size)
+        game.play(move, player_color.lower())
+
+    game.board2file(out_file, 'a')
