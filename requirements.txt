@@ -1,3 +1,8 @@
+keras
+# keras requires tensorflow or theano as backend
+tensorflow
+# theano
 pygame
 numpy
 sgf
+matplotlib
