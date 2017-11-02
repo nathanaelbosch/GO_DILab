@@ -1,10 +1,11 @@
 # A machine learning how to play GO
-DataInnovation-Lab - WS20172018
+TUM Data Innovation Lab - WS 20172018 - Team Hikarus
 
-## Some organisational stuff
-Programming language used so far: Python3.6
-(if you don't have it I recommend to get it, some cool things like f-strings in there ;) )
+## Setup
+- We use **pygame** for the GUI. Because of thread-issues (known and unresolved according to some forums online) this doesn't work properly when run from a virtual python environment (at least for the an anaconda environment that's the case), so it must be a normal installation.
+- Install _Python 3.6_ if not already present
+- Run `pip install -r requirements.txt` (or `pip3` on macOS sometimes) or let your favorite IDE help you with installing the required modules. If a module fails to install via the IDE, try to install it via `pip`/`pip3`.
 
-Virtual environments are always a good habit for programming projects.
-They don't interfere with the installed packages and you can easily set them up using the
-requirements.txt file from the repo (pip install -r requirements.txt)
+## Usage
+- In `run.py` you can configure the type of GUI and the type of players.
+- run `src/play/run.py` either via a run configuration in your IDE or via command line (the location from which you run doesn't matter, the path gets set correctly by the script).
