@@ -1,6 +1,6 @@
 # A machine learning how to play GO
 
-### :game_die: TUM Data Innovation Lab WS2017/18, Team Hikarus
+### :game_die: TUM Data Innovation Lab WS2017/18, Team Hikaru
 
 ## Setup
 - We use **pygame** for the GUI. Because of thread-issues (known and unresolved according to some forums online) this doesn't work properly when run from a virtual python environment (at least for the an anaconda environment that's the case), so it must be a normal installation.
