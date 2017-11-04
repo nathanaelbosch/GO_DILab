@@ -99,7 +99,7 @@ class Game:
             print(self)
 
     def play(self, move: Move, player: {'w', 'b'}, testing=False):
-        _starting_board = self.board.copy()
+        _temp_board = self.board.copy()
 
         # 1. Check if the player is passing and if this ends the game
         if move.is_pass:
@@ -117,11 +117,11 @@ class Game:
         # Use the numerical player representation (-1 or 1 so far)
         color = WHITE if player == 'w' else BLACK
         # Check if the location is empty
-        if self.board[loc] != 0:
+        if _temp_board[loc] != 0:
             raise InvalidMove_Error(
                 'There is already a stone at that location')
         # "Play the stone" at the location
-        self.board[loc] = color
+        _temp_board[loc] = color
 
         # 3. Check if this kills a group of stones and remove them
         # How this is done:
@@ -133,7 +133,7 @@ class Game:
         neighbors = self._get_adjacent_coords(loc)
         groups = []
         for n in neighbors:
-            if self.board[n] == -color:
+            if _temp_board[n] == -color:
                 groups.append(self._get_chain(n))
         for g in groups:
             if self._check_dead(g):
@@ -143,19 +143,19 @@ class Game:
                 if color == WHITE:
                     self.white_player_captured += len(g)
                 for c in g:
-                    self.board[c] = 0
+                    _temp_board[c] = 0
 
         # 4. Validity Checks
         # 4a. No suicides!
         own_chain = self._get_chain(loc)
         if self._check_dead(own_chain):
             # This play is actually a suicide! Revert changes and raise Error
-            self.board[loc] = 0
+            _temp_board[loc] = 0
             raise InvalidMove_Error('No suicides')
         # 4b. No board state twice! (Depends on rules, yes, TODO)
         if (len(self.board_history) > 0 and
-                    self._board_to_number(self.board) in self.board_history):
-            self.board[loc] = 0
+                    self._board_to_number(_temp_board) in self.board_history):
+            _temp_board[loc] = 0
             raise InvalidMove_Error(
                 'Same constellation can only appear once')
 
@@ -163,11 +163,9 @@ class Game:
         # If we were testing just revert everything, else append to history
         if not testing:
             # Append move and board to histories
+            self.board = _temp_board
             self.board_history.add(self._board_to_number(self.board.copy()))
             self.play_history.append(player + ':' + str(move))
-        else:
-            # Revert changes
-            self.board = _starting_board.copy()
 
     # deprecated
     def play_str(self, move: str, player: {'w', 'b'}, testing=False):
