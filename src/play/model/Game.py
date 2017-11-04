@@ -84,12 +84,14 @@ class Game:
     def start(self):
         self.is_running = True
 
+    # deprecated
     def w(self, loc: str, show_board=False):
         """White plays"""
         self.play_str(loc, 'w')
         if show_board or self.show_each_turn:
             print(self)
 
+    # deprecated
     def b(self, loc: str, show_board=False):
         """Black plays"""
         self.play_str(loc, 'b')
@@ -167,7 +169,7 @@ class Game:
             # Revert changes
             self.board = _starting_board.copy()
 
-    # deprecated TODO remove
+    # deprecated
     def play_str(self, move: str, player: {'w', 'b'}, testing=False):
         """Play at a location, and check for all the rules
 
