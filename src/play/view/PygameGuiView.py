@@ -39,18 +39,23 @@ class PygameGuiView(View):
         self.running = True
         self.screen = pygame.display.set_mode(window_size)
         pygame.display.set_caption('Go')
-        self.buttons.append(Button(210, 530, 80, 40, 'Pass', self.screen, self.send_pass_move))
-        self.labels.append(Label(100, 30, 300, 40, self.get_turn_label_text, self.screen))
+        self.buttons.append(Button(
+            210, 530, 80, 40, 'Pass', self.screen, self.send_pass_move))
+        self.labels.append(Label(
+            100, 30, 300, 40, self.get_turn_label_text, self.screen))
         self.render()
 
         while self.running:
             event = pygame.event.poll()
             if event.type == pygame.MOUSEBUTTONUP:
                 x, y = event.pos
-                col = int(round((x - board_top_left_coord[0]) / self.cell_size))
-                row = int(round((y - board_top_left_coord[1]) / self.cell_size))
+                col = int(round((x - board_top_left_coord[0]) /
+                                self.cell_size))
+                row = int(round((y - board_top_left_coord[1]) /
+                                self.cell_size))
                 if 0 <= col < self.game.size and 0 <= row < self.game.size:
-                    self.game_controller.current_player.receive_next_move_from_gui(Move(col, row))
+                    self.game_controller.current_player \
+                        .receive_next_move_from_gui(Move(col, row))
                 for btn in self.buttons:
                     btn.check_mouse_released()
             if event.type == pygame.QUIT:
@@ -59,7 +64,8 @@ class PygameGuiView(View):
                 btn.is_mouse_over_btn()
             self.render()
 
-        # this exiting mechanism doesn't work (on macOS at least), causes a freeze TODO
+        # TODO: This exiting mechanism doesn't work (on macOS at least)
+        # causes a freeze TODO
         pygame.quit()
         sys.exit(0)
 
@@ -70,7 +76,8 @@ class PygameGuiView(View):
         self.console_view.show_player_turn_end(name)
 
     def send_pass_move(self):
-        self.game_controller.current_player.receive_next_move_from_gui(Move(is_pass=True))
+        self.game_controller.current_player.receive_next_move_from_gui(
+            Move(is_pass=True))
 
     def get_turn_label_text(self):
         return 'It\'s ' + self.game_controller.current_player.name + '\'s turn'
@@ -80,17 +87,22 @@ class PygameGuiView(View):
         self.screen.fill(brown)
         for i in range(0, self.game.size):
             # horizontals
-            pygame.draw.line(self.screen, black, [board_top_left_coord[0], board_top_left_coord[1] + i * self.cell_size],
-                             [board_top_left_coord[0] + board_size, board_top_left_coord[1] + i * self.cell_size], 1)
+            pygame.draw.line(
+                self.screen, black,
+                [board_top_left_coord[0],
+                 board_top_left_coord[1] + i * self.cell_size],
+                [board_top_left_coord[0] + board_size,
+                 board_top_left_coord[1] + i * self.cell_size], 1)
             # verticals
-            pygame.draw.line(self.screen, black, [board_top_left_coord[0] + i * self.cell_size, board_top_left_coord[1]],
-                             [board_top_left_coord[0] + i * self.cell_size, board_top_left_coord[1] + board_size], 1)
+            pygame.draw.line(
+                self.screen, black,
+                [board_top_left_coord[0] + i * self.cell_size,
+                 board_top_left_coord[1]],
+                [board_top_left_coord[0] + i * self.cell_size,
+                 board_top_left_coord[1] + board_size], 1)
         # stones
-        b = self.game.board.copy()  # is it necessary to copy it?
-        b[b == BLACK] = 2
-        b[b == WHITE] = 3
-        black_rows, black_cols = np.where(b == 2)
-        white_rows, white_cols = np.where(b == 3)
+        black_rows, black_cols = np.where(self.game.board == BLACK)
+        white_rows, white_cols = np.where(self.game.board == WHITE)
         for i in range(0, len(black_rows)):
             indices = black_cols[i], black_rows[i]
             self.draw_stone(indices, black)
@@ -114,7 +126,10 @@ class PygameGuiView(View):
         self.console_view.show_error(msg)
 
 
-class Button:  # adapted from gamedev.net/forums/topic/686666-pygame-buttons/?do=findComment&comment=5333411
+class Button:
+    """Adapted from
+    gamedev.net/forums/topic/686666-pygame-buttons/?do=findComment&comment=5333411
+    """
 
     def __init__(self, x, y, w, h, text, screen, on_click):
         self.x = x
@@ -143,7 +158,9 @@ class Button:  # adapted from gamedev.net/forums/topic/686666-pygame-buttons/?do
 
     def is_mouse_over_btn(self):
         pos = pygame.mouse.get_pos()
-        self.mouse_is_over_btn = self.x <= pos[0] < self.x + self.w and self.y <= pos[1] < self.y + self.h
+        self.mouse_is_over_btn = (
+            self.x <= pos[0] < self.x + self.w and
+            self.y <= pos[1] < self.y + self.h)
 
     def check_mouse_released(self):
         if self.mouse_is_over_btn:
