@@ -12,8 +12,10 @@ import numpy as np
 import random as rn
 from typing import Tuple, List
 import logging
+import copy
 
 from src.play.utils.Move import Move
+from src.play.model.Board import Board
 
 logging.basicConfig(
     # filename='logs/Game.log',
@@ -66,7 +68,7 @@ class Game:
         self.result = setup.get('RE')
         self.time = int(setup.get('TM', 0))
         self.show_each_turn = show_each_turn
-        self.board = np.matrix([[0]*self.size]*self.size)
+        self.board = Board([[0]*self.size]*self.size)
         self.white_rank = int(setup.get('WR', 0))
         self.black_rank = int(setup.get('BR', 0))
 
@@ -99,8 +101,14 @@ class Game:
             print(self)
 
     def play(self, move: Move, player: {'w', 'b'}, testing=False):
-        _temp_board = self.board.copy()
+        """Play a move!
 
+        Also checks all the rules.
+        Implemented by first playing on test_board. If everything holds
+        then we apply the changes to self.board.
+        """
+        test_board = copy.deepcopy(self.board)
+        # test_board = self.board.copy()
         # 1. Check if the player is passing and if this ends the game
         if move.is_pass:
             self.play_history.append(player + ':' + str(move))
@@ -117,11 +125,11 @@ class Game:
         # Use the numerical player representation (-1 or 1 so far)
         color = WHITE if player == 'w' else BLACK
         # Check if the location is empty
-        if _temp_board[loc] != 0:
+        if test_board[loc] != 0:
             raise InvalidMove_Error(
                 'There is already a stone at that location')
         # "Play the stone" at the location
-        _temp_board[loc] = color
+        test_board[loc] = color
 
         # 3. Check if this kills a group of stones and remove them
         # How this is done:
@@ -133,29 +141,29 @@ class Game:
         neighbors = self._get_adjacent_coords(loc)
         groups = []
         for n in neighbors:
-            if _temp_board[n] == -color:
-                groups.append(self._get_chain(n))
+            if test_board[n] == -color:
+                groups.append(test_board._get_chain(n))
         for g in groups:
-            if self._check_dead(g):
+            if test_board._check_dead(g):
                 # Capture the stones!
                 if color == BLACK:
                     self.black_player_captured += len(g)
                 if color == WHITE:
                     self.white_player_captured += len(g)
                 for c in g:
-                    _temp_board[c] = 0
+                    test_board[c] = 0
 
         # 4. Validity Checks
         # 4a. No suicides!
-        own_chain = self._get_chain(loc)
-        if self._check_dead(own_chain):
+        own_chain = test_board._get_chain(loc)
+        if test_board._check_dead(own_chain):
             # This play is actually a suicide! Revert changes and raise Error
-            _temp_board[loc] = 0
+            test_board[loc] = 0
             raise InvalidMove_Error('No suicides')
         # 4b. No board state twice! (Depends on rules, yes, TODO)
         if (len(self.board_history) > 0 and
-                    self._board_to_number(_temp_board) in self.board_history):
-            _temp_board[loc] = 0
+                    test_board._board_to_number() in self.board_history):
+            test_board[loc] = 0
             raise InvalidMove_Error(
                 'Same constellation can only appear once')
 
@@ -163,8 +171,8 @@ class Game:
         # If we were testing just revert everything, else append to history
         if not testing:
             # Append move and board to histories
-            self.board = _temp_board
-            self.board_history.add(self._board_to_number(self.board.copy()))
+            self.board = test_board
+            self.board_history.add(test_board._board_to_number())
             self.play_history.append(player + ':' + str(move))
 
     # deprecated
@@ -340,7 +348,8 @@ class Game:
             neighbors.append((loc[0], loc[1]+1))
         return neighbors
 
-    def _get_chain(self, loc: Tuple[int, int]) -> List[Tuple[int, int]]:
+    def _get_chain(self, loc: Tuple[int, int],
+                    board=None) -> List[Tuple[int, int]]:
         player = self.board[loc]
         # Check if neighbors of same player
         to_check = [loc]
