@@ -108,6 +108,12 @@ class Game:
                 return self.evaluate_points()  # Game ended!
             return  # There is nothing to do
 
+        # 1b. First quick validity-check
+        if (move.col + 1 > self.size or move.row + 1 > self.size or
+                move.col < 0 or move.row < 0):
+            raise InvalidMove_Error(
+                'Location is not present on the board: '+str(move))
+
         # 2. Play the stone
         loc = move.to_matrix_location()
         # Use the numerical player representation (-1 or 1 so far)
@@ -164,7 +170,7 @@ class Game:
             self.play_history.append(player + ':' + str(move))
 
     def __str__(self):
-        """Game representation = Board representation!"""
+        """Game representation = Board representation"""
         return str(self.board)
 
     def evaluate_points(self):
