@@ -1,7 +1,8 @@
 """Class that handles moves!
 
-We want to create moves out of matrix locations, sgf strings, gtp strings, ...
-We also want to output the move in different formats!
+Supports alternative constructors using `from_*`, so that it supports
+the sgf format, gtp, and matrix locations
+
 """
 
 
@@ -61,6 +62,40 @@ class Move:
         (3/1)
         """
         return cls(loc[1], loc[0])
+
+    def to_sgf(self):
+        """Output move following the SGF standard
+
+        Examples
+        --------
+        >>> Move(0,1).to_sgf()
+        'ab'
+        >>> Move(is_pass=True).to_sgf()
+        ''
+        """
+        if self.is_pass:
+            return ''
+        else:
+            col = chr(self.col + ord('a'))
+            row = chr(self.row + ord('a'))
+            return col+row
+
+    def to_gtp(self):
+        """Output move following the GTP standard
+
+        Examples
+        --------
+        >>> Move(0,1).to_gtp()
+        'A2'
+        >>> Move(is_pass=True).to_gtp()
+        'pass'
+        """
+        if self.is_pass:
+            return 'pass'
+        else:
+            col = str(chr(self.col + ord('A')))
+            row = str(self.row + 1)
+            return col+row
 
     def to_matrix_location(self):
         return self.row, self.col  # row/col instead of col/row
