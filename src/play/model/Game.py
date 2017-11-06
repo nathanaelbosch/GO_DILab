@@ -114,7 +114,7 @@ class Game:
             self.play_history.append(player + ':' + str(move))
             # Append the move to the move_history
             if (len(self.play_history) > 2 and
-                        self.play_history[-2].split(':')[1] == ''):
+                    self.play_history[-2].split(':')[1] == ''):
                 logger.info('Game finished!')
                 self.is_running = False
                 return self.evaluate_points()  # Game ended!
@@ -162,7 +162,7 @@ class Game:
             raise InvalidMove_Error('No suicides')
         # 4b. No board state twice! (Depends on rules, yes, TODO)
         if (len(self.board_history) > 0 and
-                    test_board._board_to_number() in self.board_history):
+                test_board._board_to_number() in self.board_history):
             test_board[loc] = 0
             raise InvalidMove_Error(
                 'Same constellation can only appear once')
