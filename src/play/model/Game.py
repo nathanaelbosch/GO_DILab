@@ -9,8 +9,6 @@ time! Python supports that since 3.?, but it's just used by linters and it
 does not affect the code in any way during the runtime (afaik).
 """
 import numpy as np
-import random as rn
-from typing import Tuple, List
 import logging
 import copy
 
