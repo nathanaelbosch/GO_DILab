@@ -87,12 +87,15 @@ def to_training_file(*args, **kwargs):
 
 def main():
     files = list_all_sgf_files('data')
-    files = rn.sample(files, 100)
+    files = rn.sample(files, 1000)
 
     # import multiprocessing
     # pool = multiprocessing.Pool()
     # pool.map(lambda x: replay_game(x, to_training_file), files)
     # map(lambda x: replay_game(x, to_training_file), files)
+
+    if os.path.isfile(OUT):
+        os.remove(OUT)
 
     for file in files:
         replay_game(file, to_training_file)
