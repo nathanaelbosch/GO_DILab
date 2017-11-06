@@ -50,33 +50,38 @@ def replay_game(file, func):
         game.play(move, player_color.lower())
         func(game, move, player_color.lower())
 
+def board_to_csv(board):
+    ls = board.tolist()
+    ls = [str(entry) for row in ls for entry in row]
+    s = ';'.join(ls)
+    return s
 
-def get_string(game, move, player):
-    def board_to_csv(board):
-        ls = board.tolist()
+def move_to_csv(move, player):
+    if move.is_pass:
+        # s = ';'.join(['0']*(9*9)+['1'])
+        s = ';'.join(['0']*(9*9))
+        return s
+    else:
+        new_game = Game()
+        new_game.play(move, player.lower())
+        ls = new_game.board.tolist()
         ls = [str(entry) for row in ls for entry in row]
+        # s = ';'.join(ls+['0'])
         s = ';'.join(ls)
         return s
 
-    def move_to_csv(move, player):
-        if move.is_pass:
-            # s = ';'.join(['0']*(9*9)+['1'])
-            s = ';'.join(['0']*(9*9))
-            return s
-        else:
-            new_game = Game()
-            new_game.play(move, player.lower())
-            ls = new_game.board.tolist()
-            ls = [str(entry) for row in ls for entry in row]
-            # s = ';'.join(ls+['0'])
-            s = ';'.join(ls)
-            return s
+def get_string(game, move, player):
+
 
     b = board_to_csv(game.board)
     m = move_to_csv(move, player)
     s = b+';'+m
     # print(s)
     return s
+
+
+def foo(file):
+    return replay_game(file, to_training_file)
 
 
 def to_training_file(*args, **kwargs):
@@ -89,16 +94,16 @@ def main():
     files = list_all_sgf_files('data')
     files = rn.sample(files, 1000)
 
-    # import multiprocessing
-    # pool = multiprocessing.Pool()
-    # pool.map(lambda x: replay_game(x, to_training_file), files)
+    import multiprocessing
+    pool = multiprocessing.Pool()
+    pool.map(foo, files)
     # map(lambda x: replay_game(x, to_training_file), files)
 
-    if os.path.isfile(OUT):
-        os.remove(OUT)
+    # if os.path.isfile(OUT):
+    #     os.remove(OUT)
 
-    for file in files:
-        replay_game(file, to_training_file)
+    # for file in files:
+    #     replay_game(file, to_training_file)
 
 
 if __name__ == '__main__':
