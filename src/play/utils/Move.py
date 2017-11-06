@@ -1,8 +1,8 @@
 """Class that handles moves!
 
-Supports alternative constructors using `from_*`, so that it supports
-the sgf format, gtp, and matrix locations
-
+Supports alternative constructors using `from_*`, so that it can be
+constructed from the sgf format, gtp, and matrix locations.
+Same goes for output, using the `to_*` functions
 """
 
 
