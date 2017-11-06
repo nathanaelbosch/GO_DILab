@@ -50,11 +50,13 @@ def replay_game(file, func):
         game.play(move, player_color.lower())
         func(game, move, player_color.lower())
 
+
 def board_to_csv(board):
     ls = board.tolist()
     ls = [str(entry) for row in ls for entry in row]
     s = ';'.join(ls)
     return s
+
 
 def move_to_csv(move, player):
     if move.is_pass:
@@ -70,9 +72,8 @@ def move_to_csv(move, player):
         s = ';'.join(ls)
         return s
 
+
 def get_string(game, move, player):
-
-
     b = board_to_csv(game.board)
     m = move_to_csv(move, player)
     s = b+';'+m
@@ -81,7 +82,10 @@ def get_string(game, move, player):
 
 
 def foo(file):
-    return replay_game(file, to_training_file)
+    try:
+        replay_game(file, to_training_file)
+    except Exception:
+        return
 
 
 def to_training_file(*args, **kwargs):
