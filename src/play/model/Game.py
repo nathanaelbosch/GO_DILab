@@ -67,8 +67,12 @@ class Game:
         self.time = int(setup.get('TM', 0))
         self.show_each_turn = show_each_turn
         self.board = Board([[EMPTY]*self.size]*self.size)
-        self.white_rank = int(setup.get('WR', 0))
-        self.black_rank = int(setup.get('BR', 0))
+        try:
+            self.white_rank = int(setup.get('WR', 0))
+            self.black_rank = int(setup.get('BR', 0))
+        except ValueError as e:
+            logger.debug('Value Error when reading rank from sgf')
+            pass
 
         self.play_history = []
         self.board_history = set()
