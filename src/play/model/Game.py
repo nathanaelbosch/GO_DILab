@@ -68,7 +68,7 @@ class Game:
         self.result = setup.get('RE')
         self.time = int(setup.get('TM', 0))
         self.show_each_turn = show_each_turn
-        self.board = Board([[0]*self.size]*self.size)
+        self.board = Board([[EMPTY]*self.size]*self.size)
         self.white_rank = int(setup.get('WR', 0))
         self.black_rank = int(setup.get('BR', 0))
 
@@ -151,19 +151,19 @@ class Game:
                 if color == WHITE:
                     self.white_player_captured += len(g)
                 for c in g:
-                    test_board[c] = 0
+                    test_board[c] = EMPTY
 
         # 4. Validity Checks
         # 4a. No suicides!
         own_chain = test_board.get_chain(loc)
         if test_board.check_dead(own_chain):
             # This play is actually a suicide! Revert changes and raise Error
-            test_board[loc] = 0
+            test_board[loc] = EMPTY
             raise InvalidMove_Error('No suicides')
         # 4b. No board state twice! (Depends on rules, yes, TODO)
         if (len(self.board_history) > 0 and
                 test_board.to_number() in self.board_history):
-            test_board[loc] = 0
+            test_board[loc] = EMPTY
             raise InvalidMove_Error(
                 'Same constellation can only appear once')
 
