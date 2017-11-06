@@ -263,12 +263,12 @@ class Game:
         black_area = black_territory + len(black_locations)
         white_area = white_territory + len(white_locations)
 
-        logger.debug(f'Black territory: {black_territory}')
-        logger.debug(f'White territory: {white_territory}')
-        logger.debug(f'Black area: {black_area}')
-        logger.debug(f'White area: {white_area}')
-        logger.debug(f'Black captured: {self.black_player_captured}')
-        logger.debug(f'White captured: {self.white_player_captured}')
+        logger.debug('Black territory: {}'.format(black_territory))
+        logger.debug('White territory: {}'.format(white_territory))
+        logger.debug('Black area: {}'.format(black_area))
+        logger.debug('White area: {}'.format(white_area))
+        logger.debug('Black captured: {}'.format(self.black_player_captured))
+        logger.debug('White captured: {}'.format(self.white_player_captured))
 
         # For japanese rules
         if self.rules.lower().startswith('j'):
@@ -276,22 +276,23 @@ class Game:
             white_score = white_territory - self.black_player_captured
             white_score += self.komi
 
-            logger.debug(f'White: {white_score}')
-            logger.debug(f'Black: {black_score}')
+            logger.debug('Black: {}'.format(black_score))
+            logger.debug('White: {}'.format(white_score))
         if self.rules.lower().startswith('c'):
             black_score = black_area
             white_score = white_area
             white_score += self.komi
 
-            logger.debug(f'White: {white_score}')
-            logger.debug(f'Black: {black_score}')
+            logger.debug('Black: {}'.format(black_score))
+            logger.debug('White: {}'.format(white_score))
         if black_score == white_score:
             print('Same score: Draw!')
             return
         winner = 'Black' if black_score > white_score else 'White'
-        print(f'{winner} won by {abs(black_score - white_score)} points!')
+        print('{} won by {} points!'.format(
+            winner, abs(black_score - white_score)))
         if self.result:
-            logger.debug(f'Result according to the sgf: {self.result}')
+            logger.debug('Result according to the sgf: {}'.format(self.result))
 
     def get_playable_locations(self, color) -> []:
         empty_locations = np.argwhere(self.board == 0)
