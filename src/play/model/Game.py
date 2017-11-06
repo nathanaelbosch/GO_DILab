@@ -76,29 +76,17 @@ class Game:
         self.board_history = set()
         if 'AB' in setup.keys():
             for loc in setup['AB']:
-                self.board[self._str2index(loc)] = BLACK
+                move = Move.from_sgf(loc)
+                self.board[move.to_matrix_location] = BLACK
         if 'AW' in setup.keys():
             for loc in setup['AW']:
-                self.board[self._str2index(loc)] = WHITE
+                move = Move.from_sgf(loc)
+                self.board[move.to_matrix_location] = WHITE
         self.black_player_captured = 0
         self.white_player_captured = 0
 
     def start(self):
         self.is_running = True
-
-    # deprecated
-    def w(self, loc: str, show_board=False):
-        """White plays"""
-        self.play_str(loc, 'w')
-        if show_board or self.show_each_turn:
-            print(self)
-
-    # deprecated
-    def b(self, loc: str, show_board=False):
-        """Black plays"""
-        self.play_str(loc, 'b')
-        if show_board or self.show_each_turn:
-            print(self)
 
     def play(self, move: Move, player: {'w', 'b'}, testing=False):
         """Play a move!
@@ -121,7 +109,7 @@ class Game:
             return  # There is nothing to do
 
         # 2. Play the stone
-        loc = move.get_loc_as_matrix_coords()
+        loc = move.to_matrix_location()
         # Use the numerical player representation (-1 or 1 so far)
         color = WHITE if player == 'w' else BLACK
         # Check if the location is empty
@@ -175,59 +163,9 @@ class Game:
             self.board_history.add(test_board.to_number())
             self.play_history.append(player + ':' + str(move))
 
-    def _str2index(self, loc: str) -> Tuple[int, int]:
-        """Convert the sgf location format to a usable matrix index
-
-        Examples
-        --------i
-        >>> g = Game(); g._str2index('ef')
-        (5, 4)
-        """
-        col = self._chr2ord(loc[0])
-        row = self._chr2ord(loc[1])
-        return (row, col)
-
-    def _index2str(self, index: Tuple[int, int]) -> str:
-        """Convert the sgf location format to a usable matrix index
-
-        Examples
-        --------
-        >>> g = Game(); g._str2index('ef')
-        (5, 4)
-        """
-        col = self._ord2chr(index[1])
-        row = self._ord2chr(index[0])
-        return col+row
-
     def __str__(self):
         """Game representation = Board representation!"""
         return str(self.board)
-
-    def _chr2ord(self, c: str) -> int:
-        """Small helper function - letter to number
-
-        Examples
-        --------
-        >>> g = Game(); g._chr2ord('f')
-        5
-        """
-        idx = ord(c) - ord('a')
-        if idx < 0 or idx >= self.size:
-            raise InvalidMove_Error(
-                c + '=' + str(idx) +
-                ' is an invalid row/column index, board size is ' +
-                str(self.size))
-        return idx
-
-    def _ord2chr(self, o: int) -> str:
-        """Small helper function - number to letter
-
-        Examples
-        --------
-        >>> g = Game(); g._ord2chr(5)
-        'f'
-        """
-        return chr(o + ord('a'))
 
     def evaluate_points(self):
         """Count the area/territory, subtract captured, komi"""
@@ -289,50 +227,13 @@ class Game:
         empty_locations = [(l[0], l[1]) for l in empty_locations]
         valid_moves = [Move(is_pass=True)]  # passing is always a valid move
         for location in empty_locations:
-            move = Move(location[0], location[1])
+            move = Move.from_matrix_location(location)
             try:
                 self.play(move, color, testing=True)
                 valid_moves.append(move)
             except InvalidMove_Error as e:
                 pass
         return valid_moves
-
-    def generate_move(self, apply=True, show_board=True):
-        """Generate a valid move - ANY valid move
-
-        This is just a proof of concept, no need for it to be smart right now.
-        """
-        # 0. Which player am I?
-        if len(self.play_history) > 0:
-            own_color = 'w' if self.play_history[-1].startswith('b') else 'b'
-        else:
-            own_color = 'b'
-
-        # 1. Get free locations on the board
-        empty_locations = np.argwhere(self.board == 0)
-        empty_locations = [(l[0], l[1]) for l in empty_locations]
-
-        # Passing is always a valid move
-        valid_moves = ['']
-        for location in empty_locations:
-            move = self._index2str(location)
-            try:
-                self.play(move, own_color, testing=True)
-                valid_moves.append(move)
-            except InvalidMove_Error as e:
-                pass
-
-        if len(valid_moves) == 0:
-            move = ''
-        else:
-            move = rn.choice(valid_moves)
-
-        if apply:
-            self.play(move, own_color)
-        if show_board:
-            print(self)
-
-        return move
 
 
 if __name__ == '__main__':
