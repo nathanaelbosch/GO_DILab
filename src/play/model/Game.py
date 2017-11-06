@@ -14,6 +14,13 @@ from typing import Tuple, List
 import logging
 import copy
 
+"""Just to adjust the internal representation of color at a single location,
+instead of all over the code ;) Just in case. Maybe something else as -1 and 1
+could be interesting, see the tick tack toe example"""
+WHITE = -1
+BLACK = 1
+EMPTY = 0
+
 from src.play.utils.Move import Move
 from src.play.model.Board import Board
 
@@ -25,13 +32,6 @@ logging.basicConfig(
     datefmt='%Y-%m-%d %H:%M:%S')
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
-
-
-"""Just to adjust the internal representation of color at a single location,
-instead of all over the code ;) Just in case. Maybe something else as -1 and 1
-could be interesting, see the tick tack toe example"""
-WHITE = -1
-BLACK = 1
 
 
 class GO_Error(Exception):
@@ -114,7 +114,7 @@ class Game:
             self.play_history.append(player + ':' + str(move))
             # Append the move to the move_history
             if (len(self.play_history) > 2 and
-                    self.play_history[-2].split(':')[1] == ''):
+                    self.play_history[-2].split(':')[1] == 'pass'):
                 logger.info('Game finished!')
                 self.is_running = False
                 return self.evaluate_points()  # Game ended!
@@ -125,7 +125,7 @@ class Game:
         # Use the numerical player representation (-1 or 1 so far)
         color = WHITE if player == 'w' else BLACK
         # Check if the location is empty
-        if test_board[loc] != 0:
+        if test_board[loc] != EMPTY:
             raise InvalidMove_Error(
                 'There is already a stone at that location')
         # "Play the stone" at the location
@@ -138,13 +138,13 @@ class Game:
         #   2. For each of them, get the respective chain
         #   3. For each neighbor of each stone in the chain, check if it is 0
         #   4. If one of them (or more) is 0 they live, else they die
-        neighbors = self._get_adjacent_coords(loc)
+        neighbors = test_board.get_adjacent_coords(loc)
         groups = []
         for n in neighbors:
             if test_board[n] == -color:
-                groups.append(test_board._get_chain(n))
+                groups.append(test_board.get_chain(n))
         for g in groups:
-            if test_board._check_dead(g):
+            if test_board.check_dead(g):
                 # Capture the stones!
                 if color == BLACK:
                     self.black_player_captured += len(g)
@@ -155,14 +155,14 @@ class Game:
 
         # 4. Validity Checks
         # 4a. No suicides!
-        own_chain = test_board._get_chain(loc)
-        if test_board._check_dead(own_chain):
+        own_chain = test_board.get_chain(loc)
+        if test_board.check_dead(own_chain):
             # This play is actually a suicide! Revert changes and raise Error
             test_board[loc] = 0
             raise InvalidMove_Error('No suicides')
         # 4b. No board state twice! (Depends on rules, yes, TODO)
         if (len(self.board_history) > 0 and
-                test_board._board_to_number() in self.board_history):
+                test_board.to_number() in self.board_history):
             test_board[loc] = 0
             raise InvalidMove_Error(
                 'Same constellation can only appear once')
@@ -172,101 +172,14 @@ class Game:
         if not testing:
             # Append move and board to histories
             self.board = test_board
-            self.board_history.add(test_board._board_to_number())
+            self.board_history.add(test_board.to_number())
             self.play_history.append(player + ':' + str(move))
-
-    # deprecated
-    def play_str(self, move: str, player: {'w', 'b'}, testing=False):
-        """Play at a location, and check for all the rules
-
-        Parameters
-        ----------
-        move: str
-            Location using the sgf notation, e.g. 'ef'
-        player: {'w', 'b'}
-            Char designation the player
-        testing: bool
-            I Introduced this so that `_play` is also a function that tests
-            for validity. If we're in "testing-mode", just revert the state
-            Also we assume noone would call this using `''` (pass)
-        """
-        # 0. Save board to be able to revert it after
-        _starting_board = self.board.copy()
-
-        # 1. Check if the player is passing and if this ends the game
-        if move == '':
-            self.play_history.append(player+':'+move)
-            # Append the move to the move_history
-            if (len(self.play_history) > 2 and
-                    self.play_history[-2].split(':')[1] == ''):
-                logger.info('Game finished!')
-                self.is_running = False
-                return self.evaluate_points()   # Game ended!
-            return                              # There is nothing to do
-
-        # 2. Play the stone
-        # Transform the 'ef' type location to a matrix index (row, col)
-        loc = self._str2index(move)
-        # Use the numerical player representation (-1 or 1 so far)
-        color = WHITE if player == 'w' else BLACK
-        # Check if the location is empty
-        if self.board[loc] != 0:
-            raise InvalidMove_Error(
-                'There is already a stone at that location')
-        # "Play the stone" at the location
-        self.board[loc] = color
-
-        # 3. Check if this kills a group of stones and remove them
-        # How this is done:
-        #   1. Get all neighbors
-        #   1b. Only look at those with the enemy color
-        #   2. For each of them, get the respective chain
-        #   3. For each neighbor of each stone in the chain, check if it is 0
-        #   4. If one of them (or more) is 0 they live, else they die
-        neighbors = self._get_adjacent_coords(loc)
-        groups = []
-        for n in neighbors:
-            if self.board[n] == -color:
-                groups.append(self._get_chain(n))
-        for g in groups:
-            if self._check_dead(g):
-                # Capture the stones!
-                if color == BLACK:
-                    self.black_player_captured += len(g)
-                if color == WHITE:
-                    self.white_player_captured += len(g)
-                for c in g:
-                    self.board[c] = 0
-
-        # 4. Validity Checks
-        # 4a. No suicides!
-        own_chain = self._get_chain(loc)
-        if self._check_dead(own_chain):
-            # This play is actually a suicide! Revert changes and raise Error
-            self.board[loc] = 0
-            raise InvalidMove_Error('No suicides')
-        # 4b. No board state twice! (Depends on rules, yes, TODO)
-        if (len(self.board_history) > 0 and
-                self._board_to_number(self.board) in self.board_history):
-            self.board[loc] = 0
-            raise InvalidMove_Error(
-                'Same constellation can only appear once')
-
-        # 5. Everything is valid :)
-        # If we were testing just revert everything, else append to history
-        if not testing:
-            # Append move and board to histories
-            self.board_history.add(self._board_to_number(self.board.copy()))
-            self.play_history.append(player+':'+move)
-        else:
-            # Revert changes
-            self.board = _starting_board.copy()
 
     def _str2index(self, loc: str) -> Tuple[int, int]:
         """Convert the sgf location format to a usable matrix index
 
         Examples
-        --------
+        --------i
         >>> g = Game(); g._str2index('ef')
         (5, 4)
         """
@@ -286,29 +199,9 @@ class Game:
         row = self._ord2chr(index[0])
         return col+row
 
-    def __repr__(self):
-        """String representation of the board!
-
-        Just a simple ascii output, quite cool but the code is a bit messy"""
-        b = self.board.copy()
-        # You might wonder why I do the following, but its so that numpy
-        # formats the str representation using a single space
-        b[b == BLACK] = 2
-        b[b == WHITE] = 3
-
-        matrix_repr = str(b)
-        matrix_repr = matrix_repr.replace('2', 'X')
-        matrix_repr = matrix_repr.replace('3', 'O')
-        matrix_repr = matrix_repr.replace('0', '·')
-        matrix_repr = matrix_repr.replace('[[', ' [')
-        matrix_repr = matrix_repr.replace(']]', ']')
-        col_index = '   a b c d e f g h i'
-        row_index = 'a,b,c,d,e,f,g,h,i'.split(',')
-        board_repr = ''
-        for i in zip(row_index, matrix_repr.splitlines()):
-            board_repr += i[0]+i[1]+'\n'
-        board_repr = col_index+'\n'+board_repr
-        return board_repr
+    def __str__(self):
+        """Game representation = Board representation!"""
+        return str(self.board)
 
     def _chr2ord(self, c: str) -> int:
         """Small helper function - letter to number
@@ -336,67 +229,6 @@ class Game:
         """
         return chr(o + ord('a'))
 
-    def _get_adjacent_coords(self, loc: Tuple[int, int]):
-        neighbors = []
-        if loc[0] > 0:
-            neighbors.append((loc[0]-1, loc[1]))
-        if loc[0] < self.size-1:
-            neighbors.append((loc[0]+1, loc[1]))
-        if loc[1] > 0:
-            neighbors.append((loc[0], loc[1]-1))
-        if loc[1] < self.size-1:
-            neighbors.append((loc[0], loc[1]+1))
-        return neighbors
-
-    def _get_chain(self, loc: Tuple[int, int],
-                    board=None) -> List[Tuple[int, int]]:
-        player = self.board[loc]
-        # Check if neighbors of same player
-        to_check = [loc]
-        group = []
-        while len(to_check) > 0:
-            current = to_check.pop()
-            neighbors = self._get_adjacent_coords(current)
-            for n in neighbors:
-                if (self.board[n] == player and
-                        n not in group and n not in to_check):
-                    to_check.append(n)
-            group.append(current)
-        return group
-
-    def _matrix2csv(self, matrix):
-        """Transform a matrix to a string, using ';' as the separator"""
-        ls = matrix.tolist()
-        ls = [str(entry) for row in ls for entry in row]
-        s = ';'.join(ls)
-        return s
-
-    def board2file(self, file, mode='a'):
-        """Store board to a file
-
-        The idea is also to create csv files that contain
-        all boards that were part of a game, so that we can
-        use those to train a network on.
-        """
-        string = self._matrix2csv(self.board)
-        with open(file, mode) as f:
-            f.write(string)
-            f.write('\n')
-
-    def _check_dead(self, group: List[Tuple[int, int]]) -> bool:
-        """Check if a group is dead
-
-        Currently done by getting all the neighbors, and checking if any
-        of them is 0.
-        """
-        total_neighbors = []
-        for loc in group:
-            total_neighbors += self._get_adjacent_coords(loc)
-        for n in total_neighbors:
-            if self.board[n] == 0:
-                return False
-        return True
-
     def evaluate_points(self):
         """Count the area/territory, subtract captured, komi"""
         white_score = 0
@@ -406,11 +238,11 @@ class Game:
         # Numpy is weird. Without tuples a lot of things dont work :/
         empty_locations = [(l[0], l[1]) for l in empty_locations]
         for stone in empty_locations:
-            chain = self._get_chain(stone)
+            chain = self.board.get_chain(stone)
             black_neighbor = False
             white_neighbor = False
             for s in chain:
-                for n in self._get_adjacent_coords(s):
+                for n in self.board.get_adjacent_coords(s):
                     if self.board[n] == BLACK:
                         black_neighbor = True
                     if self.board[n] == WHITE:
@@ -501,24 +333,6 @@ class Game:
             print(self)
 
         return move
-
-    def _board_to_number(self, board):
-        """Basically just create a unique representation for a board
-
-        I do this because performence gets bad once the board history is
-        large
-        """
-        number = 0
-        i = 0
-        for entry in np.nditer(board):
-            if entry == WHITE:
-                number += 1 * 10**i
-            elif entry == BLACK:
-                number += 2 * 10**i
-            else:
-                number += 3 * 10**i
-            i += 1
-        return number
 
 
 if __name__ == '__main__':

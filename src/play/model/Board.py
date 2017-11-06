@@ -2,20 +2,23 @@
 import numpy as np
 from typing import Tuple, List
 
-# from src.play.model.Game import WHITE, BLACK
-WHITE = -1
-BLACK = 1
+from src.play.model.Game import BLACK, WHITE, EMPTY
 
 
 class Board(np.matrix):
-    def _get_chain(self, loc: Tuple[int, int]) -> List[Tuple[int, int]]:
+    """Class that purely handles the board, as well as board_related functions
+
+    The motivation for this was also that we can make a copy of the real board,
+    and evaluate all the `get_chain`, `check_dead` etc on the copy
+    """
+    def get_chain(self, loc: Tuple[int, int]) -> List[Tuple[int, int]]:
         player = self[loc]
         # Check if neighbors of same player
         to_check = [loc]
         group = []
         while len(to_check) > 0:
             current = to_check.pop()
-            neighbors = self._get_adjacent_coords(current)
+            neighbors = self.get_adjacent_coords(current)
             for n in neighbors:
                 if (self[n] == player and
                         n not in group and n not in to_check):
@@ -23,7 +26,7 @@ class Board(np.matrix):
             group.append(current)
         return group
 
-    def _check_dead(self, group: List[Tuple[int, int]]) -> bool:
+    def check_dead(self, group: List[Tuple[int, int]]) -> bool:
         """Check if a group is dead
 
         Currently done by getting all the neighbors, and checking if any
@@ -31,13 +34,13 @@ class Board(np.matrix):
         """
         total_neighbors = []
         for loc in group:
-            total_neighbors += self._get_adjacent_coords(loc)
+            total_neighbors += self.get_adjacent_coords(loc)
         for n in total_neighbors:
-            if self[n] == 0:
+            if self[n] == EMPTY:
                 return False
         return True
 
-    def _get_adjacent_coords(self, loc: Tuple[int, int]):
+    def get_adjacent_coords(self, loc: Tuple[int, int]):
         neighbors = []
         if loc[0] > 0:
             neighbors.append((loc[0]-1, loc[1]))
@@ -49,11 +52,12 @@ class Board(np.matrix):
             neighbors.append((loc[0], loc[1]+1))
         return neighbors
 
-    def _board_to_number(self):
-        """Basically just create a unique representation for a board
+    def to_number(self):
+        """Create a unique representation for a board
 
-        I do this because performence gets bad once the board history is
-        large
+        Does this by creating an integer, with each position indicating a
+        location on the board. I do this because performence gets bad once
+        the board history is large
         """
         number = 0
         i = 0
@@ -66,3 +70,58 @@ class Board(np.matrix):
                 number += 3 * 10**i
             i += 1
         return number
+
+    def __str__(self):
+        """String representation of the board!
+
+        Just a simple ascii output, quite cool but the code is a bit messy"""
+        b = self.copy()
+        rows = list(range(b.shape[0]))
+        rows = [chr(i + ord('a')) for i in rows]
+        cols = list(range(b.shape[1]))
+        cols = [chr(i + ord('a')) for i in cols]
+        # You might wonder why I do the following, but its so that numpy
+        # formats the str representation using a single space
+        b[b == BLACK] = 2
+        b[b == WHITE] = 3
+
+        matrix_repr = super(Board, b).__str__()
+        matrix_repr = matrix_repr.replace('2', 'X')
+        matrix_repr = matrix_repr.replace('3', 'O')
+        matrix_repr = matrix_repr.replace('0', '·')
+        matrix_repr = matrix_repr.replace('[[', ' [')
+        matrix_repr = matrix_repr.replace(']]', ']')
+
+        col_index = ' '.join(cols)
+        board_repr = ''
+        for i in zip(rows, matrix_repr.splitlines()):
+            board_repr += i[0]+i[1]+'\n'
+        board_repr = ' '*3 + col_index+'\n'+board_repr
+        return board_repr
+
+    ###########################################################################
+    # Not used yet, but more relevant to `Board` than to `Game`
+    def _matrix2csv(self, matrix):
+        """Transform a matrix to a string, using ';' as the separator"""
+        ls = matrix.tolist()
+        ls = [str(entry) for row in ls for entry in row]
+        s = ';'.join(ls)
+        return s
+
+    def board2file(self, file, mode='a'):
+        """Store board to a file
+
+        The idea is also to create csv files that contain
+        all boards that were part of a game, so that we can
+        use those to train a network on.
+        """
+        string = self._matrix2csv(self.board)
+        with open(file, mode) as f:
+            f.write(string)
+            f.write('\n')
+
+
+if __name__ == '__main__':
+    import doctest
+    # doctest.testmod(extraglobs={'g': Game()})
+    doctest.testmod()
