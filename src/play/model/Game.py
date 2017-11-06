@@ -160,7 +160,8 @@ class Game:
                 'Same constellation can only appear once')
 
         # 5. Everything is valid :)
-        # If we were testing just revert everything, else append to history
+        # If we were testing we're done
+        # If not then apply changes and append move and board to history
         if not testing:
             # Append move and board to histories
             self.board = test_board
@@ -173,9 +174,10 @@ class Game:
 
     def evaluate_points(self):
         """Count the area/territory, subtract captured, komi"""
-        white_score = 0
-        black_score = 0
+        black_territory = 0
+        white_territory = 0
 
+        # 1. Count terrotory
         empty_locations = np.argwhere(self.board == 0)
         # Numpy is weird. Without tuples a lot of things dont work :/
         empty_locations = [(l[0], l[1]) for l in empty_locations]
@@ -193,27 +195,34 @@ class Game:
                 # Neutral territory
                 pass
             elif black_neighbor and not white_neighbor:
-                black_score += len(chain)
+                black_territory += len(chain)
             elif not black_neighbor and white_neighbor:
-                white_score += len(chain)
+                white_territory += len(chain)
 
-        logger.debug(f'White territory: {white_score}')
-        logger.debug(f'Black territory: {black_score}')
-        logger.debug(f'White captured: {self.white_player_captured}')
+        # 2. Count area
+        black_locations = np.argwhere(self.board == BLACK)
+        white_locations = np.argwhere(self.board == WHITE)
+        black_area = black_territory + len(black_locations)
+        white_area = white_territory + len(white_locations)
+
+        logger.debug(f'Black territory: {black_territory}')
+        logger.debug(f'White territory: {white_territory}')
+        logger.debug(f'Black area: {black_area}')
+        logger.debug(f'White area: {white_area}')
         logger.debug(f'Black captured: {self.black_player_captured}')
+        logger.debug(f'White captured: {self.white_player_captured}')
 
         # For japanese rules
         if self.rules.lower().startswith('j'):
-            black_score -= self.white_player_captured
-            white_score -= self.black_player_captured
+            black_score = black_territory - self.white_player_captured
+            white_score = white_territory - self.black_player_captured
             white_score += self.komi
 
-            print(f'White: {white_score}\nBlack: {black_score}')
+            logger.debug(f'White: {white_score}')
+            logger.debug(f'Black: {black_score}')
         if self.rules.lower().startswith('c'):
-            black_locations = np.argwhere(self.board == BLACK)
-            white_locations = np.argwhere(self.board == WHITE)
-            black_score += len(black_locations)
-            white_score += len(white_locations)
+            black_score = black_area
+            white_score = white_area
             white_score += self.komi
 
             logger.debug(f'White: {white_score}')
