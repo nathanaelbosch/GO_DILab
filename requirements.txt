@@ -6,3 +6,5 @@ pygame
 numpy
 sgf
 matplotlib
+pandas
+scikit-learn
