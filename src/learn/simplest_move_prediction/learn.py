@@ -32,12 +32,13 @@ def list_all_csv_files(dir):
 
 def main():
     all_files = list_all_csv_files(DIR)
-    all_files = rn.sample(all_files, 100)
+    # all_files = rn.sample(all_files, 1000)
+    print(len(all_files))
     X, y = np.empty((0, 9*9)), np.empty((0, 9*9))
 
     for file in all_files:
         # file = rn.choice(all_files)
-        print(file)
+        # print(file)
         data = pd.read_csv(file, sep=';', header=None)
         _X = data[data.columns[:(9*9)]].as_matrix()
         _y = data[data.columns[(9*9):]].as_matrix()
@@ -52,24 +53,26 @@ def main():
     in_dim = X_train.shape[1]
     out_dim = y_train.shape[1]
     model = Sequential()
-    model.add(Dense(40, input_dim=in_dim, activation='relu'))
+    model.add(Dense(200, input_dim=in_dim, activation='relu'))
     model.add(Dropout(0.25))
-    model.add(Dense(40, input_dim=in_dim, activation='relu'))
+    model.add(Dense(200, input_dim=in_dim, activation='relu'))
     model.add(Dropout(0.25))
     model.add(Dense(out_dim, activation='softmax'))
 
     # compile model
     model.compile(
-        loss='binary_crossentropy',
+        loss='categorical_crossentropy',
         optimizer='adam',
         metrics=['accuracy'])
 
     # Fit the model
-    model.fit(X_train, y_train, epochs=50, batch_size=10)
+    model.fit(X_train, y_train, epochs=10, batch_size=1000)
 
     # Evaluate model
     scores = model.evaluate(X_test, y_test)
     print('\n{:s}: {:.2f}'.format(model.metrics_names[1], scores[1]*100))
+
+    model.save('src/learn/simplest_move_prediction/model.h5')
 
 
 if __name__ == '__main__':

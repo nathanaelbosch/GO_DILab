@@ -88,7 +88,7 @@ def foo(file):
 
 def main():
     files = list_all_sgf_files('data')
-    # files = rn.sample(files, 1000)
+    files = rn.sample(files, 1000)
 
     import multiprocessing
     pool = multiprocessing.Pool()

@@ -8,6 +8,7 @@ sys.path.append(project_dir)
 from src.play import (Game, PygameGuiView, ConsoleView,
                       HumanConsolePlayer, HumanGuiPlayer,
                       RandomBotPlayer, GameController)
+from src.learn.simplest_move_prediction.SimplestNNPlayer import SimplestNNPlayer
 
 
 def parse_args():
@@ -34,7 +35,8 @@ def main():
     player_types = {
         'human_nogui': HumanConsolePlayer,
         'human': HumanGuiPlayer,
-        'random': RandomBotPlayer
+        'random': RandomBotPlayer,
+        'simplest': SimplestNNPlayer
     }
 
     name1 = 'Max' if args.player1 == 'human' else 'Robo'
