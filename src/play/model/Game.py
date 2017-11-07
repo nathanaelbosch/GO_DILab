@@ -177,7 +177,7 @@ class Game:
         black_territory = 0
         white_territory = 0
 
-        # 1. Count terrotory
+        # 1. Count territory
         empty_locations = np.argwhere(self.board == 0)
         # Numpy is weird. Without tuples a lot of things dont work :/
         empty_locations = [(l[0], l[1]) for l in empty_locations]
