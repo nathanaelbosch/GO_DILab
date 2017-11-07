@@ -19,7 +19,7 @@ class Board(np.matrix):
         label_im, nb_labels = ndimage.label(test_matrix)
         label_im = label_im == label_im[loc]
         locations = np.where(label_im)
-        group = self.numpy2tuple(locations)
+        group = list(zip(locations[0],locations[1]))
         return group
 
     def check_dead(self, group: List[Tuple[int, int]]) -> bool:
@@ -34,6 +34,8 @@ class Board(np.matrix):
         for n in total_neighbors:
             if self[n] == EMPTY:
                 return False
+
+
         return True
 
     def get_adjacent_coords(self, loc: Tuple[int, int]):
@@ -115,15 +117,6 @@ class Board(np.matrix):
         with open(file, mode) as f:
             f.write(string)
             f.write('\n')
-
-    def numpy2tuple(self, locations) ->List[Tuple[int, int]]:
-        x_coords = locations[0]
-        y_coords = locations[1]
-        group = []
-        for i in range(0,len(x_coords)):
-            location = (x_coords[i],y_coords[i])
-            group.append(location)
-        return group
 
 
 if __name__ == '__main__':
