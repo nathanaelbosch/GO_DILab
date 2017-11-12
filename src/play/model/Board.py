@@ -3,7 +3,7 @@ import numpy as np
 from typing import Tuple, List
 
 from src.play.model.Game import BLACK, WHITE, EMPTY
-
+from scipy import ndimage
 
 class Board(np.matrix):
     """Class that purely handles the board, as well as board_related functions
@@ -12,18 +12,14 @@ class Board(np.matrix):
     and evaluate all the `get_chain`, `check_dead` etc on the copy
     """
     def get_chain(self, loc: Tuple[int, int]) -> List[Tuple[int, int]]:
+        # This method uses morphological operations to find out the
+        # connected components ie., chains
         player = self[loc]
-        # Check if neighbors of same player
-        to_check = [loc]
-        group = []
-        while len(to_check) > 0:
-            current = to_check.pop()
-            neighbors = self.get_adjacent_coords(current)
-            for n in neighbors:
-                if (self[n] == player and
-                        n not in group and n not in to_check):
-                    to_check.append(n)
-            group.append(current)
+        test_matrix = self == self[loc]
+        label_im, nb_labels = ndimage.label(test_matrix)
+        label_im = label_im == label_im[loc]
+        locations = np.where(label_im)
+        group = list(zip(locations[0],locations[1]))
         return group
 
     def check_dead(self, group: List[Tuple[int, int]]) -> bool:
@@ -38,6 +34,8 @@ class Board(np.matrix):
         for n in total_neighbors:
             if self[n] == EMPTY:
                 return False
+
+
         return True
 
     def get_adjacent_coords(self, loc: Tuple[int, int]):
