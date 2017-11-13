@@ -2,6 +2,7 @@ import sys
 import random as rn
 
 from src.play import Game
+from src.play.model.Game import InvalidMove_Error
 from src.play.utils.Move import Move
 
 
@@ -74,7 +75,7 @@ class GTPplayer:
         if len(args) == 0:
             self.send_failure_response('no command passed')
         else:
-            self.send_success_response(str(args[0] in self.gtp_commands))
+            self.send_success_response(str(args[0] in self.gtp_commands).lower())
 
     def list_commands(self, args):
         self.send_success_response('\n'+'\n'.join(list(self.gtp_commands.keys())))
@@ -120,7 +121,12 @@ class GTPplayer:
             return
         gtp_move = args[1]
         move = Move().from_gtp(gtp_move)
-        self.game.play(move, color)
+        try:
+            move.check_if_on_board(self.game.size)
+            self.game.play(move, color)
+        except InvalidMove_Error:
+            self.send_failure_response('illegal move')
+            return
         self.send_success_response()
 
     def genmove(self, args):
