@@ -1,5 +1,5 @@
 import sys
-import random as rn
+import random
 
 from src.play import Game
 from src.play.model.Game import InvalidMove_Error
@@ -137,7 +137,7 @@ class GTPplayer:
         if color is None:
             self.send_failure_response('invalid color ' + args[0])
             return
-        random_move = rn.choice(self.game.get_playable_locations(color))
+        random_move = random.choice(self.game.get_playable_locations(color))
         self.game.play(random_move, color)  # or does the controller tell us to do this?
         self.send_success_response(random_move.to_gtp())
 
@@ -146,6 +146,7 @@ def main():
     game = Game()
     gtp_player = GTPplayer(game)
     gtp_player.run()
+    # add logging to a file? TODO
 
 
 if __name__ == '__main__':
