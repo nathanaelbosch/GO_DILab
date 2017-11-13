@@ -15,6 +15,7 @@ class GTPplayer:
             self.genmove.__name__: self.genmove,
             self.play.__name__: self.play,
             self.list_commands.__name__: self.list_commands,
+            self.known_command.__name__: self.known_command,
         }
 
     def send_success_response(self, message):
@@ -64,6 +65,12 @@ class GTPplayer:
 
     def list_commands(self, args):
         self.send_success_response('\n'+'\n'.join(list(self.gtp_commands.keys())))
+
+    def known_command(self, args):
+        if len(args) == 0:
+            self.send_failure_response('no command passed')
+        else:
+            self.send_success_response(str(args[0] in self.gtp_commands))
 
     def run(self):
         while True:
