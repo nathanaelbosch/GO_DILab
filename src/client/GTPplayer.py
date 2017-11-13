@@ -14,7 +14,7 @@ class GTPplayer:
         self.gtp_commands = {
             self.genmove.__name__: self.genmove,
             self.play.__name__: self.play,
-            # TODO
+            self.list_commands.__name__: self.list_commands,
         }
 
     def send_success_response(self, message):
@@ -61,6 +61,9 @@ class GTPplayer:
         move = Move().from_gtp(gtp_move)
         self.game.play(move, color)
         self.send_success_response('')
+
+    def list_commands(self, args):
+        self.send_success_response('\n'+'\n'.join(list(self.gtp_commands.keys())))
 
     def run(self):
         while True:
