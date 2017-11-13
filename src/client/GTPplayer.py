@@ -16,6 +16,7 @@ class GTPplayer:
             self.play.__name__: self.play,
             self.list_commands.__name__: self.list_commands,
             self.known_command.__name__: self.known_command,
+            self.quit.__name__: self.quit,
         }
 
     def send_success_response(self, message):
@@ -71,6 +72,11 @@ class GTPplayer:
             self.send_failure_response('no command passed')
         else:
             self.send_success_response(str(args[0] in self.gtp_commands))
+
+    def quit(self, args):
+        self.send_success_response("")
+        self.out.close()
+        exit(0)
 
     def run(self):
         while True:
