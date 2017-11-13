@@ -20,6 +20,9 @@ class GTPplayer:
             self.protocol_version.__name__: self.protocol_version,
             self.version.__name__: self.version,
             self.name.__name__: self.name,
+            self.boardsize.__name__: self.boardsize,
+            self.clear_board.__name__: self.clear_board,
+            self.komi.__name__: self.komi,
         }
 
     def send_success_response(self, message=''):
@@ -90,6 +93,32 @@ class GTPplayer:
 
     def name(self, args):
         self.send_success_response('Hikaru - Random Bot')
+
+    def boardsize(self, args):
+        if len(args) == 0:
+            self.send_failure_response('no value passed')
+            return
+        board_size = int(args[0])
+        if not 19 >= board_size > 1:  # whats a meaningful min value?
+            self.send_failure_response('unacceptable size')
+            return
+        self.game.size = board_size  # can't just change it during the game like that though - trigger new game?
+        self.send_success_response()
+
+    def clear_board(self, args):
+        self.game = Game()  # just like that? seems kinda brutal
+        self.send_success_response()
+
+    def komi(self, args):
+        if len(args) == 0:
+            self.send_failure_response('no value passed')
+            return
+        try:
+            komi = float(args[0])
+            self.game.komi = komi
+            self.send_success_response()
+        except ValueError:
+            self.send_failure_response('not an acceptable value: ' + args[0])
 
     def run(self):
         while True:
