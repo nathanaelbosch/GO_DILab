@@ -7,26 +7,30 @@ from src.play.model.Game import InvalidMove_Error, Game
 from src.play.utils.Move import Move
 
 
-
 class GTPplayer:
 
     def __init__(self, game):
         self.game = game
         self.out = sys.stdout
-
-        self.gtp_commands = {
-            self.protocol_version.__name__: self.protocol_version,
-            self.name.__name__: self.name,
-            self.version.__name__: self.version,
-            self.known_command.__name__: self.known_command,
-            self.list_commands.__name__: self.list_commands,
-            self.quit.__name__: self.quit,
-            self.boardsize.__name__: self.boardsize,
-            self.clear_board.__name__: self.clear_board,
-            self.komi.__name__: self.komi,
-            self.play.__name__: self.play,
-            self.genmove.__name__: self.genmove,
-        }
+        self.gtp_commands = {}
+        gtp_methods = [
+            self.protocol_version,
+            self.name,
+            self.version,
+            self.known_command,
+            self.list_commands,
+            self.quit,
+            self.boardsize,
+            self.clear_board,
+            self.komi,
+            self.play,
+            self.genmove,
+        ]
+        # create a dictionary with the method-name as key and the method as
+        # value. in that way, valid GTP commands serve directly as keys to
+        # get the corresponding method
+        for method in gtp_methods:
+            self.gtp_commands[method.__name__] = method
 
     def run(self):
         while True:
