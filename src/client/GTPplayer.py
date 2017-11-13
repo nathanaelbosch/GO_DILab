@@ -1,5 +1,8 @@
 import sys
 import random
+from os.path import dirname, abspath
+project_dir = dirname(dirname(dirname(abspath(__file__))))
+sys.path.append(project_dir)
 from src.play.model.Game import InvalidMove_Error, Game
 from src.play.utils.Move import Move
 
