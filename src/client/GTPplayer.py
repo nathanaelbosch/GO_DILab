@@ -22,7 +22,7 @@ class GTPplayer:
             self.name.__name__: self.name,
         }
 
-    def send_success_response(self, message):
+    def send_success_response(self, message=''):
         # following lysator.liu.se/~gunnar/gtp/gtp2-spec-draft2/gtp2-spec.html#SECTION00044000000000000000
         self.out.write('= ' + message + '\n\n')
         self.out.flush()
@@ -65,7 +65,7 @@ class GTPplayer:
         gtp_move = args[1]
         move = Move().from_gtp(gtp_move)
         self.game.play(move, color)
-        self.send_success_response('')
+        self.send_success_response()
 
     def list_commands(self, args):
         self.send_success_response('\n'+'\n'.join(list(self.gtp_commands.keys())))
@@ -77,7 +77,7 @@ class GTPplayer:
             self.send_success_response(str(args[0] in self.gtp_commands))
 
     def quit(self, args):
-        self.send_success_response("")
+        self.send_success_response()
         self.out.close()
         exit(0)
 
