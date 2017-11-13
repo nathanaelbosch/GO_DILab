@@ -4,7 +4,6 @@ Supports alternative constructors using `from_*`, so that it can be
 constructed from the sgf format, gtp, and matrix locations.
 Same goes for output, using the `to_*` functions
 """
-from src.play.model.Game import InvalidMove_Error
 
 
 class Move:
@@ -107,9 +106,11 @@ class Move:
             return 'pass'
         return '(' + str(self.col) + '/' + str(self.row) + ')'
 
-    def check_if_on_board(self, size):
-        if not (0 < self.col < size and 0 < self.row < size):
-            raise InvalidMove_Error('Location outside of the board with size: ' + size)
+    # TODO
+    # it would be better style if this would throw an InvalidMove_Error, that creates
+    # circular import-errors though, the error class would have to be moved out of Game
+    def is_on_board(self, size):
+        return 0 < self.col < size and 0 < self.row < size
 
 
 if __name__ == '__main__':

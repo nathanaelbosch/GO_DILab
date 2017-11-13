@@ -1,9 +1,8 @@
 import sys
 import random
-
-from src.play import Game
-from src.play.model.Game import InvalidMove_Error
+from src.play.model.Game import InvalidMove_Error, Game
 from src.play.utils.Move import Move
+
 
 
 class GTPplayer:
@@ -121,13 +120,16 @@ class GTPplayer:
             return
         gtp_move = args[1]
         move = Move().from_gtp(gtp_move)
+
+        if not move.is_on_board(self.game.size):
+            self.send_failure_response('Location ' + gtp_move + ' is outside of board with size ' + str(self.game.size))
+            return
         try:
-            move.check_if_on_board(self.game.size)
             self.game.play(move, color)
+            self.send_success_response()
         except InvalidMove_Error:
             self.send_failure_response('illegal move')
             return
-        self.send_success_response()
 
     def genmove(self, args):
         if len(args) == 0:
