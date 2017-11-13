@@ -17,6 +17,9 @@ class GTPplayer:
             self.list_commands.__name__: self.list_commands,
             self.known_command.__name__: self.known_command,
             self.quit.__name__: self.quit,
+            self.protocol_version.__name__: self.protocol_version,
+            self.version.__name__: self.version,
+            self.name.__name__: self.name,
         }
 
     def send_success_response(self, message):
@@ -77,6 +80,16 @@ class GTPplayer:
         self.send_success_response("")
         self.out.close()
         exit(0)
+
+    def protocol_version(self, args):
+        # version of the GTP specification lysator.liu.se/~gunnar/gtp/gtp2-spec-draft2/gtp2-spec.html
+        self.send_success_response('2')
+
+    def version(self, args):
+        self.send_success_response('1.0')
+
+    def name(self, args):
+        self.send_success_response('Hikaru - Random Bot')
 
     def run(self):
         while True:
