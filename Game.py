@@ -12,15 +12,9 @@ import numpy as np
 import logging
 import copy
 
-"""Just to adjust the internal representation of color at a single location,
-instead of all over the code ;) Just in case. Maybe something else as -1 and 1
-could be interesting, see the tick tack toe example"""
-WHITE = -1
-BLACK = 1
-EMPTY = 0
+from Move import *
+from Board import *
 
-from src.play.utils.Move import Move
-from src.play.model.Board import Board
 
 logging.basicConfig(
     # filename='logs/Game.log',
@@ -66,7 +60,7 @@ class Game:
         self.result = setup.get('RE')
         self.time = int(setup.get('TM', 0))
         self.show_each_turn = show_each_turn
-        self.board = Board([[EMPTY]*self.size]*self.size)
+        self.board = Board([[EMPTY] * self.size] * self.size)
         self.white_rank = int(setup.get('WR', 0))
         self.black_rank = int(setup.get('BR', 0))
 

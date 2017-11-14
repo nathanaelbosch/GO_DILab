@@ -2,9 +2,9 @@ import numpy as np
 import pygame
 from pygame import gfxdraw
 import sys
-from src.play.model.Game import BLACK
-from src.play.model.Game import WHITE
-from src.play.utils.Move import Move
+
+from Board import BLACK, WHITE
+from Move import Move
 from src.play.view.ConsoleView import ConsoleView
 from src.play.view.View import View
 

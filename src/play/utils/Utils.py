@@ -1,5 +1,5 @@
-from src.play.model.Game import InvalidMove_Error
-from src.play.utils.Move import Move
+from Game import InvalidMove_Error
+from Move import Move
 
 
 def call_method_on_each(arr, method, *args):  # via stackoverflow.com/a/2682075/2474159

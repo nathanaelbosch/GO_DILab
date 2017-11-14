@@ -1,5 +1,6 @@
 import threading
-from src.play.model.Game import InvalidMove_Error
+
+from Game import InvalidMove_Error
 
 
 class GameController(threading.Thread):

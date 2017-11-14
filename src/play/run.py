@@ -3,13 +3,13 @@ import argparse
 from os.path import dirname, abspath
 # set GO_DILab as PYTHONPATH, therewith the script can be run from anywhere
 # each dirname is one level up
-project_dir = dirname(dirname(dirname(abspath(__file__))))
-sys.path.append(project_dir)
+# project_dir = dirname(dirname(dirname(abspath(__file__))))
+# sys.path.append(project_dir)
+from Game import Game
 from src.play.controller.GameController import GameController
 from src.play.controller.players.HumanConsolePlayer import HumanConsolePlayer
 from src.play.controller.players.HumanGuiPlayer import HumanGuiPlayer
 from src.play.controller.players.RandomBotPlayer import RandomBotPlayer
-from src.play.model.Game import Game
 from src.play.view.ConsoleView import ConsoleView
 from src.play.view.PygameGuiView import PygameGuiView
 

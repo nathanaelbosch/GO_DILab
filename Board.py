@@ -2,8 +2,15 @@
 import numpy as np
 from typing import Tuple, List
 
-from src.play.model.Game import BLACK, WHITE, EMPTY
 from scipy import ndimage
+
+"""Just to adjust the internal representation of color at a single location,
+instead of all over the code ;) Just in case. Maybe something else as -1 and 1
+could be interesting, see the tick tack toe example"""
+WHITE = -1
+BLACK = 1
+EMPTY = 0
+
 
 class Board(np.matrix):
     """Class that purely handles the board, as well as board_related functions
