@@ -7,3 +7,4 @@ pygame
 numpy
 sgf
 matplotlib
+scipy
