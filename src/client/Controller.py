@@ -1,35 +1,48 @@
 import subprocess
-import sys
+import time
 
-
-player1 = subprocess.Popen(
-    [sys.executable, 'GTPplayer.py'],
-    stdin=subprocess.PIPE, stdout=subprocess.PIPE, bufsize=0)
-
-player2 = subprocess.Popen(
-    [sys.executable, 'GTPplayer.py'],
-    stdin=subprocess.PIPE, stdout=subprocess.PIPE, bufsize=0)
+# or sys.executable instead of 'python'
+player1 = subprocess.Popen(['python', 'GTPplayer.py'], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+player2 = subprocess.Popen(['python', 'GTPplayer.py'], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
 
 current_player = player1
 other_player = player2
 
 
-def to_byte(_str):
-    b = bytearray()
-    b.extend(map(ord, _str))
-    return b
+def get_player_id(player):
+    return 'black' if player == player1 else 'white'
 
-for i in range(1):
+
+def await_response(player):
+    _response = ''
+    while len(_response) == 0:
+        _response = player.stdout.readline().decode('utf-8').strip()
+        player.stdout.flush()
+    print('[response from ' + get_player_id(player) + ']\t' + _response)
+    return _response
+
+
+def send_command(player, command):
+    print('[command to ' + get_player_id(player) + ']\t\t' + command)
+    b = bytearray()
+    b.extend(map(ord, command + '\n'))
+    player.stdin.write(b)
+    player.stdin.flush()
+
+
+for i in range(5):  # while until someone sends quit? doesn't happen for random bots though TODO
+    print('\nnext turn\n')
     color = 'b' if current_player == player1 else 'w'
 
-    current_player.stdin.write(to_byte('genmove ' + color + '\n'))
-    response = current_player.stdout.readline().decode('utf-8').strip()
-    print(response)
+    send_command(current_player, 'genmove ' + color)
+    response = await_response(current_player)
     move = response[2:]  # strip away the "= "
+    send_command(other_player, 'play ' + color + ' ' + move)
+    await_response(other_player)
 
-    other_player.stdin.write(to_byte('play b ' + move + '\n'))
-    response = other_player.stdout.readline().decode('utf-8').strip()
-    print(response)
+    # keep track of game on own board to validate moves TODO
+
+    time.sleep(0.5)
 
     # swap players for next turn
     if current_player == player1:
