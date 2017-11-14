@@ -1,10 +1,10 @@
 # commenting out keras and tensorflow until non-problematic packages for Windows are found
-#keras
+# keras
 # keras requires tensorflow or theano as backend
-#tensorflow
+# tensorflow
 # theano
-pygame
+# pygame
+# matplotlib
 numpy
 sgf
-matplotlib
 scipy
