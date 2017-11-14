@@ -8,7 +8,6 @@ I did my best on the docstrings, and I used some type-annotation from time to
 time! Python supports that since 3.?, but it's just used by linters and it
 does not affect the code in any way during the runtime (afaik).
 """
-import numpy as np
 import logging
 import copy
 

@@ -1,7 +1,6 @@
 """Class to purely handle everything that concerns the board"""
-import numpy as np
 from typing import Tuple, List
-
+import numpy as np
 from scipy import ndimage
 
 """Just to adjust the internal representation of color at a single location,
