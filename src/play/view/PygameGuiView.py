@@ -2,12 +2,11 @@ import numpy as np
 import pygame
 from pygame import gfxdraw
 import sys
-import time
-from src.play import ConsoleView
-from src.play.view import View
-from src.play.view import Move
 from src.play.model.Game import BLACK
 from src.play.model.Game import WHITE
+from src.play.utils.Move import Move
+from src.play.view.ConsoleView import ConsoleView
+from src.play.view.View import View
 
 brown = (165, 42, 42)
 black = (0, 0, 0)

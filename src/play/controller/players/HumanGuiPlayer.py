@@ -1,4 +1,4 @@
-from src.play import Player
+from src.play.controller.players.Player import Player
 
 
 class HumanGuiPlayer(Player):
