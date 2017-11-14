@@ -5,6 +5,7 @@
 # theano
 # pygame
 # matplotlib
+# scipy
+# sgf
+
 numpy
-sgf
-scipy
