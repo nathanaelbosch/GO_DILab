@@ -6,12 +6,12 @@ from os.path import dirname, abspath
 # project_dir = dirname(dirname(dirname(abspath(__file__))))
 # sys.path.append(project_dir)
 from Game import Game
-from src.play.controller.GameController import GameController
-from src.play.controller.players.HumanConsolePlayer import HumanConsolePlayer
-from src.play.controller.players.HumanGuiPlayer import HumanGuiPlayer
-from src.play.controller.players.RandomBotPlayer import RandomBotPlayer
-from src.play.view.ConsoleView import ConsoleView
-from src.play.view.PygameGuiView import PygameGuiView
+from archive.src.play.controller.GameController import GameController
+from archive.src.play.controller.players.HumanConsolePlayer import HumanConsolePlayer
+from archive.src.play.controller.players.HumanGuiPlayer import HumanGuiPlayer
+from archive.src.play.controller.players.RandomBotPlayer import RandomBotPlayer
+from archive.src.play.view.ConsoleView import ConsoleView
+from archive.src.play.view.PygameGuiView import PygameGuiView
 
 
 def parse_args():

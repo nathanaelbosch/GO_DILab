@@ -5,8 +5,8 @@ import sys
 
 from Board import BLACK, WHITE
 from Move import Move
-from src.play.view.ConsoleView import ConsoleView
-from src.play.view.View import View
+from archive.src.play.view.ConsoleView import ConsoleView
+from archive.src.play.view.View import View
 
 brown = (165, 42, 42)
 black = (0, 0, 0)

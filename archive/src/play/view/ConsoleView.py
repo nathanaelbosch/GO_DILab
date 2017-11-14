@@ -1,4 +1,4 @@
-from src.play.view.View import View
+from archive.src.play.view.View import View
 
 
 class ConsoleView(View):

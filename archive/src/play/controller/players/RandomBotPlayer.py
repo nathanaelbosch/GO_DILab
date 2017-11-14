@@ -1,7 +1,7 @@
 import random as rn
 import time
 
-from src.play.controller.players.Player import Player
+from archive.src.play.controller.players.Player import Player
 
 
 class RandomBotPlayer(Player):

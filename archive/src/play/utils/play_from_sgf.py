@@ -2,8 +2,8 @@
 # TODO think about if/how to integrate this into the GUI-workflow as importer
 import sgf
 import sys
-from src.play import Game
-from src.play.utils.Utils import str2move
+from Game import Game
+from archive.src.play.utils.Utils import str2move
 
 sys.path.append('.')
 
