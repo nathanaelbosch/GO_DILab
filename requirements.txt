@@ -1,6 +1,7 @@
-keras
+# commenting out keras and tensorflow until non-problematic packages for Windows are found
+#keras
 # keras requires tensorflow or theano as backend
-tensorflow
+#tensorflow
 # theano
 pygame
 numpy
