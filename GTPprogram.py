@@ -164,7 +164,7 @@ class GTPprogram:
         if color is None:
             self.send_failure_response('invalid color ' + args[0])
             return
-        move = self.bot.genmove(color)
+        move = self.bot.genmove(color, self.game)
         self.game.play(move, color)
         self.send_success_response(move.to_gtp(self.game.size))
 
@@ -173,7 +173,7 @@ def main():
     game = Game()
     logfile = 'log_' + strftime('%d-%m-%Y_%H-%M-%S') + '.txt'
     # bot = RandomBot(game)
-    bot = RandomGroupingBot(game)
+    bot = RandomGroupingBot()
     gtp_program = GTPprogram(game, bot, logfile)
     gtp_program.run()
 
