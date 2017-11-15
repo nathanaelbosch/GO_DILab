@@ -95,9 +95,13 @@ class Board(np.matrix):
         Just a simple ascii output, quite cool but the code is a bit messy"""
         b = self.copy()
         rows = list(range(b.shape[0]))
-        rows = [chr(i + ord('a')) for i in rows]
         cols = list(range(b.shape[1]))
-        cols = [chr(i + ord('a')) for i in cols]
+        rows = [str(self.shape[0] - i) for i in rows]
+        cols = [chr(i + ord('a')) if i < 8 else chr(i + 1 + ord('a')) for i in cols]
+        # was previously not GTP conform:
+        # rows = [chr(i + ord('a')) for i in rows]
+        # cols = [chr(i + ord('a')) for i in cols]
+
         # You might wonder why I do the following, but its so that numpy
         # formats the str representation using a single space
         b[b == BLACK] = 2
