@@ -1,6 +1,9 @@
 # Don't git data
 data
 
+# ignore log files
+log*
+
 # the PyCharm IDE creates this folder
 .idea/
 

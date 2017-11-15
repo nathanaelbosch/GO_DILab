@@ -1,16 +1,21 @@
 import sys
 import random
+from time import strftime
+from datetime import datetime
 # from os.path import dirname, abspath
 # project_dir = dirname(dirname(dirname(abspath(__file__))))
 # sys.path.append(project_dir)
+
 from Game import *
 
 
 class GTPplayer:
 
-    def __init__(self, game):
+    def __init__(self, game, logfile):
         self.game = game
-        self.out = sys.stdout
+        self.stdout = sys.stdout
+        self.logfile = open(logfile, 'w')
+        self.write_log('start', '')
         self.gtp_commands = {}
         gtp_methods = [
             self.protocol_version,
@@ -34,6 +39,7 @@ class GTPplayer:
     def run(self):
         while True:
             stdin_line = sys.stdin.readline().strip()
+            self.write_log('receive: ', stdin_line)
             if len(stdin_line) == 0:  # ignore empty lines
                 continue
             # print('reading input: ' + stdin_line)
@@ -44,14 +50,21 @@ class GTPplayer:
                 continue
             self.gtp_commands[command](parts[1:])
 
+    def write_log(self, type, message):
+        self.logfile.write('[' + datetime.now().strftime('%d.%m.%Y %H:%M:%S.%f') + '] ' + type + message.strip() + '\n')
+        self.logfile.flush()
+
+    def write_out(self, message):
+        self.stdout.write(message)
+        self.stdout.flush()
+        self.write_log('   send: ', message)
+
     def send_success_response(self, message=''):
         # following lysator.liu.se/~gunnar/gtp/gtp2-spec-draft2/gtp2-spec.html#SECTION00044000000000000000
-        self.out.write('= ' + message + '\n\n')
-        self.out.flush()
+        self.write_out('= ' + message + '\n\n')
 
     def send_failure_response(self, message):
-        self.out.write('? ' + message + '\n\n')
-        self.out.flush()
+        self.write_out('? ' + message + '\n\n')
 
     @staticmethod  # returns None if color is invalid
     def validate_color(col):
@@ -87,7 +100,8 @@ class GTPplayer:
 
     def quit(self, args):
         self.send_success_response()
-        self.out.close()
+        self.stdout.close()
+        self.logfile.close()
         exit(0)
 
     def boardsize(self, args):
@@ -155,7 +169,8 @@ class GTPplayer:
 
 def main():
     game = Game()
-    gtp_player = GTPplayer(game)
+    logfile = 'log_' + strftime('%d-%m-%Y_%H-%M-%S') + '.txt'
+    gtp_player = GTPplayer(game, logfile)
     gtp_player.run()
     # add logging to a file? TODO
 
