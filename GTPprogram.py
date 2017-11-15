@@ -174,7 +174,6 @@ def main():
     bot = RandomBot(game)
     gtp_player = GTPprogram(game, bot, logfile)
     gtp_player.run()
-    # add logging to a file? TODO
 
 
 if __name__ == '__main__':
