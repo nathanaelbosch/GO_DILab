@@ -1,5 +1,4 @@
 import sys
-import random
 from time import strftime
 from datetime import datetime
 # from os.path import dirname, abspath
@@ -17,7 +16,7 @@ class GTPprogram:
         self.bot = bot
         self.stdout = sys.stdout
         self.logfile = open(logfile, 'w')
-        self.write_log('  start: ', __file__)
+        self.write_log('  start: ', self.bot.__class__.__name__ + ', ' + __file__)
         self.gtp_commands = {}
         gtp_methods = [
             self.protocol_version,
