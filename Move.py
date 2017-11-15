@@ -34,7 +34,7 @@ class Move:
             return cls(col, row)
 
     @classmethod
-    def from_gtp(cls, string):
+    def from_gtp(cls, string, size):
         """Create instance from string using the SGF standard
 
         Examples
@@ -53,7 +53,7 @@ class Move:
             if _ord >= ord('j'):
                 _ord -= 1
             col = _ord - ord('a')
-            row = int(string[1]) - 1
+            row = size - int(string[1])
             # raise possible parsing errors here TODO
             return cls(col, row)
 
@@ -85,7 +85,7 @@ class Move:
             row = chr(self.row + ord('a'))
             return col+row
 
-    def to_gtp(self):
+    def to_gtp(self, size):
         """Output move following the GTP standard
 
         Examples
@@ -103,8 +103,8 @@ class Move:
             if self.col >= 8:
                 _chr += 1
             col = str(chr(_chr))
-            row = str(self.row + 1)
-            return col+row
+            row = str(size - self.row)
+            return col + row
 
     def to_matrix_location(self):
         return self.row, self.col  # row/col instead of col/row

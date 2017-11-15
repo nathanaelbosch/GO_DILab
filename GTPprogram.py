@@ -143,7 +143,7 @@ class GTPprogram:
         if 'i' in gtp_move or 'I' in gtp_move:
             self.send_failure_response('i is excluded from board coordinates in GTP')
             return
-        move = Move().from_gtp(gtp_move)
+        move = Move().from_gtp(gtp_move, self.game.size)
 
         if not move.is_on_board(self.game.size):
             self.send_failure_response('Location ' + gtp_move + ' is outside of board with size ' + str(self.game.size))
@@ -165,7 +165,7 @@ class GTPprogram:
             return
         move = self.bot.genmove(color)
         self.game.play(move, color)
-        self.send_success_response(move.to_gtp())
+        self.send_success_response(move.to_gtp(self.game.size))
 
 
 def main():
