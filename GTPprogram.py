@@ -7,7 +7,7 @@ from datetime import datetime
 # sys.path.append(project_dir)
 
 from Game import *
-from RandomBot import RandomBot
+from bots.RandomBot import RandomBot
 
 
 class GTPprogram:
