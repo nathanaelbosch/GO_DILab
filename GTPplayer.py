@@ -125,6 +125,9 @@ class GTPplayer:
             self.send_failure_response('invalid color ' + args[0])
             return
         gtp_move = args[1]
+        if 'i' in gtp_move or 'I' in gtp_move:
+            self.send_failure_response('i is excluded from board coordinates in GTP')
+            return
         move = Move().from_gtp(gtp_move)
 
         if not move.is_on_board(self.game.size):

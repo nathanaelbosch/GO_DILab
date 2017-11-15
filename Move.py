@@ -48,7 +48,11 @@ class Move:
         if string == 'pass':
             return cls(is_pass=True)
         else:
-            col = ord(string[0]) - ord('a')
+            _ord = ord(string[0])
+            # i is excluded from board coordinates in GTP
+            if _ord >= ord('j'):
+                _ord -= 1
+            col = _ord - ord('a')
             row = int(string[1]) - 1
             # raise possible parsing errors here TODO
             return cls(col, row)
@@ -94,7 +98,11 @@ class Move:
         if self.is_pass:
             return 'pass'
         else:
-            col = str(chr(self.col + ord('A')))
+            _chr = self.col + ord('A')
+            # i is excluded from board coordinates in GTP
+            if self.col >= 8:
+                _chr += 1
+            col = str(chr(_chr))
             row = str(self.row + 1)
             return col+row
 
