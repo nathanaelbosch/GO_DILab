@@ -174,8 +174,8 @@ def main():
     logfile = 'log_' + strftime('%d-%m-%Y_%H-%M-%S') + '.txt'
     # bot = RandomBot(game)
     bot = RandomGroupingBot(game)
-    gtp_player = GTPprogram(game, bot, logfile)
-    gtp_player.run()
+    gtp_program = GTPprogram(game, bot, logfile)
+    gtp_program.run()
 
 
 if __name__ == '__main__':
