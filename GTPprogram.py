@@ -86,7 +86,7 @@ class GTPprogram:
         self.send_success_response('2')
 
     def name(self, args):
-        self.send_success_response('Hikaru - Random Bot')
+        self.send_success_response('Hikaru - ' + self.bot.__class__.__name__)
 
     def version(self, args):
         self.send_success_response('1.0')
