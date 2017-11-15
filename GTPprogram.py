@@ -7,12 +7,14 @@ from datetime import datetime
 # sys.path.append(project_dir)
 
 from Game import *
+from RandomBot import RandomBot
 
 
-class GTPplayer:
+class GTPprogram:
 
-    def __init__(self, game, logfile):
+    def __init__(self, game, bot, logfile):
         self.game = game
+        self.bot = bot
         self.stdout = sys.stdout
         self.logfile = open(logfile, 'w')
         self.write_log('  start: ', __file__)
@@ -162,15 +164,16 @@ class GTPplayer:
         if color is None:
             self.send_failure_response('invalid color ' + args[0])
             return
-        random_move = random.choice(self.game.get_playable_locations(color))
-        self.game.play(random_move, color)  # or does the controller tell us to do this?
-        self.send_success_response(random_move.to_gtp())
+        move = self.bot.genmove(color)
+        self.game.play(move, color)
+        self.send_success_response(move.to_gtp())
 
 
 def main():
     game = Game()
     logfile = 'log_' + strftime('%d-%m-%Y_%H-%M-%S') + '.txt'
-    gtp_player = GTPplayer(game, logfile)
+    bot = RandomBot(game)
+    gtp_player = GTPprogram(game, bot, logfile)
     gtp_player.run()
     # add logging to a file? TODO
 
