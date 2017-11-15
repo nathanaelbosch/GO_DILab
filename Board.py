@@ -58,6 +58,22 @@ class Board(np.matrix):
 
         return True
 
+    def is_on_board(self, col, row):
+        return 0 <= col < self.shape[0] and 0 <= row < self.shape[1]
+
+    def get_all_neighbor_coords(self, loc: Tuple[int, int]):
+        neighbors = []
+        deltas = [
+            (1, 1), (1, 0), (1, -1), (0, -1),
+            (-1, -1), (-1, 0), (-1, 1), (0, 1)
+        ]
+        for delta in deltas:
+            col = loc[0] + delta[0]
+            row = loc[1] + delta[1]
+            if self.is_on_board(col, row):
+                neighbors.append((col, row))
+        return neighbors
+
     def get_adjacent_coords(self, loc: Tuple[int, int]):
         neighbors = []
         if loc[0] > 0:

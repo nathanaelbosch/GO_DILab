@@ -7,6 +7,7 @@ from datetime import datetime
 
 from Game import *
 from bots.RandomBot import RandomBot
+from bots.RandomGroupingBot import RandomGroupingBot
 
 
 class GTPprogram:
@@ -171,7 +172,8 @@ class GTPprogram:
 def main():
     game = Game()
     logfile = 'log_' + strftime('%d-%m-%Y_%H-%M-%S') + '.txt'
-    bot = RandomBot(game)
+    # bot = RandomBot(game)
+    bot = RandomGroupingBot(game)
     gtp_player = GTPprogram(game, bot, logfile)
     gtp_player.run()
 
