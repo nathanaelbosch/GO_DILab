@@ -31,6 +31,7 @@ class GTPprogram:
             self.komi,
             self.play,
             self.genmove,
+            self.showboard,
         ]
         # create a dictionary with the method-name as key and the method as
         # value. in that way, valid GTP commands serve directly as keys to
@@ -167,6 +168,9 @@ class GTPprogram:
         move = self.bot.genmove(color, self.game)
         self.game.play(move, color)
         self.send_success_response(move.to_gtp(self.game.size))
+
+    def showboard(self, args):
+        print(self.game.board.__str__())
 
 
 def main():
