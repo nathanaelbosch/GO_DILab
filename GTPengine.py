@@ -16,9 +16,10 @@ class GTPengine:
     def __init__(self):
         self.game = Game()
         self.bot = RandomBot()
-        self.stdin = sys.stdin
-        self.stdout = sys.stdout
         self.bot_name = self.bot.__class__.__name__
+        self.controller = None
+        self.stdin = None
+        self.stdout = None
         self.logfile = open('log_' + self.bot_name + '_' + strftime('%d-%m-%Y_%H-%M-%S') + '.txt', 'w')
         self.write_log('  start: ', self.bot_name + ', ' + __file__)
         self.gtp_commands = {}
@@ -64,28 +65,33 @@ class GTPengine:
         self.bot_name = self.bot.__class__.__name__
         self.send_success_response('switched to player type ' + player_type)
 
+    def handle_input_from_controller(self, input):
+        self.write_log('receive: ', input)
+        parts = input.split(' ')
+        command = parts[0]
+        if command not in self.gtp_commands:
+            self.send_failure_response('command unknown: ' + input)
+            return
+        self.gtp_commands[command](parts[1:])
+
     def run(self):
         while True:
             stdin_line = self.stdin.readline().strip()
-            self.write_log('receive: ', stdin_line)
             if len(stdin_line) == 0:  # ignore empty lines
                 continue
-            # print('reading input: ' + stdin_line)
-            parts = stdin_line.split(' ')
-            command = parts[0]
-            if command not in self.gtp_commands:
-                self.send_failure_response('command unknown: ' + stdin_line)
-                continue
-            self.gtp_commands[command](parts[1:])
+            self.handle_input_from_controller(stdin_line)
 
     def write_log(self, type, message):
         self.logfile.write('[' + datetime.now().strftime('%d.%m.%Y %H:%M:%S.%f') + '] ' + type + message.strip() + '\n')
         self.logfile.flush()
 
     def write_out(self, message):
-        self.stdout.write(message)
-        self.stdout.flush()
         self.write_log('   send: ', message)
+        if self.stdout is not None:
+            self.stdout.write(message)
+            self.stdout.flush()
+        if self.controller is not None:
+            self.controller.handle_input_from_engine(self, message)
 
     def send_success_response(self, message=''):
         # following lysator.liu.se/~gunnar/gtp/gtp2-spec-draft2/gtp2-spec.html#SECTION00044000000000000000
@@ -128,7 +134,8 @@ class GTPengine:
 
     def quit(self, args):
         self.send_success_response()
-        self.stdout.close()
+        if self.stdout is not None:
+            self.stdout.close()
         self.logfile.close()
         exit(0)
 
@@ -200,6 +207,8 @@ class GTPengine:
 
 def main():
     gtp_engine = GTPengine()
+    gtp_engine.stdin = sys.stdin
+    gtp_engine.stdout = sys.stdout
     gtp_engine.run()
 
 
