@@ -12,11 +12,11 @@ from bots.RandomGroupingBot import RandomGroupingBot
 
 class GTPengine:
 
-    def __init__(self, game, bot, logfile):
-        self.game = game
-        self.bot = bot
+    def __init__(self):
+        self.game = Game()
+        self.bot = RandomBot()
         self.stdout = sys.stdout
-        self.logfile = open(logfile, 'w')
+        self.logfile = open('log_' + strftime('%d-%m-%Y_%H-%M-%S') + '.txt', 'w')
         self.write_log('  start: ', self.bot.__class__.__name__ + ', ' + __file__)
         self.gtp_commands = {}
         gtp_methods = [
@@ -174,11 +174,7 @@ class GTPengine:
 
 
 def main():
-    game = Game()
-    logfile = 'log_' + strftime('%d-%m-%Y_%H-%M-%S') + '.txt'
-    # bot = RandomBot(game)
-    bot = RandomGroupingBot()
-    gtp_engine = GTPengine(game, bot, logfile)
+    gtp_engine = GTPengine()
     gtp_engine.run()
 
 
