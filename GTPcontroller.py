@@ -46,6 +46,8 @@ class GTPcontroller:
             self.send_to_player(self.other_player, 'play ' + self.current_player.color + ' ' + move)
 
             self.game.play(Move().from_gtp(move, self.game.size), self.current_player.color)
+            print('\n' + self.game.__str__())
+
             time.sleep(0.5)
 
             # swap players for next turn
