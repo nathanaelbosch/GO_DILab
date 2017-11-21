@@ -35,6 +35,10 @@ class GTPcontroller:
         print('      send to ' + player.name + ' (' + player.color + '): ' + command)
         player.engine.handle_input_from_controller(command)
 
+    def broadcast(self, command):
+        self.send_to_player(self.player1, 'quit')
+        self.send_to_player(self.player2, 'quit')
+
     def wait_for_response(self, player, message):
         self.send_to_player(player, message)
         while player.latest_response is None:
@@ -62,7 +66,9 @@ class GTPcontroller:
                 self.current_player = self.player1
                 self.other_player = self.player2
 
+        self.broadcast('quit')
         print('\n' + self.game.__str__())
+        exit(0)
 
     def handle_input_from_engine(self, engine, input):
         input = input.strip()
