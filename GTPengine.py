@@ -10,7 +10,7 @@ from bots.RandomBot import RandomBot
 from bots.RandomGroupingBot import RandomGroupingBot
 
 
-class GTPprogram:
+class GTPengine:
 
     def __init__(self, game, bot, logfile):
         self.game = game
@@ -178,8 +178,8 @@ def main():
     logfile = 'log_' + strftime('%d-%m-%Y_%H-%M-%S') + '.txt'
     # bot = RandomBot(game)
     bot = RandomGroupingBot()
-    gtp_program = GTPprogram(game, bot, logfile)
-    gtp_program.run()
+    gtp_engine = GTPengine(game, bot, logfile)
+    gtp_engine.run()
 
 
 if __name__ == '__main__':
