@@ -39,7 +39,8 @@ class GTPcontroller:
         return player.get_latest_response()
 
     def run(self):
-        while True:
+        self.game.start()
+        while self.game.is_running:
             print('\nnext turn\n')
             response = self.wait_for_response(self.current_player, 'genmove ' + self.current_player.color)
             move = response[2:]  # strip away the "= "
@@ -57,6 +58,8 @@ class GTPcontroller:
             else:
                 self.current_player = self.player1
                 self.other_player = self.player2
+
+        print('\n' + self.game.__str__())
 
     def handle_input_from_engine(self, engine, input):
         input = input.strip()
