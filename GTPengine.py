@@ -20,7 +20,7 @@ class GTPengine:
         self.controller = None
         self.stdin = None
         self.stdout = None
-        self.logfile = open('log_' + self.bot_name + '_' + strftime('%d-%m-%Y_%H-%M-%S') + '.txt', 'w')
+        self.logfile = open('log_' + strftime('%d-%m-%Y_%H-%M-%S') + '.txt', 'w')
         self.write_log('  start: ', self.bot_name + ', ' + __file__)
         self.gtp_commands = {}
         gtp_methods = [
