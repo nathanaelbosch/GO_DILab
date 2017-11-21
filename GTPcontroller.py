@@ -82,7 +82,7 @@ class Player:
 
 
 def main():
-    gtp_controller = GTPcontroller(RandomGroupingBot.__name__, RandomBot.__name__)
+    gtp_controller = GTPcontroller(RandomGroupingBot.__name__, HumanConsole.__name__)
     gtp_controller.run()
 
 
