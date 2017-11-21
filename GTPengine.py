@@ -6,6 +6,7 @@ from datetime import datetime
 # sys.path.append(project_dir)
 
 from Game import *
+from bots.HumanConsole import HumanConsole
 from bots.RandomBot import RandomBot
 from bots.RandomGroupingBot import RandomGroupingBot
 
@@ -20,6 +21,7 @@ class GTPengine:
         self.write_log('  start: ', self.bot.__class__.__name__ + ', ' + __file__)
         self.gtp_commands = {}
         gtp_methods = [
+            self.set_player_type,  # not a GTP-command
             self.protocol_version,
             self.name,
             self.version,
@@ -38,6 +40,26 @@ class GTPengine:
         # get the corresponding method
         for method in gtp_methods:
             self.gtp_commands[method.__name__] = method
+
+        self.player_types = {}
+        player_types_arr = [
+            HumanConsole,
+            RandomBot,
+            RandomGroupingBot,
+        ]
+        for player_type in player_types_arr:
+            self.player_types[player_type.__name__] = player_type
+
+    def set_player_type(self, args):
+        if len(args) == 0:
+            self.send_failure_response('no player type passed')
+            return
+        player_type = args[0]
+        if player_type not in self.player_types:
+            self.send_failure_response('player type ' + player_type + ' unknown')
+            return
+        self.bot = self.player_types[player_type]()
+        self.send_success_response('switched to player type ' + player_type)
 
     def run(self):
         while True:
