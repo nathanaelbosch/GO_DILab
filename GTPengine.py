@@ -16,12 +16,11 @@ class GTPengine:
     def __init__(self):
         self.game = Game()
         self.bot = RandomBot()
-        self.bot_name = self.bot.__class__.__name__
         self.controller = None
         self.stdin = None
         self.stdout = None
         self.logfile = open('log_' + strftime('%d-%m-%Y_%H-%M-%S') + '.txt', 'w')
-        self.write_log('  start: ', self.bot_name + ', ' + __file__)
+        self.write_log('  start: ', self.bot.__class__.__name__ + ', ' + __file__)
         self.gtp_commands = {}
         gtp_methods = [
             self.set_player_type,  # not a GTP-command
@@ -62,7 +61,6 @@ class GTPengine:
             self.send_failure_response('player type ' + player_type + ' unknown')
             return
         self.bot = self.player_types[player_type]()
-        self.bot_name = self.bot.__class__.__name__
         self.send_success_response('switched to player type ' + player_type)
 
     def handle_input_from_controller(self, input):
@@ -118,7 +116,7 @@ class GTPengine:
         self.send_success_response('2')
 
     def name(self, args):
-        self.send_success_response(self.bot_name)
+        self.send_success_response(self.bot.__class__.__name__)
 
     def version(self, args):
         self.send_success_response('1.0')
