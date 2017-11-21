@@ -1,6 +1,8 @@
 import time
 
 from GTPengine import GTPengine
+from Game import Game
+from Move import Move
 from bots.HumanConsole import HumanConsole
 from bots.RandomBot import RandomBot
 from bots.RandomGroupingBot import RandomGroupingBot
@@ -9,6 +11,7 @@ from bots.RandomGroupingBot import RandomGroupingBot
 class GTPcontroller:
 
     def __init__(self, player1type, player2type):
+        self.game = Game()
         self.player1 = Player('b')
         self.player1.engine.controller = self
         self.player2 = Player('w')
@@ -42,6 +45,7 @@ class GTPcontroller:
             move = response[2:]  # strip away the "= "
             self.send_to_player(self.other_player, 'play ' + self.current_player.color + ' ' + move)
 
+            self.game.play(Move().from_gtp(move, self.game.size), self.current_player.color)
             time.sleep(0.5)
 
             # swap players for next turn
