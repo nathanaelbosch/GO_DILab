@@ -8,6 +8,9 @@ from bots.RandomBot import RandomBot
 from bots.RandomGroupingBot import RandomGroupingBot
 
 
+END_OF_TURN_SLEEP_TIME = 0.5
+
+
 class GTPcontroller:
 
     def __init__(self, player1type, player2type):
@@ -49,7 +52,7 @@ class GTPcontroller:
             self.game.play(Move().from_gtp(move, self.game.size), self.current_player.color)
             print('\n' + self.game.__str__())
 
-            time.sleep(0.5)
+            time.sleep(END_OF_TURN_SLEEP_TIME)
 
             # swap players for next turn
             if self.current_player == self.player1:
@@ -82,8 +85,11 @@ class Player:
 
 
 def main():
-    gtp_controller = GTPcontroller(RandomGroupingBot.__name__, HumanConsole.__name__)
-    gtp_controller.run()
+    GTPcontroller(
+        RandomBot.__name__,
+        RandomGroupingBot.__name__,
+        # HumanConsole.__name__,
+    ).run()
 
 
 if __name__ == '__main__':
