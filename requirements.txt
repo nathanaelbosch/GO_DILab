@@ -4,8 +4,11 @@
 # tensorflow
 # theano
 # pygame
-# matplotlib
 # scipy
-# sgf
 
 numpy
+sgf
+matplotlib
+pandas
+scikit-learn
+h5py

@@ -12,6 +12,7 @@ from archive.src.play.controller.players.HumanGuiPlayer import HumanGuiPlayer
 from archive.src.play.controller.players.RandomBotPlayer import RandomBotPlayer
 from archive.src.play.view.ConsoleView import ConsoleView
 from archive.src.play.view.PygameGuiView import PygameGuiView
+from src.learn.simplest_move_prediction.SimplestNNPlayer import SimplestNNPlayer
 
 
 def parse_args():
@@ -38,7 +39,8 @@ def main():
     player_types = {
         'human_nogui': HumanConsolePlayer,
         'human': HumanGuiPlayer,
-        'random': RandomBotPlayer
+        'random': RandomBotPlayer,
+        'simplest': SimplestNNPlayer
     }
 
     name1 = 'Max' if args.player1 == 'human' else 'Robo'

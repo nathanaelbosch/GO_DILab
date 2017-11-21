@@ -22,7 +22,7 @@ logging.basicConfig(
     format='%(levelname)s:%(name)s:%(message)s',
     datefmt='%Y-%m-%d %H:%M:%S')
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.ERROR)
 
 
 class GO_Error(Exception):
@@ -59,9 +59,13 @@ class Game:
         self.result = setup.get('RE')
         self.time = int(setup.get('TM', 0))
         self.show_each_turn = show_each_turn
-        self.board = Board([[EMPTY] * self.size] * self.size)
-        self.white_rank = int(setup.get('WR', 0))
-        self.black_rank = int(setup.get('BR', 0))
+        self.board = Board([[EMPTY]*self.size]*self.size)
+        try:
+            self.white_rank = int(setup.get('WR', 0))
+            self.black_rank = int(setup.get('BR', 0))
+        except ValueError as e:
+            logger.debug('Value Error when reading rank from sgf')
+            pass
 
         self.play_history = []
         self.board_history = set()
