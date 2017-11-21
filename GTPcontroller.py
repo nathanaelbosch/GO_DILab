@@ -1,67 +1,81 @@
-import subprocess
-import threading
 import time
 
 from GTPengine import GTPengine
+from bots.HumanConsole import HumanConsole
+from bots.RandomBot import RandomBot
+from bots.RandomGroupingBot import RandomGroupingBot
 
 
-class GTPengineThread(threading.Thread):
-    def __init__(self):
-        threading.Thread.__init__(self)
-        self.gtp_engine = GTPengine()
-        self.start()
+class GTPcontroller:
+
+    def __init__(self, player1type, player2type):
+        self.player1 = Player('b')
+        self.player1.engine.controller = self
+        self.player2 = Player('w')
+        self.player2.engine.controller = self
+        self.map = {
+            self.player1.engine: self.player1,
+            self.player2.engine: self.player2,
+        }
+        self.send_to_player(self.player1, 'set_player_type ' + player1type)
+        self.send_to_player(self.player2, 'set_player_type ' + player2type)
+        self.player1.name = self.wait_for_response(self.player1, 'name')[2:]
+        self.player2.name = self.wait_for_response(self.player2, 'name')[2:]
+        self.current_player = self.player1
+        self.other_player = self.player2
+
+    @staticmethod
+    def send_to_player(player, command):
+        print('      send to ' + player.name + ' (' + player.color + '): ' + command)
+        player.engine.handle_input_from_controller(command)
+
+    def wait_for_response(self, player, message):
+        self.send_to_player(player, message)
+        while player.latest_response is None:
+            pass
+        return player.get_latest_response()
 
     def run(self):
-        self.gtp_engine.run()
+        while True:
+            print('\nnext turn\n')
+            response = self.wait_for_response(self.current_player, 'genmove ' + self.current_player.color)
+            move = response[2:]  # strip away the "= "
+            self.send_to_player(self.other_player, 'play ' + self.current_player.color + ' ' + move)
+
+            time.sleep(0.5)
+
+            # swap players for next turn
+            if self.current_player == self.player1:
+                self.current_player = self.player2
+                self.other_player = self.player1
+            else:
+                self.current_player = self.player1
+                self.other_player = self.player2
+
+    def handle_input_from_engine(self, engine, input):
+        input = input.strip()
+        player = self.map[engine]
+        print('received from ' + player.name + ' (' + player.color + '): ' + input)
+        player.latest_response = input
 
 
-# or sys.executable instead of 'python'
-player1 = subprocess.Popen(['python', 'GTPplayer.py'], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
-player2 = subprocess.Popen(['python', 'GTPplayer.py'], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+class Player:
+    def __init__(self, color):
+        self.engine = GTPengine()
+        self.color = color
+        self.name = 'unknown'
+        self.latest_response = None
 
-current_player = player1
-other_player = player2
-
-
-def get_player_id(player):
-    return 'black' if player == player1 else 'white'
-
-
-def await_response(player):
-    _response = ''
-    while len(_response) == 0:
-        _response = player.stdout.readline().decode('utf-8').strip()
-        player.stdout.flush()
-    print('[response from ' + get_player_id(player) + ']\t' + _response)
-    return _response
+    def get_latest_response(self):
+        resp = self.latest_response
+        self.latest_response = None
+        return resp
 
 
-def send_command(player, command):
-    print('[command to ' + get_player_id(player) + ']\t\t' + command)
-    b = bytearray()
-    b.extend(map(ord, command + '\n'))
-    player.stdin.write(b)
-    player.stdin.flush()
+def main():
+    gtp_controller = GTPcontroller(RandomGroupingBot.__name__, RandomBot.__name__)
+    gtp_controller.run()
 
 
-for i in range(5):  # while until someone sends quit? doesn't happen for random bots though TODO
-    print('\nnext turn\n')
-    color = 'b' if current_player == player1 else 'w'
-
-    send_command(current_player, 'genmove ' + color)
-    response = await_response(current_player)
-    move = response[2:]  # strip away the "= "
-    send_command(other_player, 'play ' + color + ' ' + move)
-    await_response(other_player)
-
-    # keep track of game on own board to validate moves TODO
-
-    time.sleep(0.5)
-
-    # swap players for next turn
-    if current_player == player1:
-        current_player = player2
-        other_player = player1
-    else:
-        current_player = player1
-        other_player = player2
+if __name__ == '__main__':
+    main()
