@@ -16,6 +16,7 @@ class GTPengine:
     def __init__(self):
         self.game = Game()
         self.bot = RandomBot()
+        self.stdin = sys.stdin
         self.stdout = sys.stdout
         self.logfile = open('log_' + strftime('%d-%m-%Y_%H-%M-%S') + '.txt', 'w')
         self.write_log('  start: ', self.bot.__class__.__name__ + ', ' + __file__)
@@ -63,7 +64,7 @@ class GTPengine:
 
     def run(self):
         while True:
-            stdin_line = sys.stdin.readline().strip()
+            stdin_line = self.stdin.readline().strip()
             self.write_log('receive: ', stdin_line)
             if len(stdin_line) == 0:  # ignore empty lines
                 continue
