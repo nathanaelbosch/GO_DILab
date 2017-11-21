@@ -30,6 +30,10 @@ class Board(np.matrix):
 
     # old get_chain method without scipy-dependency
     def get_chain(self, loc: Tuple[int, int]) -> List[Tuple[int, int]]:
+        """ This method uses morphological operations to find out the
+         connected components ie., chains. wikipedia link to
+         morphological operation - https://en.wikipedia.org/wiki/Mathematical_morphology
+        """
         player = self[loc]
         # Check if neighbors of same player
         to_check = [loc]
@@ -57,6 +61,26 @@ class Board(np.matrix):
                 return False
 
         return True
+        """ 
+        Check if group is dead by morphological operation :
+        This method works better with larger groups. Smaller groups can use the previous method
+        """
+        #recreate the region of interest ie., group
+        # group_colour = self[group[0]]
+        # roi = self[group]
+        # print(roi)
+        # a = ndimage.binary_dilation(roi)
+        # b = -(a-roi)
+        # b = np.lib.pad(self,((1,1),(1,1)),'constant')
+        # x = np.lib.pad(self,((1,1),(1,1)),'constant',constant_values=-group_colour)
+        # roi = np.lib.pad(roi, ((1, 1), (1, 1)), 'constant')
+        # c = np.multiply(b,x) + roi
+        # d = ndimage.binary_erosion(c)
+        # new_roi = d[group]
+        # old_roi = roi[group]
+        # if new_roi == old_roi:
+        #     return True
+        # return False
 
     def is_on_board(self, col, row):
         return 0 <= col < self.shape[0] and 0 <= row < self.shape[1]
