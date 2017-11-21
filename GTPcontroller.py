@@ -1,5 +1,19 @@
 import subprocess
+import threading
 import time
+
+from GTPengine import GTPengine
+
+
+class GTPengineThread(threading.Thread):
+    def __init__(self):
+        threading.Thread.__init__(self)
+        self.gtp_engine = GTPengine()
+        self.start()
+
+    def run(self):
+        self.gtp_engine.run()
+
 
 # or sys.executable instead of 'python'
 player1 = subprocess.Popen(['python', 'GTPplayer.py'], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
