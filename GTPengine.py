@@ -1,3 +1,5 @@
+import random
+import string
 import sys
 from time import strftime
 from datetime import datetime
@@ -20,7 +22,8 @@ class GTPengine:
         self.controller = None
         self.stdin = None
         self.stdout = None
-        self.logfile = open('log_' + strftime('%d-%m-%Y_%H-%M-%S') + '.txt', 'w')
+        random_str = ''.join(random.choices(string.ascii_lowercase, k=3))
+        self.logfile = open('log_' + strftime('%d-%m-%Y_%H-%M-%S') + '_' + random_str + '.txt', 'w')
         self.write_log('  start: ', self.bot.__class__.__name__ + ', ' + __file__)
         self.gtp_commands = {}
         gtp_methods = [
