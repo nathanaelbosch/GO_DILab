@@ -9,6 +9,7 @@ from Game import *
 from bots.HumanConsole import HumanConsole
 from bots.RandomBot import RandomBot
 from bots.RandomGroupingBot import RandomGroupingBot
+from bots.SimplestNNBot import SimplestNNBot
 
 
 class GTPengine:
@@ -48,6 +49,7 @@ class GTPengine:
             HumanConsole,
             RandomBot,
             RandomGroupingBot,
+            SimplestNNBot,
         ]
         for player_type in player_types_arr:
             self.player_types[player_type.__name__] = player_type

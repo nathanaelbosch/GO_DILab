@@ -6,7 +6,7 @@ from Move import Move
 from bots.HumanConsole import HumanConsole
 from bots.RandomBot import RandomBot
 from bots.RandomGroupingBot import RandomGroupingBot
-
+from bots.SimplestNNBot import SimplestNNBot
 
 END_OF_TURN_SLEEP_TIME = 0.5
 
@@ -93,7 +93,7 @@ class Player:
 def main():
     GTPcontroller(
         RandomBot.__name__,
-        RandomGroupingBot.__name__,
+        SimplestNNBot.__name__,
         # HumanConsole.__name__,
     ).run()
 
