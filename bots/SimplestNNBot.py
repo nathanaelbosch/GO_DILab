@@ -8,7 +8,7 @@ class SimplestNNBot:
 
     def __init__(self):
         self.model = keras.models.load_model(
-            'src/learn/simplest_move_prediction/model.h5')
+            'archive/src/learn/simplest_move_prediction/model.h5')
 
     def genmove(self, color, game) -> Move:
         # We're still interested in the playable locations
