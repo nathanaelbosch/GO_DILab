@@ -1,14 +1,20 @@
-import numpy as np
 import keras
+import numpy as np
+from os.path import abspath, dirname
 
-from Move import Move
+import sys
+
+import os
+
+from src.play.model.Move import Move
 
 
 class SimplestNNBot:
 
     def __init__(self):
-        self.model = keras.models.load_model(
-            'archive/src/learn/simplest_move_prediction/model.h5')
+        project_dir = dirname(dirname(dirname(dirname(dirname(abspath(__file__))))))
+        filepath = os.path.join(project_dir, 'src\learn\simplest_move_prediction\model.h5')
+        self.model = keras.models.load_model(filepath)
 
     def genmove(self, color, game) -> Move:
         # We're still interested in the playable locations
