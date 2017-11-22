@@ -1,7 +1,5 @@
 import time
 
-from src.play.controller.bots import RandomBot
-from src.play.controller.bots.SimplestNNBot import SimplestNNBot
 from src.play.model.Game import Game
 from src.play.model.Move import Move
 
@@ -87,15 +85,3 @@ class Player:
         resp = self.latest_response
         self.latest_response = None
         return resp
-
-
-def main():
-    GTPcontroller(
-        RandomBot.__name__,
-        SimplestNNBot.__name__,
-        # HumanConsole.__name__,
-    ).run()
-
-
-if __name__ == '__main__':
-    main()
