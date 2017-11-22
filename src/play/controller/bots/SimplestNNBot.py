@@ -13,6 +13,8 @@ class SimplestNNBot:
 
     def __init__(self):
         project_dir = dirname(dirname(dirname(dirname(dirname(abspath(__file__))))))
+        # try to make this path relative instead of absolute to project_dir,
+        # otherwise it might make troubles when packing it into an executable TODO
         filepath = os.path.join(project_dir, 'src\learn\simplest_move_prediction\model.h5')
         self.model = keras.models.load_model(filepath)
 
