@@ -1,5 +1,6 @@
 # Don't git data
-data
+data/*
+!data/info.txt
 
 # ignore log files
 log*
