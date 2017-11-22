@@ -142,7 +142,7 @@ class GTPengine:
             self.stdout.close()
         self.logfile.close()
         if self.controller is None:  # otherwise controller does this
-            exit(0)
+            sys.exit(0)
 
     def boardsize(self, args):
         if len(args) == 0:
