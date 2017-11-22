@@ -13,3 +13,7 @@ h5py
 
 # pygame
 # scipy
+
+# pyinstaller: if you want to build an executable from GTPengine (confirmed to work in Windows, other OSs untested)
+# if pyinstaller throws AttributeError: module 'enum' has no attribute 'IntFlag',
+# run 'pip uninstall enum34' (via stackoverflow.com/a/45716067)
