@@ -8,12 +8,12 @@ I did my best on the docstrings, and I used some type-annotation from time to
 time! Python supports that since 3.?, but it's just used by linters and it
 does not affect the code in any way during the runtime (afaik).
 """
-import logging
 import copy
+import logging
 
-from Move import *
-from Board import *
+from src.play.model.Board import *
 
+from src.play.model.Move import *
 
 logging.basicConfig(
     # filename='logs/Game.log',

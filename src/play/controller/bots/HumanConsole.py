@@ -1,5 +1,6 @@
-from Game import InvalidMove_Error
-from Move import Move
+from src.play.model.Game import InvalidMove_Error
+
+from src.play.model.Move import Move
 
 
 class HumanConsole:

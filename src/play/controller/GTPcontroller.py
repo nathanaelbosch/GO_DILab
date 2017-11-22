@@ -1,12 +1,11 @@
 import time
 
-from GTPengine import GTPengine
-from Game import Game
-from Move import Move
-from bots.HumanConsole import HumanConsole
-from bots.RandomBot import RandomBot
-from bots.RandomGroupingBot import RandomGroupingBot
-from bots.SimplestNNBot import SimplestNNBot
+from src.play.controller.bots import RandomBot
+from src.play.controller.bots.SimplestNNBot import SimplestNNBot
+from src.play.model.Game import Game
+from src.play.model.Move import Move
+
+from src.play.controller.GTPengine import GTPengine
 
 END_OF_TURN_SLEEP_TIME = 0.5
 

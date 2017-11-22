@@ -1,6 +1,6 @@
 import random
 
-import Move
+from src.play.model import Move
 
 
 class RandomBot:

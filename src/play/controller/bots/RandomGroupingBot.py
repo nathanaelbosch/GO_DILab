@@ -1,7 +1,8 @@
 import random
 
-import Move
-from Board import WHITE, BLACK
+from src.play.model.Board import WHITE, BLACK
+
+from src.play.model import Move
 
 GROUPING_PROBABILITY = 0.75
 

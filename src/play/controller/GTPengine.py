@@ -1,17 +1,20 @@
 import random
 import string
 import sys
-from time import strftime
 from datetime import datetime
+from time import strftime
+
+from src.play.controller.bots.RandomBot import RandomBot
+from src.play.controller.bots.RandomGroupingBot import RandomGroupingBot
+from src.play.controller.bots.SimplestNNBot import SimplestNNBot
+from src.play.model.Game import *
+
+from src.play.controller.bots.HumanConsole import HumanConsole
+
+
 # from os.path import dirname, abspath
 # project_dir = dirname(dirname(dirname(abspath(__file__))))
 # sys.path.append(project_dir)
-
-from Game import *
-from bots.HumanConsole import HumanConsole
-from bots.RandomBot import RandomBot
-from bots.RandomGroupingBot import RandomGroupingBot
-from bots.SimplestNNBot import SimplestNNBot
 
 
 class GTPengine:
