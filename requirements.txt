@@ -1,6 +1,8 @@
 # keras works with tensorflow or theano as backend
 # on Windows tensorflow requires the 64-bit version of Python 3
-tensorflow
+# tensorflow
+theano==0.9.0
+# in your ~.keras\keras.json file, set the "backend" to "theano"
 keras
 numpy
 sgf
@@ -9,6 +11,5 @@ pandas
 scikit-learn
 h5py
 
-# theano
 # pygame
 # scipy
