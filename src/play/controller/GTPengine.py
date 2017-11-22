@@ -4,17 +4,17 @@ import sys
 from datetime import datetime
 from time import strftime
 
+from os.path import dirname, abspath
+
+project_dir = dirname(dirname(dirname(dirname(abspath(__file__)))))
+sys.path.append(project_dir)
+
 from src.play.controller.bots.RandomBot import RandomBot
 from src.play.controller.bots.RandomGroupingBot import RandomGroupingBot
 from src.play.controller.bots.SimplestNNBot import SimplestNNBot
 from src.play.model.Game import *
 
 from src.play.controller.bots.HumanConsole import HumanConsole
-
-
-# from os.path import dirname, abspath
-# project_dir = dirname(dirname(dirname(abspath(__file__))))
-# sys.path.append(project_dir)
 
 
 class GTPengine:
