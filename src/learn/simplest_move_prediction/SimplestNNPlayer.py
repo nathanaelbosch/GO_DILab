@@ -1,5 +1,6 @@
 from src.play import Player
-from src.play.utils.Move import Move
+from src.play.model.Move import Move
+from src.play.model.Board import WHITE, BLACK, EMPTY
 import random as rn
 import numpy as np
 import keras
@@ -12,14 +13,30 @@ class SimplestNNPlayer(Player):
             'src/learn/simplest_move_prediction/model.h5')
         Player.__init__(self, 'SimplestNN', color, game)
 
+    def board_to_input(self):
+        b = self.game.board
+        if self.color == 'b':
+            me = BLACK
+            other = WHITE
+        else:
+            me = WHITE
+            other = BLACK
+        my_board = (b == me) * 2 - 1
+        other_board = (b == other) * 2 - 1
+
+        my_board_vect = my_board.reshape(
+            1, my_board.shape[0]*my_board.shape[1])
+        other_board_vect = other_board.reshape(
+            1, other_board.shape[0]*other_board.shape[1])
+        return np.append(my_board_vect, other_board_vect)
+
     def get_move(self):
         # We're still interested in the playable locations
         playable_locations = self.game.get_playable_locations(self.color)
 
         # Format the board and make predictions
-        board = self.game.board.tolist()
-        board = np.array([[entry for row in board for entry in row]])
-        pred_moves = self.model.predict(board)
+        inp = self.board_to_input()
+        pred_moves = self.model.predict(inp)
         # print(pred_moves)
 
         pred_moves = pred_moves.reshape(9, 9)

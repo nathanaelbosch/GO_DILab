@@ -83,7 +83,9 @@ class Game:
     def start(self):
         self.is_running = True
 
-    def play(self, move: Move, player: {'w', 'b'}, testing=False):
+    def play(self, move: Move, player: {'w', 'b'},
+             testing=False,
+             checking=True):
         """Play a move!
 
         Also checks all the rules.
@@ -104,19 +106,21 @@ class Game:
             return  # There is nothing to do
 
         # 1b. First quick validity-check
-        if (move.col + 1 > self.size or move.row + 1 > self.size or
-                move.col < 0 or move.row < 0):
-            raise InvalidMove_Error(
-                'Location is not present on the board: '+str(move))
+        if checking:
+            if (move.col + 1 > self.size or move.row + 1 > self.size or
+                    move.col < 0 or move.row < 0):
+                raise InvalidMove_Error(
+                    'Location is not present on the board: '+str(move))
 
         # 2. Play the stone
         loc = move.to_matrix_location()
         # Use the numerical player representation (-1 or 1 so far)
         color = WHITE if player == 'w' else BLACK
         # Check if the location is empty
-        if test_board[loc] != EMPTY:
-            raise InvalidMove_Error(
-                'There is already a stone at that location')
+        if checking:
+            if test_board[loc] != EMPTY:
+                raise InvalidMove_Error(
+                    'There is already a stone at that location')
         # "Play the stone" at the location
         test_board[loc] = color
 
@@ -144,17 +148,18 @@ class Game:
 
         # 4. Validity Checks
         # 4a. No suicides!
-        own_chain = test_board.get_chain(loc)
-        if test_board.check_dead(own_chain):
-            # This play is actually a suicide! Revert changes and raise Error
-            test_board[loc] = EMPTY
-            raise InvalidMove_Error('No suicides')
-        # 4b. No board state twice! (Depends on rules, yes, TODO)
-        if (len(self.board_history) > 0 and
-                test_board.to_number() in self.board_history):
-            test_board[loc] = EMPTY
-            raise InvalidMove_Error(
-                'Same constellation can only appear once')
+        if checking:
+            own_chain = test_board.get_chain(loc)
+            if test_board.check_dead(own_chain):
+                # This play is actually a suicide! Revert changes and raise Error
+                test_board[loc] = EMPTY
+                raise InvalidMove_Error('No suicides')
+            # 4b. No board state twice! (Depends on rules, yes, TODO)
+            if (len(self.board_history) > 0 and
+                    test_board.to_number() in self.board_history):
+                test_board[loc] = EMPTY
+                raise InvalidMove_Error(
+                    'Same constellation can only appear once')
 
         # 5. Everything is valid :)
         # If we were testing we're done
@@ -162,8 +167,9 @@ class Game:
         if not testing:
             # Append move and board to histories
             self.board = test_board
-            self.board_history.add(test_board.to_number())
-            self.play_history.append(player + ':' + str(move))
+            if checking:
+                self.board_history.add(test_board.to_number())
+                self.play_history.append(player + ':' + str(move))
 
     def __str__(self):
         """Game representation = Board representation"""

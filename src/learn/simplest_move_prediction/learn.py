@@ -31,19 +31,26 @@ def list_all_csv_files(dir):
 
 
 def main():
-    all_files = list_all_csv_files(DIR)
+    # all_files = list_all_csv_files(DIR)
     # all_files = rn.sample(all_files, 1000)
+    all_files = ['test.out']
     print(len(all_files))
-    X, y = np.empty((0, 9*9)), np.empty((0, 9*9))
+    in_size = 2*9*9
+    out_size = 9*9
+    X, y = np.empty((0, in_size)), np.empty((0, out_size))
 
     for file in all_files:
         # file = rn.choice(all_files)
         # print(file)
-        data = pd.read_csv(file, sep=';', header=None)
-        _X = data[data.columns[:(9*9)]].as_matrix()
-        _y = data[data.columns[(9*9):]].as_matrix()
+        # data = pd.read_csv(file, sep=';', header=None)
+        data = pd.read_csv(file, sep=',', header=None)
+        _X = data[data.columns[:(in_size)]].as_matrix()
+        _y = data[data.columns[(in_size):]].as_matrix()
         X = np.concatenate((X, _X))
         y = np.concatenate((y, _y))
+
+    # X -= np.mean(X)
+    # X /= np.std(X, axis = 0)
 
     # split into 67% for train and 33% for test
     X_train, X_test, y_train, y_test = train_test_split(
@@ -53,10 +60,10 @@ def main():
     in_dim = X_train.shape[1]
     out_dim = y_train.shape[1]
     model = Sequential()
-    model.add(Dense(200, input_dim=in_dim, activation='relu'))
+    model.add(Dense(100, input_dim=in_dim, activation='relu'))
     model.add(Dropout(0.25))
-    model.add(Dense(200, input_dim=in_dim, activation='relu'))
-    model.add(Dropout(0.25))
+    # model.add(Dense(100, input_dim=in_dim, activation='relu'))
+    # model.add(Dropout(0.25))
     model.add(Dense(out_dim, activation='softmax'))
 
     # compile model
