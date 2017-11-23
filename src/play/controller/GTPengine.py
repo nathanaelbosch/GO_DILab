@@ -9,7 +9,7 @@ from src.play.model.Game import *
 from src.play.controller.bots.RandomBot import RandomBot
 from src.play.controller.bots.RandomGroupingBot import RandomGroupingBot
 from src.play.controller.bots.HumanConsole import HumanConsole
-from src.learn.simplest_move_prediction.SimplestNNBot import SimplestNNBot
+from src.learn.dev_nath.SimplestNNBot import SimplestNNBot
 
 
 class GTPengine:
