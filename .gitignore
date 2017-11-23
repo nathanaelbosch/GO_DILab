@@ -6,6 +6,9 @@ data/*
 # ignore log files
 log*
 
+# ignore executables
+*.exe
+
 # the PyCharm IDE creates this folder
 .idea/
 
