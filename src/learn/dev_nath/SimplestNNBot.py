@@ -1,12 +1,11 @@
-import keras
 import numpy as np
 from os.path import abspath, dirname
 from src.play.model.Move import Move
 from src.play.model.Board import WHITE, BLACK, EMPTY
 
 import sys
-
 import os
+from os.path import abspath, dirname
 
 from src.play.model.Move import Move
 
@@ -40,8 +39,7 @@ class SimplestNNBot:
             1, other_board.shape[0]*other_board.shape[1])
         return np.append(my_board_vect, other_board_vect)
 
-    def genmove(self):
-        print('NN generating move')
+    def genmove(self, color, game) -> Move:
         # We're still interested in the playable locations
         playable_locations = self.game.get_playable_locations(self.color)
 
