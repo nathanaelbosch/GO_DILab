@@ -3,10 +3,8 @@ import pygame
 from pygame import gfxdraw
 import sys
 
-from Board import BLACK, WHITE
-from Move import Move
-from archive.src.play.view.ConsoleView import ConsoleView
-from archive.src.play.view.View import View
+from src.play.model.Board import BLACK, WHITE
+from src.play.model.Move import Move
 
 brown = (165, 42, 42)
 black = (0, 0, 0)
@@ -21,19 +19,17 @@ board_size = 400
 stone_radius = 20
 
 
-class PygameView(View):
+class PygameView():
 
     def __init__(self, game):
-        View.__init__(self, game)
-        self.console_view = ConsoleView(game)
-        self.console_view.print_board()
+        self.game = game
         self.running = False
         self.cell_size = board_size / (self.game.size - 1)
         self.buttons = []
         self.labels = []
 
-    def open(self, game_controller):
-        self.game_controller = game_controller
+    def open(self, controller):
+        self.controller = controller
         pygame.init()
         self.running = True
         self.screen = pygame.display.set_mode(window_size)
@@ -53,7 +49,7 @@ class PygameView(View):
                 row = int(round((y - board_top_left_coord[1]) /
                                 self.cell_size))
                 if 0 <= col < self.game.size and 0 <= row < self.game.size:
-                    self.game_controller.current_player \
+                    self.controller.current_player \
                         .receive_next_move_from_gui(Move(col, row))
                 for btn in self.buttons:
                     btn.check_mouse_released()
@@ -63,23 +59,21 @@ class PygameView(View):
                 btn.is_mouse_over_btn()
             self.render()
 
-        # TODO: This exiting mechanism doesn't work (on macOS at least)
-        # causes a freeze TODO
         pygame.quit()
         sys.exit(0)
 
     def show_player_turn_start(self, name):
-        self.console_view.show_player_turn_start(name)
+        pass
 
     def show_player_turn_end(self, name):
-        self.console_view.show_player_turn_end(name)
+        pass
 
     def send_pass_move(self):
-        self.game_controller.current_player.receive_next_move_from_gui(
+        self.controller.current_player.receive_next_move_from_gui(
             Move(is_pass=True))
 
     def get_turn_label_text(self):
-        return 'It\'s ' + self.game_controller.current_player.name + '\'s turn'
+        return 'It\'s ' + self.controller.current_player.name + '\'s turn'
 
     def render(self):
         # board
@@ -122,14 +116,13 @@ class PygameView(View):
         pygame.gfxdraw.filled_circle(self.screen, x, y, stone_radius, col)
 
     def show_error(self, msg):
-        self.console_view.show_error(msg)
+        pass
 
 
 class Button:
     """Adapted from
     gamedev.net/forums/topic/686666-pygame-buttons/?do=findComment&comment=5333411
     """
-
     def __init__(self, x, y, w, h, text, screen, on_click):
         self.x = x
         self.y = y
