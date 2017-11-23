@@ -62,6 +62,9 @@ class PygameView:
         pygame.quit()
         sys.exit(0)
 
+    def game_ended(self):
+        self.labels[0] = (Label(100, 30, 300, 40, lambda: "Game has ended", self.screen))
+
     def send_pass_move(self):
         self.controller.receive_move_from_gui(Move(is_pass=True))
 
@@ -107,9 +110,6 @@ class PygameView:
         # antialiasing via stackoverflow.com/a/26774279/2474159
         gfxdraw.aacircle(self.screen, x, y, stone_radius, col)
         gfxdraw.filled_circle(self.screen, x, y, stone_radius, col)
-
-    def show_error(self, msg):
-        pass
 
 
 class Button:

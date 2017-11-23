@@ -1,5 +1,6 @@
 import threading
 import time
+import sys
 
 from src import Utils
 from src.play.controller.bots.HumanGui import HumanGui
@@ -74,7 +75,9 @@ class GTPcontroller(threading.Thread):
 
         self.broadcast('quit')
         print('\n' + self.game.__str__())
-        exit(0)
+        if self.view is not None:
+            self.view.game_ended()
+        sys.exit(0)
 
     def handle_input_from_engine(self, engine, input):
         input = input.strip()
