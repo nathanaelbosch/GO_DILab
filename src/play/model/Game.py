@@ -225,10 +225,10 @@ class Game:
             logger.debug('Black: {}'.format(black_score))
             logger.debug('White: {}'.format(white_score))
         if black_score == white_score:
-            print('Same score: Draw!')
+            logger.info('Same score: Draw!')
             return
         winner = 'Black' if black_score > white_score else 'White'
-        print('{} won by {} points!'.format(
+        logger.info('{} won by {} points!'.format(
             winner, abs(black_score - white_score)))
         if self.result:
             logger.debug('Result according to the sgf: {}'.format(self.result))
