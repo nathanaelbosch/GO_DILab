@@ -1,6 +1,8 @@
 # Don't git data
 data/*
 !data/info.txt
+logs/*
+!logs/touch.txt
 !data/some_game.sgf
 
 # ignore log files

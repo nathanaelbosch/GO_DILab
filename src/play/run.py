@@ -19,6 +19,7 @@ def main():
     GTPcontroller(
         RandomBot.__name__,
         SimplestNNBot.__name__,
+        # RandomGroupingBot.__name__,
         logging.INFO,
     ).run()
 

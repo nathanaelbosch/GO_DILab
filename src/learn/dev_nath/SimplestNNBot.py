@@ -2,7 +2,6 @@ import numpy as np
 from os.path import abspath, dirname
 from src.play.model.Move import Move
 from src.play.model.Board import WHITE, BLACK, EMPTY
-import keras
 import sys
 import os
 from os.path import abspath, dirname
@@ -21,6 +20,7 @@ class SimplestNNBot:
         # filepath = os.path.join(
             # project_dir, 'src/learn/dev_nath/model.h5')
         # self.model = keras.models.load_model(filepath)
+        import keras
         self.model = keras.models.load_model('src/learn/dev_nath/model.h5')
         with open('src/learn/dev_nath/mean_var.txt', 'r') as f:
             lines = f.readlines()
@@ -56,6 +56,10 @@ class SimplestNNBot:
         print(type(a))
         return a
 
+    def softmax(self, x):
+        e_x = np.exp(x - np.max(x))
+        return e_x / e_x.sum()
+
     def genmove(self, color, game) -> Move:
         # We're still interested in the playable locations
         playable_locations = game.get_playable_locations(color)
@@ -79,13 +83,16 @@ class SimplestNNBot:
 
         # print([i for row in potential_moves for i in row])
 
+        potential_moves = self.softmax(potential_moves)
+        print(potential_moves)
+
         row, col = np.unravel_index(
             potential_moves.argmax(),
             potential_moves.shape)
 
         move = Move(col=col, row=row)
         if (potential_moves[move.to_matrix_location()] == dummy_value or
-                potential_moves[move.to_matrix_location()] < 0.0001):
+                potential_moves[move.to_matrix_location()] < (1/81+0.001)):
             move = Move(is_pass=True)
 
         return move

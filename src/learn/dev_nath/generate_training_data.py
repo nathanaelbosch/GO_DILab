@@ -11,7 +11,7 @@ from src.play.model.Game import WHITE, BLACK, EMPTY
 from src.play.model.Move import Move
 
 
-OUT_PATH = 'data/training_data/simplest_move_prediction/'
+# OUT_PATH = 'data/training_data/simplest_move_prediction/'
 
 
 def error_resistance(funct):
@@ -86,24 +86,43 @@ def foo(line):
 
 
 def main():
+    import multiprocessing
+    pool = multiprocessing.Pool()
+
     file = 'data/full_file.txt'
     with open(file, 'r') as f:
         lines = f.readlines()
-    lines = rn.sample(lines, 5000)
+    numgames = 15000
+    lines = rn.sample(lines, numgames)
     # print(lines)
 
-    import multiprocessing
-    pool = multiprocessing.Pool()
-    data = pool.map(foo, lines)
+    max_batchsize = 5000
+    first = True; i=1
+    still_todo = numgames
+    filepath = 'src/learn/dev_nath/{}_games.csv'.format(numgames)
+    if os.path.isfile(filepath):
+        os.remove(filepath)
+    f = open('src/learn/dev_nath/{}_games.csv'.format(numgames), 'ab')
+    while still_todo > 0:
+        print('Batch', i); i+=1
+        batch_lines = lines[:max_batchsize]
+        still_todo = still_todo - max_batchsize
+        if still_todo > 0:
+            lines = lines[max_batchsize:]
 
-    # data = map(lambda x: replay_game(x, to_numpy), lines)
-    data = [d for d in data if d is not None]
-    data = np.concatenate(data)
-    print(data.shape)
-    np.savetxt('src/learn/dev_nath/test.out', data, delimiter=',', fmt='%d')
-    # print(data[0].shape)
-    # print(data[1].shape)
-    # print(data[0][0].shape)
+        data = pool.map(foo, batch_lines)
+
+        # data = map(lambda x: replay_game(x, to_numpy), lines)
+        data = [d for d in data if d is not None]
+        data = np.concatenate(data)
+        print(data.shape)
+        np.savetxt(f, data, delimiter=',', fmt='%d')
+
+        # print(data[0].shape)
+        # print(data[1].shape)
+        # print(data[0][0].shape)
+
+    f.close()
 
 
 if __name__ == '__main__':

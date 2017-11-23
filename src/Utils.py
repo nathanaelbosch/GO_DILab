@@ -24,7 +24,9 @@ def setup_logger(name, log_file, level):
 def get_unique_file_logger(cls, level=logging.INFO):
     rand_str = ''.join(random.choices(string.ascii_lowercase, k=5))
     logger = setup_logger(rand_str,
-                          cls.__class__.__name__ + '_' + strftime('%d-%m-%Y_%H-%M-%S') + '_' + rand_str + '.log',
+                          'logs/' + cls.__class__.__name__ + '_' +
+                          strftime('%d-%m-%Y_%H-%M-%S') + '_' +
+                          rand_str + '.log',
                           level)
     logger.propagate = False  # via stackoverflow.com/a/2267567/2474159
     return logger

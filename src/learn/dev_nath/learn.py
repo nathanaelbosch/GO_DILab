@@ -13,6 +13,10 @@ DEV_PATH = 'src/learn/dev_nath'
 np.random.seed(123)  # for reproducibility
 
 
+from tensorflow.python.client import device_lib
+print(device_lib.list_local_devices())
+
+
 # 1. Get data
 def list_all_csv_files(dir):
     """List all sgf-files in a dir
@@ -34,7 +38,7 @@ def list_all_csv_files(dir):
 def main():
     # all_files = list_all_csv_files(DIR)
     # all_files = rn.sample(all_files, 1000)
-    all_files = ['src/learn/dev_nath/test.out']
+    all_files = ['src/learn/dev_nath/5000_games.csv']
     print(len(all_files))
     in_size = 2*9*9
     out_size = 9*9
@@ -54,21 +58,25 @@ def main():
         f.write(str(np.mean(X)))
         f.write('\n')
         X -= np.mean(X)
-        print(np.std(X))
+        # print(np.std(X))
         f.write(str(np.std(X)))
         f.write('\n')
         X /= np.std(X)
 
     # split into 67% for train and 33% for test
     X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.33)
+        X, y, test_size=0.3)
 
     # create model
     in_dim = X_train.shape[1]
     out_dim = y_train.shape[1]
     model = Sequential()
-    model.add(Dense(100, input_dim=in_dim, activation='relu'))
+    model.add(Dense(200, input_dim=in_dim, activation='relu'))
     model.add(Dropout(0.25))
+    model.add(Dense(200, input_dim=in_dim, activation='relu'))
+    model.add(Dropout(0.25))
+    # model.add(Dense(100, input_dim=in_dim, activation='relu'))
+    # model.add(Dropout(0.25))
     # model.add(Dense(100, input_dim=in_dim, activation='relu'))
     # model.add(Dropout(0.25))
     model.add(Dense(out_dim, activation='softmax'))
@@ -86,7 +94,7 @@ def main():
     scores = model.evaluate(X_test, y_test)
     print('\n{:s}: {:.2f}'.format(model.metrics_names[1], scores[1]*100))
 
-    model.save('src/learn/dev_nath/model.h5')
+    model.save(os.path.join(DEV_PATH, 'model.h5'))
 
 
 if __name__ == '__main__':
