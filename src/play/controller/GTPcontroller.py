@@ -1,3 +1,4 @@
+import threading
 import time
 
 from src import Utils
@@ -9,9 +10,10 @@ from src.play.controller.GTPengine import GTPengine
 END_OF_TURN_SLEEP_TIME = 0
 
 
-class GTPcontroller:
+class GTPcontroller(threading.Thread):
 
     def __init__(self, player1type, player2type, logging_level):
+        threading.Thread.__init__(self)
         self.logger = Utils.get_unique_file_logger(self, logging_level)
         self.game = Game()
         self.player1 = Player('b', logging_level)

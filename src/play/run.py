@@ -21,7 +21,7 @@ def main():
         SimplestNNBot.__name__,
         # RandomGroupingBot.__name__,
         logging.INFO,
-    ).run()
+    ).start()
 
 
 if __name__ == '__main__':
