@@ -1,5 +1,6 @@
 import time
 
+from src import Utils
 from src.play.model.Game import Game
 from src.play.model.Move import Move
 
@@ -10,11 +11,12 @@ END_OF_TURN_SLEEP_TIME = 0.5
 
 class GTPcontroller:
 
-    def __init__(self, player1type, player2type):
+    def __init__(self, player1type, player2type, logging_level):
+        self.logger = Utils.get_unique_file_logger(self, logging_level)
         self.game = Game()
-        self.player1 = Player('b')
+        self.player1 = Player('b', logging_level)
         self.player1.engine.controller = self
-        self.player2 = Player('w')
+        self.player2 = Player('w', logging_level)
         self.player2.engine.controller = self
         self.map = {
             self.player1.engine: self.player1,
@@ -27,9 +29,12 @@ class GTPcontroller:
         self.current_player = self.player1
         self.other_player = self.player2
 
-    @staticmethod
-    def send_to_player(player, command):
-        print('      send to ' + player.name + ' (' + player.color + '): ' + command)
+    def log_and_print(self, message):
+        self.logger.info(message)
+        print(message)
+
+    def send_to_player(self, player, command):
+        self.log_and_print('      send to ' + player.name + ' (' + player.color + '): ' + command)
         player.engine.handle_input_from_controller(command)
 
     def broadcast(self, command):
@@ -70,13 +75,13 @@ class GTPcontroller:
     def handle_input_from_engine(self, engine, input):
         input = input.strip()
         player = self.map[engine]
-        print('received from ' + player.name + ' (' + player.color + '): ' + input)
+        self.log_and_print('received from ' + player.name + ' (' + player.color + '): ' + input)
         player.latest_response = input
 
 
 class Player:
-    def __init__(self, color):
-        self.engine = GTPengine()
+    def __init__(self, color, logging_level):
+        self.engine = GTPengine(logging_level)
         self.color = color
         self.name = 'unknown'
         self.latest_response = None

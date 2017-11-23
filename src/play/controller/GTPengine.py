@@ -1,32 +1,26 @@
-import random
-import string
 import sys
-from datetime import datetime
-from time import strftime
-
 from os.path import dirname, abspath
 
 project_dir = dirname(dirname(dirname(dirname(abspath(__file__)))))
 sys.path.append(project_dir)
 
+from src import Utils
+from src.play.model.Game import *
 from src.play.controller.bots.RandomBot import RandomBot
 from src.play.controller.bots.RandomGroupingBot import RandomGroupingBot
-from src.play.model.Game import *
-
 from src.play.controller.bots.HumanConsole import HumanConsole
 
 
 class GTPengine:
 
-    def __init__(self):
+    def __init__(self, logging_level):
         self.game = Game()
         self.bot = RandomBot()
         self.controller = None
         self.stdin = None
         self.stdout = None
-        random_str = ''.join(random.choices(string.ascii_lowercase, k=3))
-        self.logfile = open('log_' + strftime('%d-%m-%Y_%H-%M-%S') + '_' + random_str + '.txt', 'w')
-        self.write_log('  start: ', self.bot.__class__.__name__ + ', ' + __file__)
+        self.logger = Utils.get_unique_file_logger(self, logging_level)
+        self.logger.info('  start: ' + self.bot.__class__.__name__ + ', ' + __file__)
         self.gtp_commands = {}
         gtp_methods = [
             self.set_player_type,  # not a GTP-command
@@ -70,7 +64,7 @@ class GTPengine:
         self.send_success_response('switched to player type ' + player_type)
 
     def handle_input_from_controller(self, input):
-        self.write_log('receive: ', input)
+        self.logger.info('receive: ' + input.strip())
         parts = input.split(' ')
         command = parts[0]
         if command not in self.gtp_commands:
@@ -85,12 +79,8 @@ class GTPengine:
                 continue
             self.handle_input_from_controller(stdin_line)
 
-    def write_log(self, type, message):
-        self.logfile.write('[' + datetime.now().strftime('%d.%m.%Y %H:%M:%S.%f') + '] ' + type + message.strip() + '\n')
-        self.logfile.flush()
-
     def write_out(self, message):
-        self.write_log('   send: ', message)
+        self.logger.info('   send: ' + message.strip())
         if self.stdout is not None:
             self.stdout.write(message)
             self.stdout.flush()
@@ -140,7 +130,6 @@ class GTPengine:
         self.send_success_response()
         if self.stdout is not None:
             self.stdout.close()
-        self.logfile.close()
         if self.controller is None:  # otherwise controller does this
             sys.exit(0)
 
@@ -211,7 +200,7 @@ class GTPengine:
 
 
 def main():
-    gtp_engine = GTPengine()
+    gtp_engine = GTPengine(logging_level=logging.INFO)
     gtp_engine.stdin = sys.stdin
     gtp_engine.stdout = sys.stdout
     gtp_engine.run()

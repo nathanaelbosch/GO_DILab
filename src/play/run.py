@@ -1,6 +1,6 @@
-from os.path import dirname, abspath
-
+import logging
 import sys
+from os.path import dirname, abspath
 
 project_dir = dirname(dirname(dirname(abspath(__file__))))
 sys.path.append(project_dir)
@@ -13,7 +13,7 @@ def main():
     GTPcontroller(
         RandomBot.__name__,
         RandomGroupingBot.__name__,
-        # HumanConsole.__name__,
+        logging.INFO,  # anything more critical than INFO will cause no logfiles to be written
     ).run()
 
 
