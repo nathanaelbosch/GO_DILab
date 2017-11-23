@@ -27,9 +27,16 @@ def setup_logger(name, log_file, level):
 def get_unique_file_logger(cls, level=logging.INFO):
     rand_str = ''.join(random.choices(string.ascii_lowercase, k=5))
     log_file = cls.__class__.__name__ + '_' + strftime('%d-%m-%Y_%H-%M-%S') + '_' + rand_str + '.log'
-    if str(sys.argv[0]).endswith('run.py'):  # else is GTPengine or executable, in that case we can't expect a folder
+    if running_run_script():  # else is GTPengine or executable, in that case we can't expect a folder
         project_dir = dirname(dirname(abspath(__file__)))
         log_file = os.path.join(os.path.join(project_dir, 'logs'), log_file)
     logger = setup_logger(rand_str, log_file, level)
     logger.propagate = False  # via stackoverflow.com/a/2267567/2474159
     return logger
+
+
+# true if the current run was started using run.py
+# false if not, that's the case e.g. when running GTPengine directly and when building an executable of GTPengine
+# better name for this method?
+def running_run_script():
+    return str(sys.argv[0]).endswith('run.py')

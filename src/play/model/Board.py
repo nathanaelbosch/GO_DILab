@@ -1,8 +1,10 @@
 """Class to purely handle everything that concerns the board"""
 from typing import Tuple, List
 import numpy as np
-import sys
-if str(sys.argv[0]).endswith('run.py'):
+
+from src import Utils
+
+if Utils.running_run_script():
     from scipy import ndimage
 
 """Just to adjust the internal representation of color at a single location,
@@ -21,7 +23,7 @@ class Board(np.matrix):
     """
     def get_chain(self, loc: Tuple[int, int]) -> List[Tuple[int, int]]:
         # if run.py was started, we can use scipy and thereby improve performance
-        if str(sys.argv[0]).endswith('run.py'):
+        if Utils.running_run_script():
             # This method uses morphological operations to find out the
             # connected components ie., chains. wikipedia link to
             # morphological operation - https://en.wikipedia.org/wiki/Mathematical_morphology
