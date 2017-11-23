@@ -1,3 +1,3 @@
-rd /S /Q .\src\play\logs
-mkdir .\src\play\logs
-copy /y nul .\src\play\logs\.gitkeep
+rd /S /Q .\logs
+mkdir .\logs
+copy /y nul .\logs\.gitkeep
