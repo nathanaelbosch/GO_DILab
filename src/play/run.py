@@ -6,7 +6,9 @@ project_dir = dirname(dirname(dirname(abspath(__file__))))
 sys.path.append(project_dir)
 
 from src.play.controller.GTPcontroller import GTPcontroller
-from src.play.controller.bots import RandomBot, RandomGroupingBot
+from src.play.controller.bots.HumanConsole import HumanConsole
+from src.play.controller.bots.RandomBot import RandomBot
+from src.play.controller.bots.RandomGroupingBot import RandomGroupingBot
 
 
 def main():
