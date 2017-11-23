@@ -6,7 +6,7 @@ logs/*
 !data/some_game.sgf
 
 # ignore log files
-log*
+*.log
 
 # ignore executables
 *.exe
