@@ -1,7 +1,9 @@
 """Class to purely handle everything that concerns the board"""
 from typing import Tuple, List
 import numpy as np
-# from scipy import ndimage
+import sys
+if str(sys.argv[0]).endswith('run.py'):
+    from scipy import ndimage
 
 """Just to adjust the internal representation of color at a single location,
 instead of all over the code ;) Just in case. Maybe something else as -1 and 1
@@ -17,23 +19,20 @@ class Board(np.matrix):
     The motivation for this was also that we can make a copy of the real board,
     and evaluate all the `get_chain`, `check_dead` etc on the copy
     """
-    # def get_chain(self, loc: Tuple[int, int]) -> List[Tuple[int, int]]:
-    #     # This method uses morphological operations to find out the
-    #     # connected components ie., chains
-    #     player = self[loc]
-    #     test_matrix = self == self[loc]
-    #     label_im, nb_labels = ndimage.label(test_matrix)
-    #     label_im = label_im == label_im[loc]
-    #     locations = np.where(label_im)
-    #     group = list(zip(locations[0],locations[1]))
-    #     return group
-
-    # old get_chain method without scipy-dependency
     def get_chain(self, loc: Tuple[int, int]) -> List[Tuple[int, int]]:
-        """ This method uses morphological operations to find out the
-         connected components ie., chains. wikipedia link to
-         morphological operation - https://en.wikipedia.org/wiki/Mathematical_morphology
-        """
+        # if run.py was started, we can use scipy and thereby improve performance
+        if str(sys.argv[0]).endswith('run.py'):
+            # This method uses morphological operations to find out the
+            # connected components ie., chains. wikipedia link to
+            # morphological operation - https://en.wikipedia.org/wiki/Mathematical_morphology
+            test_matrix = self == self[loc]
+            label_im, nb_labels = ndimage.label(test_matrix)
+            label_im = label_im == label_im[loc]
+            locations = np.where(label_im)
+            group = list(zip(locations[0],locations[1]))
+            return group
+        # if GTPengine.py was started, via pyinstaller for instance, we can't use scipy
+        # because pyinstaller doesn't seem to be able to handle it
         player = self[loc]
         # Check if neighbors of same player
         to_check = [loc]
