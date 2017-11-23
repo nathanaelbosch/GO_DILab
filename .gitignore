@@ -2,11 +2,11 @@
 data/*
 !data/info.txt
 logs/*
-!logs/touch.txt
+!logs/.gitkeep
 !data/some_game.sgf
 
 # ignore log files
-log*
+*.log
 
 # ignore executables
 *.exe

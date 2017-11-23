@@ -1,7 +1,10 @@
+import threading
 import time
+import sys
 
 from src import Utils
-from src.play.model.Game import Game
+from src.play.controller.bots.HumanGui import HumanGui
+from src.play.model.Game import Game, InvalidMove_Error
 from src.play.model.Move import Move
 
 from src.play.controller.GTPengine import GTPengine
@@ -9,11 +12,13 @@ from src.play.controller.GTPengine import GTPengine
 END_OF_TURN_SLEEP_TIME = 0
 
 
-class GTPcontroller:
+class GTPcontroller(threading.Thread):
 
     def __init__(self, player1type, player2type, logging_level):
+        threading.Thread.__init__(self)
         self.logger = Utils.get_unique_file_logger(self, logging_level)
         self.game = Game()
+        self.view = None
         self.player1 = Player('b', logging_level)
         self.player1.engine.controller = self
         self.player2 = Player('w', logging_level)
@@ -70,13 +75,24 @@ class GTPcontroller:
 
         self.broadcast('quit')
         print('\n' + self.game.__str__())
-        exit(0)
+        if self.view is not None:
+            self.view.game_ended()
+        sys.exit(0)
 
     def handle_input_from_engine(self, engine, input):
         input = input.strip()
         player = self.map[engine]
         self.log_and_print('received from ' + player.name + ' (' + player.color + '): ' + input)
         player.latest_response = input
+
+    def receive_move_from_gui(self, move):
+        human = self.current_player.engine.bot
+        if type(human) is HumanGui:
+            try:
+                self.game.play(move, self.current_player.color, testing=True)
+                human.move = move
+            except InvalidMove_Error as e:
+                print('\ninvalid move')
 
 
 class Player:

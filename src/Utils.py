@@ -2,6 +2,9 @@ import logging
 import random
 import string
 from time import strftime
+import sys
+import os
+from os.path import dirname, abspath
 
 formatter = logging.Formatter(
     fmt='%(asctime)s.%(msecs)03d %(levelname)s %(message)s',
@@ -23,10 +26,10 @@ def setup_logger(name, log_file, level):
 
 def get_unique_file_logger(cls, level=logging.INFO):
     rand_str = ''.join(random.choices(string.ascii_lowercase, k=5))
-    logger = setup_logger(rand_str,
-                          'logs/' + cls.__class__.__name__ + '_' +
-                          strftime('%d-%m-%Y_%H-%M-%S') + '_' +
-                          rand_str + '.log',
-                          level)
+    log_file = cls.__class__.__name__ + '_' + strftime('%d-%m-%Y_%H-%M-%S') + '_' + rand_str + '.log'
+    if str(sys.argv[0]).endswith('run.py'):  # else is GTPengine or executable, in that case we can't expect a folder
+        project_dir = dirname(dirname(abspath(__file__)))
+        log_file = os.path.join(os.path.join(project_dir, 'logs'), log_file)
+    logger = setup_logger(rand_str, log_file, level)
     logger.propagate = False  # via stackoverflow.com/a/2267567/2474159
     return logger

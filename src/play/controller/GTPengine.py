@@ -8,6 +8,7 @@ from src import Utils
 from src.play.model.Game import *
 
 from src.play.controller.bots.HumanConsole import HumanConsole
+from src.play.controller.bots.HumanGui import HumanGui
 from src.play.controller.bots.RandomBot import RandomBot
 from src.play.controller.bots.RandomGroupingBot import RandomGroupingBot
 from src.learn.dev_nath.SimplestNNBot import SimplestNNBot
@@ -48,6 +49,7 @@ class GTPengine:
         self.player_types = {}
         player_types_arr = [
             HumanConsole,
+            HumanGui,
             RandomBot,
             RandomGroupingBot,
             SimplestNNBot,
