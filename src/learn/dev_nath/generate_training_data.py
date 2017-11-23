@@ -89,7 +89,7 @@ def main():
     file = 'data/full_file.txt'
     with open(file, 'r') as f:
         lines = f.readlines()
-    lines = rn.sample(lines, 1000)
+    lines = rn.sample(lines, 5000)
     # print(lines)
 
     import multiprocessing
@@ -100,7 +100,7 @@ def main():
     data = [d for d in data if d is not None]
     data = np.concatenate(data)
     print(data.shape)
-    np.savetxt('test.out', data, delimiter=',', fmt='%d')
+    np.savetxt('src/learn/dev_nath/test.out', data, delimiter=',', fmt='%d')
     # print(data[0].shape)
     # print(data[1].shape)
     # print(data[0][0].shape)

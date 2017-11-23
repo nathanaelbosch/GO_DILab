@@ -9,6 +9,7 @@ from keras.models import Sequential
 from keras.layers import Dense, Dropout
 
 DIR = 'data/training_data/simplest_move_prediction'
+DEV_PATH = 'src/learn/dev_nath'
 np.random.seed(123)  # for reproducibility
 
 
@@ -33,7 +34,7 @@ def list_all_csv_files(dir):
 def main():
     # all_files = list_all_csv_files(DIR)
     # all_files = rn.sample(all_files, 1000)
-    all_files = ['test.out']
+    all_files = ['src/learn/dev_nath/test.out']
     print(len(all_files))
     in_size = 2*9*9
     out_size = 9*9
@@ -49,8 +50,14 @@ def main():
         X = np.concatenate((X, _X))
         y = np.concatenate((y, _y))
 
-    # X -= np.mean(X)
-    # X /= np.std(X, axis = 0)
+    with open(os.path.join(DEV_PATH, 'mean_var.txt'), 'w') as f:
+        f.write(str(np.mean(X)))
+        f.write('\n')
+        X -= np.mean(X)
+        print(np.std(X))
+        f.write(str(np.std(X)))
+        f.write('\n')
+        X /= np.std(X)
 
     # split into 67% for train and 33% for test
     X_train, X_test, y_train, y_test = train_test_split(
@@ -79,7 +86,7 @@ def main():
     scores = model.evaluate(X_test, y_test)
     print('\n{:s}: {:.2f}'.format(model.metrics_names[1], scores[1]*100))
 
-    model.save('src/learn/simplest_move_prediction/model.h5')
+    model.save('src/learn/dev_nath/model.h5')
 
 
 if __name__ == '__main__':

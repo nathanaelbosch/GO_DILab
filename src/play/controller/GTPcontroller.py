@@ -6,7 +6,7 @@ from src.play.model.Move import Move
 
 from src.play.controller.GTPengine import GTPengine
 
-END_OF_TURN_SLEEP_TIME = 0.5
+END_OF_TURN_SLEEP_TIME = 0
 
 
 class GTPcontroller:
