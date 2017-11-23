@@ -20,6 +20,7 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument(
         '--no-gui',
+        action='store_true',
         help='No GUI')
     parser.add_argument(
         '-p1', '--player1',
