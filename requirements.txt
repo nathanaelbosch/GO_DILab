@@ -1,8 +1,8 @@
 # keras works with tensorflow or theano as backend
-# on Windows tensorflow requires the 64-bit version of Python 3
-# tensorflow
-theano==0.9.0
-# in your ~.keras\keras.json file, set the "backend" to "theano"
+# on Windows tensorflow seems to require the 64-bit version of Python 3
+# theano==0.9.0 # in your ~.keras\keras.json file, set the "backend" to "theano"
+
+tensorflow
 keras
 numpy
 sgf
@@ -10,9 +10,8 @@ matplotlib
 pandas
 scikit-learn
 h5py
-
-# pygame
-# scipy
+pygame
+scipy
 
 # pyinstaller: if you want to build an executable from GTPengine (confirmed to work in Windows, other OSs untested)
 # if pyinstaller throws AttributeError: module 'enum' has no attribute 'IntFlag',
