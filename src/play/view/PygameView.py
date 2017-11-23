@@ -19,17 +19,18 @@ board_size = 400
 stone_radius = 20
 
 
-class PygameView():
+class PygameView:
 
-    def __init__(self, game):
-        self.game = game
+    def __init__(self, controller):
+        controller.view = self
+        self.controller = controller
+        self.game = controller.game
         self.running = False
         self.cell_size = board_size / (self.game.size - 1)
         self.buttons = []
         self.labels = []
 
-    def open(self, controller):
-        self.controller = controller
+    def open(self):
         pygame.init()
         self.running = True
         self.screen = pygame.display.set_mode(window_size)
@@ -49,8 +50,7 @@ class PygameView():
                 row = int(round((y - board_top_left_coord[1]) /
                                 self.cell_size))
                 if 0 <= col < self.game.size and 0 <= row < self.game.size:
-                    self.controller.current_player \
-                        .receive_next_move_from_gui(Move(col, row))
+                    self.controller.receive_move_from_gui(Move(col, row))
                 for btn in self.buttons:
                     btn.check_mouse_released()
             if event.type == pygame.QUIT:
@@ -62,15 +62,8 @@ class PygameView():
         pygame.quit()
         sys.exit(0)
 
-    def show_player_turn_start(self, name):
-        pass
-
-    def show_player_turn_end(self, name):
-        pass
-
     def send_pass_move(self):
-        self.controller.current_player.receive_next_move_from_gui(
-            Move(is_pass=True))
+        self.controller.receive_move_from_gui(Move(is_pass=True))
 
     def get_turn_label_text(self):
         return 'It\'s ' + self.controller.current_player.name + '\'s turn'
@@ -112,8 +105,8 @@ class PygameView():
         x = int(board_top_left_coord[0] + self.cell_size * indices[0])
         y = int(board_top_left_coord[1] + indices[1] * self.cell_size)
         # antialiasing via stackoverflow.com/a/26774279/2474159
-        pygame.gfxdraw.aacircle(self.screen, x, y, stone_radius, col)
-        pygame.gfxdraw.filled_circle(self.screen, x, y, stone_radius, col)
+        gfxdraw.aacircle(self.screen, x, y, stone_radius, col)
+        gfxdraw.filled_circle(self.screen, x, y, stone_radius, col)
 
     def show_error(self, msg):
         pass
