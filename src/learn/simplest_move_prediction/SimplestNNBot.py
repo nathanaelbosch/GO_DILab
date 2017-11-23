@@ -1,10 +1,6 @@
-import keras
 import numpy as np
-from os.path import abspath, dirname
-
-import sys
-
 import os
+from os.path import abspath, dirname
 
 from src.play.model.Move import Move
 
@@ -12,13 +8,15 @@ from src.play.model.Move import Move
 class SimplestNNBot:
 
     def __init__(self):
-        project_dir = dirname(dirname(dirname(dirname(dirname(abspath(__file__))))))
-        # try to make this path relative instead of absolute to project_dir,
-        # otherwise it might make troubles when packing it into an executable TODO
-        filepath = os.path.join(project_dir, 'src\learn\simplest_move_prediction\model.h5')
-        self.model = keras.models.load_model(filepath)
+        self.model = None
 
     def genmove(self, color, game) -> Move:
+        if self.model is None:
+            # run.py and GTPengine.py import this bot, this calls __init__ even so the bot might not be used.
+            # Importing keras and loading the model creates log-entries in the console that we don't need to see
+            # when this bot is not used. Therefore initialize upon first genmove request, not in __init__
+            import keras
+            self.model = keras.models.load_model(os.path.join(dirname(abspath(__file__)), 'model.h5'))
         # We're still interested in the playable locations
         playable_locations = game.get_playable_locations(color)
 
