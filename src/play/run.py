@@ -14,10 +14,12 @@ from src.learn.dev_nath.SimplestNNBot import SimplestNNBot
 
 
 def main():
+    # if you don't want logfiles: change the logging-level to something more critical than INFO (e.g. WARNING)
+
     GTPcontroller(
         RandomBot.__name__,
         RandomGroupingBot.__name__,
-        logging.INFO,  # anything more critical than INFO will cause no logfiles to be written
+        logging.INFO,
     ).run()
 
 
