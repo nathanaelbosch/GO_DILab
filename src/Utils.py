@@ -25,7 +25,9 @@ def setup_logger(name, log_file, level):
 
 
 def get_unique_file_logger(cls, level=logging.INFO):
-    rand_str = ''.join(random.choices(string.ascii_lowercase, k=5))
+    rand_str = ''
+    for i in range(0, 5):
+        rand_str += random.choice(string.ascii_lowercase)
     log_file = cls.__class__.__name__ + '_' + strftime('%d-%m-%Y_%H-%M-%S') + '_' + rand_str + '.log'
     if running_run_script():  # else is GTPengine or executable, in that case we can't expect a folder
         project_dir = dirname(dirname(abspath(__file__)))

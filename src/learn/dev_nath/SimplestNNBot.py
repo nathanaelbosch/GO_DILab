@@ -12,17 +12,14 @@ from src.play.model.Move import Move
 class SimplestNNBot:
 
     def __init__(self):
-        project_dir = dirname(dirname(dirname(dirname(dirname(
-            abspath(__file__))))))
-        # try to make this path relative instead of absolute to project_dir,
-        # otherwise it might make troubles when packing it into
-        # an executable TODO
-        # filepath = os.path.join(
-            # project_dir, 'src/learn/dev_nath/model.h5')
-        # self.model = keras.models.load_model(filepath)
+        project_dir = dirname(dirname(dirname(dirname(
+            abspath(__file__)))))
         import keras
-        self.model = keras.models.load_model('src/learn/dev_nath/model.h5')
-        with open('src/learn/dev_nath/mean_var.txt', 'r') as f:
+        model_path = os.path.join(
+            project_dir, 'src/learn/dev_nath/model.h5')
+        self.model = keras.models.load_model(model_path)
+        mean_var_path = os.path.join(project_dir, 'src/learn/dev_nath/mean_var.txt')
+        with open(mean_var_path, 'r') as f:
             lines = f.readlines()
         self.mean = float(lines[0])
         self.std = float(lines[1])
