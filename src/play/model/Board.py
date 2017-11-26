@@ -83,6 +83,20 @@ class Board(np.matrix):
         #     return True
         # return False
 
+    # currently only used in Ben's NN-dev
+    def place_stone_and_capture_if_applicable(self, loc, player_val, opponent_val, empty_val):
+        self[loc] = player_val
+        # remove stones if this move captured them
+        neighbors = self.get_adjacent_coords(loc)
+        groups = []
+        for n in neighbors:
+            if self[n] == opponent_val:
+                groups.append(self.get_chain(n))
+        for g in groups:
+            if self.check_dead(g):
+                for c in g:
+                    self[c] = empty_val
+
     def is_on_board(self, col, row):
         return 0 <= col < self.shape[0] and 0 <= row < self.shape[1]
 
@@ -164,9 +178,16 @@ class Board(np.matrix):
 
     ###########################################################################
     # Not used yet, but more relevant to `Board` than to `Game`
-    def _matrix2csv(self, matrix):
-        """Transform a matrix to a string, using ';' as the separator"""
-        ls = matrix.tolist()
+    def matrix2csv(self):
+        """
+        Transform a matrix to a string, using ';' as the separator
+        Goes through the matrix row by row, meaning if the matrix is:
+            AA
+            BB
+        its serialization will look like this:
+            AABB
+        """
+        ls = self.tolist()
         ls = [str(entry) for row in ls for entry in row]
         s = ';'.join(ls)
         return s
@@ -178,7 +199,7 @@ class Board(np.matrix):
         all boards that were part of a game, so that we can
         use those to train a network on.
         """
-        string = self._matrix2csv(self.board)
+        string = self.matrix2csv(self.board)
         with open(file, mode) as f:
             f.write(string)
             f.write('\n')

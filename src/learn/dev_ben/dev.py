@@ -1,95 +1,50 @@
 import os
 import sgf
+from time import strftime
 from os.path import dirname, abspath
-from keras.models import Sequential
-from keras.layers import Dense
-import numpy as np
+from src.play.model.Board import Board
 
+size = 9
+EMPTY_val = 0  # 0.45
+BLACK_val = 1  # -1.35
+WHITE_val = -1  # 1.05
 
 data_dir = os.path.join(dirname(dirname(dirname(dirname(abspath(__file__))))), 'data')
-path = os.path.join(data_dir, 'some_game.sgf')
+paths = [
+    os.path.join(data_dir, 'game_57083.sgf'),
+    os.path.join(data_dir, 'game_100672.sgf'),
+]
 
-sgf_file = open(path, 'r')
-collection = sgf.parse(sgf_file.read())
-game_tree = collection.children[0]
+training_data_dir = os.path.join(data_dir, 'training_data')
+if not os.path.exists(training_data_dir):  # create the folder if it does not exist yet
+    os.makedirs(training_data_dir)
+training_data_file = open(
+    os.path.join(training_data_dir, str(len(paths)) + '_games_' + strftime('%d-%m-%Y_%H-%M-%S') + '.csv'), 'w')
 
-meta = game_tree.nodes[0].properties
-moves = game_tree.nodes[1:]
+for path in paths:
+    sgf_file = open(path, 'r')
+    training_data_file.write(os.path.basename(path) + '\n')
+    collection = sgf.parse(sgf_file.read())
+    game_tree = collection.children[0]
+    meta = game_tree.nodes[0].properties
+    moves = game_tree.nodes[1:]
+    # see SGF properties here: www.red-bean.com/sgf/properties.html
 
-# see SGF properties here: www.red-bean.com/sgf/properties.html
+    board = Board([[EMPTY_val] * size] * size)
+    training_data_file.write(board.matrix2csv() + '\n')
 
-cols = rows = 9
+    for move in moves:
+        keys = move.properties.keys()
+        if 'B' not in keys and 'W' not in keys:  # don't know how to deal with special stuff yet
+            continue
+        # can't rely on the order in keys(), apparently must extract it like this
+        player_color = 'B' if 'B' in move.properties.keys() else 'W'
+        sgf_move = move.properties[player_color][0]
+        if len(sgf_move) is 2:  # otherwise its a pass
+            loc = ord(sgf_move[1]) - ord('a'), ord(sgf_move[0]) - ord('a')
+            player_val = BLACK_val if player_color == 'B' else WHITE_val
+            opponent_val = WHITE_val if player_color == 'B' else BLACK_val
+            board.place_stone_and_capture_if_applicable(loc, player_val, opponent_val, EMPTY_val)
+        training_data_file.write(board.matrix2csv() + '\n')
 
-
-def print_matrix(m, gtp_format=False):
-    matrix_str = ''
-    for row in range(0, rows):
-        row_str = ''
-        for col in range(0, cols):
-            row_str += str(m[col][row] if gtp_format else m[row][col]) + ' '
-        matrix_str += row_str + '\n'
-    print(matrix_str)
-
-
-def serialize_matrix(m):
-    entries = []
-    for row in range(0, rows):
-        for col in range(0, cols):
-            entries.append(m[row][col])
-    return entries
-
-
-EMPTY = 0.45
-BLACK = -1.35
-WHITE = 1.05
-matrix = [[EMPTY for x in range(cols)] for y in range(rows)]
-out = [[0 for x in range(cols)] for y in range(rows)]
-
-for i in range(0, 10):
-    move = moves[i]
-    # can't rely on the order in keys(), apparently must extract it like this:
-    player_color = 'B' if 'B' in move.properties.keys() else 'W'
-    sgf_move = move.properties[player_color][0]
-    print(sgf_move, i)
-
-    if len(sgf_move) == 2:
-        # .sgf coords are col/row, we want row/col
-        col = ord(sgf_move[1]) - ord('a')
-        row = ord(sgf_move[0]) - ord('a')
-        if i == 9:
-            out[row][col] = 1
-            break
-        matrix[row][col] = BLACK if player_color == 'B' else WHITE
-    else:
-        # is pass, no idea yet what to do with it
-        pass
-
-
-print_matrix(matrix, True)
-inp = serialize_matrix(matrix)
-print(inp)
-print_matrix(out, True)
-outp = serialize_matrix(out)
-print(outp)
-
-
-X = np.array([
-    inp,
-])
-Y = np.array([
-    outp,
-])
-
-# set up network topology
-model = Sequential()
-dim = rows * cols
-# first arg of Dense is # of neurons
-model.add(Dense(162, input_dim=dim, activation='relu'))
-# last layer = output layer, must have 81 again
-model.add(Dense(dim, activation='softmax'))
-model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
-model.fit(X, Y, epochs=1)
-scores = model.evaluate(X, Y)
-print("\n%s: %.2f%%" % (model.metrics_names[1], scores[1] * 100))
-
-print(model.predict(X))
+training_data_file.close()
