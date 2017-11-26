@@ -1,6 +1,5 @@
 import os
 import sgf
-from time import strftime
 from os.path import dirname, abspath
 from src.play.model.Board import Board
 
@@ -13,17 +12,16 @@ data_dir = os.path.join(dirname(dirname(dirname(dirname(abspath(__file__))))), '
 sgf_files = [
     os.path.join(data_dir, 'game_57083.sgf'),
     os.path.join(data_dir, 'game_100672.sgf'),
+    os.path.join(data_dir, 'some_game.sgf'),
 ]
 
 training_data_dir = os.path.join(data_dir, 'training_data')
 if not os.path.exists(training_data_dir):  # create the folder if it does not exist yet
     os.makedirs(training_data_dir)
-training_data_file = open(
-    os.path.join(training_data_dir, str(len(sgf_files)) + '_games_' + strftime('%d-%m-%Y_%H-%M-%S') + '.csv'), 'w')
 
 for path in sgf_files:
     sgf_file = open(path, 'r')
-    training_data_file.write(os.path.basename(path) + '\n')
+    training_data_file = open(os.path.join(training_data_dir, os.path.basename(path) + '.csv'), 'w')
     collection = sgf.parse(sgf_file.read())
     game_tree = collection.children[0]
     moves = game_tree.nodes[1:]
@@ -46,5 +44,3 @@ for path in sgf_files:
             opponent_val = WHITE_val if player_color == 'B' else BLACK_val
             board.place_stone_and_capture_if_applicable(loc, player_val, opponent_val, EMPTY_val)
         training_data_file.write(board.matrix2csv() + '\n')
-
-training_data_file.close()
