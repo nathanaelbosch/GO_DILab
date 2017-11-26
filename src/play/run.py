@@ -32,6 +32,9 @@ def parse_args():
         help='Player 2 - white - options: "human", "random", "random_grouping" or "dev_nn_nath"',
         default='random')
     parser.add_argument(
+        '-r', '--replay',
+        help='replays the game in .sgf format that is being passed as path')
+    parser.add_argument(
         '-s', '--sleep',
         help='time in seconds to sleep at the end of each turn',
         default='0.5')
@@ -40,6 +43,13 @@ def parse_args():
 
 def main():
     args = parse_args()
+
+    if args.replay:
+        sgf_path = args.replay
+        if not os.path.isfile(sgf_path):
+            print('invalid path to .sgf file: ' + sgf_path)
+            sys.exit(1)
+        # TODO
 
     if args.no_gui:
         if args.player1 == 'human':
