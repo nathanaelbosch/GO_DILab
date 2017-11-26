@@ -9,14 +9,13 @@ from src.play.model.Move import Move
 
 from src.play.controller.GTPengine import GTPengine
 
-END_OF_TURN_SLEEP_TIME = 0
-
 
 class GTPcontroller(threading.Thread):
 
-    def __init__(self, player1type, player2type, logging_level):
+    def __init__(self, player1type, player2type, logging_level, end_of_turn_sleep_time):
         threading.Thread.__init__(self)
         self.logger = Utils.get_unique_file_logger(self, logging_level)
+        self.end_of_turn_sleep_time = end_of_turn_sleep_time
         self.game = Game()
         self.view = None
         self.player1 = Player('b', logging_level)
@@ -63,7 +62,7 @@ class GTPcontroller(threading.Thread):
             self.game.play(Move().from_gtp(move, self.game.size), self.current_player.color)
             print('\n' + self.game.__str__())
 
-            time.sleep(END_OF_TURN_SLEEP_TIME)
+            time.sleep(self.end_of_turn_sleep_time)
 
             # swap players for next turn
             if self.current_player == self.player1:

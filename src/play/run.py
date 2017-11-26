@@ -1,5 +1,6 @@
 import logging
 import sys
+import os.path
 from os.path import dirname, abspath
 import argparse
 
@@ -30,11 +31,25 @@ def parse_args():
         '-p2', '--player2',
         help='Player 2 - white - options: "human", "random", "random_grouping" or "dev_nn_nath"',
         default='random')
+    parser.add_argument(
+        '-r', '--replay',
+        help='replays the game in .sgf format that is being passed as path')
+    parser.add_argument(
+        '-s', '--sleep',
+        help='time in seconds to sleep at the end of each turn',
+        default='0.5')
     return parser.parse_args()
 
 
 def main():
     args = parse_args()
+
+    if args.replay:
+        sgf_path = args.replay
+        if not os.path.isfile(sgf_path):
+            print('invalid path to .sgf file: ' + sgf_path)
+            sys.exit(1)
+        # TODO
 
     if args.no_gui:
         if args.player1 == 'human':
@@ -53,7 +68,7 @@ def main():
     player2type = player_types[args.player2].__name__
 
     # if you don't want logfiles: change the logging-level to something more critical than INFO (e.g. WARNING)
-    controller = GTPcontroller(player1type, player2type, logging.INFO)
+    controller = GTPcontroller(player1type, player2type, logging.INFO, float(args.sleep))
     controller.start()
     if not args.no_gui:
         PygameView(controller).open()
