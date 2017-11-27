@@ -15,7 +15,7 @@ X = []
 Y = []
 
 for csv_file in os.listdir(training_data_dir):
-    if csv_file != 'game_100672.sgf.csv': continue  # dev restriction
+    if csv_file != 'some_game.sgf.csv': continue  # dev restriction
 
     data = np.genfromtxt(os.path.join(training_data_dir, csv_file), dtype=float, delimiter=';')
 
