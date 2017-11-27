@@ -12,36 +12,35 @@ from keras.layers import Dense
 data_dir = os.path.join(dirname(dirname(dirname(dirname(abspath(__file__))))), 'data')
 training_data_dir = os.path.join(data_dir, 'training_data')
 
-X = np.array([])
-Y = np.array([])
-
+X = []
+Y = []
 
 for csv_file in os.listdir(training_data_dir):
     if csv_file != 'game_100672.sgf.csv': continue  # dev restriction
 
     data = np.genfromtxt(os.path.join(training_data_dir, csv_file), dtype=float, delimiter=';')
 
-    # TODO
+    for line in data:
+        x = line[:-2]
+        y = [0 for _i in range(82)]  # pos 0 is PASS
+        if line[81] is -1:  # = PASS
+            y[0] = 1
+        else:
+            y[int(line[81]) + 1] = 1
+        X.append(x)
+        Y.append(y)
 
+X = np.array(X)
+Y = np.array(Y)
 
-# X = np.array([
-#     inp,
-# ])
-# Y = np.array([
-#     outp,
-# ])
-#
-#
-# # set up network topology
-# model = Sequential()
-# dim = rows * cols
-# # first arg of Dense is # of neurons
-# model.add(Dense(162, input_dim=dim, activation='relu'))
-# # last layer = output layer, must have 81 again
-# model.add(Dense(dim, activation='softmax'))
-# model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
-# model.fit(X, Y, epochs=1)
-# scores = model.evaluate(X, Y)
-# print("\n%s: %.2f%%" % (model.metrics_names[1], scores[1] * 100))
-#
-# print(model.predict(X))
+# set up network topology
+model = Sequential()
+# first arg of Dense is # of neurons
+model.add(Dense(162, input_dim=81, activation='relu'))
+model.add(Dense(82, activation='softmax'))
+model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
+model.fit(X, Y, epochs=1)
+scores = model.evaluate(X, Y)
+print("\n%s: %.2f%%" % (model.metrics_names[1], scores[1] * 100))
+
+print(model.predict(X))
