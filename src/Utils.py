@@ -1,3 +1,4 @@
+import importlib
 import logging
 import random
 import string
@@ -42,3 +43,11 @@ def get_unique_file_logger(cls, level=logging.INFO):
 # better name for this method?
 def running_run_script():
     return str(sys.argv[0]).endswith('run.py')
+
+
+def set_keras_backend(backend):
+    from keras import backend as K
+    if K.backend() != backend:
+        os.environ['KERAS_BACKEND'] = backend
+        importlib.reload(K)
+        assert K.backend() == backend

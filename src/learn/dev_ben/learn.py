@@ -2,8 +2,11 @@ import os
 import numpy as np
 from os.path import dirname, abspath
 
-# from keras.models import Sequential
-# from keras.layers import Dense
+from src import Utils
+Utils.set_keras_backend("tensorflow")
+
+from keras.models import Sequential
+from keras.layers import Dense
 
 
 data_dir = os.path.join(dirname(dirname(dirname(dirname(abspath(__file__))))), 'data')

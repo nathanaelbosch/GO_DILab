@@ -1,5 +1,6 @@
 import numpy as np
 from os.path import abspath, dirname
+from src import Utils
 from src.play.model.Move import Move
 from src.play.model.Board import WHITE, BLACK, EMPTY
 import sys
@@ -14,6 +15,7 @@ class SimplestNNBot:
     def __init__(self):
         project_dir = dirname(dirname(dirname(dirname(
             abspath(__file__)))))
+        Utils.set_keras_backend("theano")
         import keras
         model_path = os.path.join(
             project_dir, 'src/learn/dev_nath/model.h5')
