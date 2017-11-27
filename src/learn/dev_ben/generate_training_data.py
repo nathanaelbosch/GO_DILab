@@ -10,8 +10,8 @@ WHITE_val = 1.05
 
 data_dir = os.path.join(dirname(dirname(dirname(dirname(abspath(__file__))))), 'data')
 sgf_files = [
-    os.path.join(data_dir, 'game_57083.sgf'),
-    os.path.join(data_dir, 'game_100672.sgf'),
+    # os.path.join(data_dir, 'game_57083.sgf'),
+    # os.path.join(data_dir, 'game_100672.sgf'),
     os.path.join(data_dir, 'some_game.sgf'),
 ]
 
@@ -50,10 +50,7 @@ for path in sgf_files:
     board = Board([[EMPTY_val] * 9] * 9)
     lines = []
 
-    # for i in range(2, 3):
     for move in moves:
-        # 8 symmetries (Dihedral group D4)
-
         original = board.copy()
 
         keys = move.properties.keys()
@@ -75,6 +72,8 @@ for path in sgf_files:
         # the last column is just to identify the transformation (might be relevant for debugging)
         # since learn parses the .csv as float arrays, it needs to be number as identifier
 
+        # 8 symmetries (Dihedral group D4)
+# ----- 1
         if loc is not None:
             # from matrix coords to origin at 4/4
             row = loc[0]
@@ -84,7 +83,7 @@ for path in sgf_files:
             loc_str = str(loc[0] * 9 + loc[1])
         lines.append(serialize_matrix(original) + ';' + loc_str + ';360')  # original
         lines.append(serialize_matrix(original, True) + ';' + loc_str + ';-360')  # original inv
-
+# ----- 2
         rot90 = np.rot90(original)
         if loc is not None:  # 90° means x/y becomes -y/x
             x_rot = -y
@@ -95,7 +94,7 @@ for path in sgf_files:
             loc_str = str(row_transf * 9 + col_transf)
         lines.append(serialize_matrix(rot90) + ';' + loc_str + ';90')  # 90 ccw
         lines.append(serialize_matrix(rot90, True) + ';' + loc_str + ';-90')  # 90 ccw inv
-
+# ----- 3
         rot180 = np.rot90(rot90)
         if loc is not None:  # 180° means x/y becomes -y/x
             row_transf = 8 - row
@@ -103,7 +102,7 @@ for path in sgf_files:
             loc_str = str(row_transf * 9 + col_transf)
         lines.append(serialize_matrix(rot180) + ';' + loc_str + ';180')  # 180
         lines.append(serialize_matrix(rot180, True) + ';' + loc_str + ';-180')  # 180 inv
-
+# ----- 4
         rot270 = np.rot90(rot180)
         if loc is not None:   # 270° means x/y becomes y/-x
             x_rot = y
@@ -113,9 +112,9 @@ for path in sgf_files:
             loc_str = str(row_transf * 9 + col_transf)
         lines.append(serialize_matrix(rot270) + ';' + loc_str + ';270')  # 270 ccw
         lines.append(serialize_matrix(rot270, True) + ';' + loc_str + ';-270')  # 270 ccw inv
-
+# ----- 5
         hflip = np.fliplr(original)
-        if loc is not None:  # invert col
+        if loc is not None:  # flip horizontally: flip the column
             row = row
             col = 8 - col
             y = 4 - row
@@ -123,7 +122,7 @@ for path in sgf_files:
             loc_str = str(row * 9 + col)
         lines.append(serialize_matrix(hflip) + ';' + loc_str + ';360.5')  # hflip
         lines.append(serialize_matrix(hflip, True) + ';' + loc_str + ';-360.5')  # hflip inv
-
+# ----- 6
         hflip_rot90 = np.rot90(hflip)
         if loc is not None:
             x_rot = -y
@@ -133,7 +132,7 @@ for path in sgf_files:
             loc_str = str(row_transf * 9 + col_transf)
         lines.append(serialize_matrix(hflip_rot90) + ';' + loc_str + ';90.5')  # hflip 90 ccw
         lines.append(serialize_matrix(hflip_rot90, True) + ';' + loc_str + ';-90.5')  # hflip 90 ccw inv
-
+# ----- 7
         hflip_rot180 = np.rot90(hflip_rot90)
         if loc is not None:
             row_transf = 8 - row
@@ -141,7 +140,7 @@ for path in sgf_files:
             loc_str = str(row_transf * 9 + col_transf)
         lines.append(serialize_matrix(hflip_rot180) + ';' + loc_str + ';180.5')  # hflip 180
         lines.append(serialize_matrix(hflip_rot180, True) + ';' + loc_str + ';-180.5')  # hflip 180 inv
-
+# ----- 8
         hflip_rot270 = np.rot90(hflip_rot180)
         if loc is not None:
             x_rot = y
