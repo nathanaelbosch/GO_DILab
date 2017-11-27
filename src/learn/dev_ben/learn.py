@@ -8,9 +8,8 @@ Utils.set_keras_backend("tensorflow")
 from keras.models import Sequential
 from keras.layers import Dense
 
-
-data_dir = os.path.join(dirname(dirname(dirname(dirname(abspath(__file__))))), 'data')
-training_data_dir = os.path.join(data_dir, 'training_data')
+project_dir = dirname(dirname(dirname(dirname(abspath(__file__)))))
+training_data_dir = os.path.join(project_dir, 'data/training_data')
 
 X = []
 Y = []
@@ -22,11 +21,12 @@ for csv_file in os.listdir(training_data_dir):
 
     for line in data:
         x = line[:-2]
-        y = [0 for _i in range(82)]  # pos 0 is PASS
-        if line[81] is -1:  # = PASS
+        y = [0 for _i in range(82)]  # pos 0 is PASS, so we need 1+81
+        move_idx = int(line[81])
+        if move_idx is -1:  # = PASS
             y[0] = 1
         else:
-            y[int(line[81]) + 1] = 1
+            y[move_idx + 1] = 1
         X.append(x)
         Y.append(y)
 
@@ -46,4 +46,4 @@ model.fit(X, Y, epochs=1)
 scores = model.evaluate(X, Y)
 print("\n%s: %.2f%%" % (model.metrics_names[1], scores[1] * 100))
 
-print(model.predict(X))
+model.save(os.path.join(project_dir, 'src/learn/dev_ben/model.h5'))
