@@ -30,6 +30,9 @@ for csv_file in os.listdir(training_data_dir):
         X.append(x)
         Y.append(y)
 
+# it might be (much) better to append to a numpy array right away?
+# np.concatenate would do the job, but seems very memory costly to reassign it in a loop?
+# a = np.array([[1,2,3]]) b = np.array([[4,5,6]]) c = np.concatenate((a,b))
 X = np.array(X)
 Y = np.array(Y)
 
