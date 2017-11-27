@@ -178,16 +178,9 @@ class Board(np.matrix):
 
     ###########################################################################
     # Not used yet, but more relevant to `Board` than to `Game`
-    def matrix2csv(self):
-        """
-        Transform a matrix to a string, using ';' as the separator
-        Goes through the matrix row by row, meaning if the matrix is:
-            AA
-            BB
-        its serialization will look like this:
-            AABB
-        """
-        ls = self.tolist()
+    def _matrix2csv(self, matrix):
+        """Transform a matrix to a string, using ';' as the separator"""
+        ls = matrix.tolist()
         ls = [str(entry) for row in ls for entry in row]
         s = ';'.join(ls)
         return s
@@ -199,7 +192,7 @@ class Board(np.matrix):
         all boards that were part of a game, so that we can
         use those to train a network on.
         """
-        string = self.matrix2csv(self.board)
+        string = self._matrix2csv(self.board)
         with open(file, mode) as f:
             f.write(string)
             f.write('\n')
