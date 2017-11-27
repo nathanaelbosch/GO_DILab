@@ -4,9 +4,9 @@ from os.path import dirname, abspath
 import numpy as np
 from src.play.model.Board import Board
 
-EMPTY_val = 'E'  # 0.45
-BLACK_val = 'B'  # -1.35
-WHITE_val = 'W'  # 1.05
+EMPTY_val = 0.45
+BLACK_val = -1.35
+WHITE_val = 1.05
 
 data_dir = os.path.join(dirname(dirname(dirname(dirname(abspath(__file__))))), 'data')
 sgf_files = [
@@ -20,16 +20,21 @@ if not os.path.exists(training_data_dir):  # create the folder if it does not ex
     os.makedirs(training_data_dir)
 
 
+def invert_entry(entry):
+    if entry == EMPTY_val:
+        return entry
+    if entry == BLACK_val:
+        return WHITE_val
+    if entry == WHITE_val:
+        return BLACK_val
+
+
 def serialize_matrix(m, invert_color=False):  # Board.matrix2csv(), but with inversion added
     ls = m.tolist()
-    ls = [str(entry) for _row in ls for entry in _row]
-    if not invert_color:
-        return ';'.join(ls)
-    for k, val in enumerate(ls):
-        if val is BLACK_val:
-            ls[k] = WHITE_val
-        elif val is WHITE_val:
-            ls[k] = BLACK_val
+    if invert_color:
+        ls = [str(invert_entry(entry)) for _row in ls for entry in _row]
+    else:
+        ls = [str(entry) for _row in ls for entry in _row]
     return ';'.join(ls)
 
 
