@@ -29,8 +29,8 @@ class SimplestNNBot:
     def board_to_input(self, color, board):
         b = board.astype(np.float64)
 
-        print(b.dtype)
-        print(type(self.mean))
+        #print(b.dtype)
+        #print(type(self.mean))
         b -= self.mean
         b /= self.std
         if color == 'b':
@@ -46,13 +46,13 @@ class SimplestNNBot:
             1, my_board.shape[0]*my_board.shape[1])
         other_board_vect = other_board.reshape(
             1, other_board.shape[0]*other_board.shape[1])
-        print(my_board_vect.shape)
-        print(other_board_vect.shape)
+        #print(my_board_vect.shape)
+        #print(other_board_vect.shape)
         a = np.append([my_board_vect, other_board_vect], [])
         a = a.reshape(
             (1, my_board_vect.shape[1]+other_board_vect.shape[1]))
-        print(a.shape)
-        print(type(a))
+        #print(a.shape)
+        #print(type(a))
         return a
 
     def softmax(self, x):
@@ -83,7 +83,7 @@ class SimplestNNBot:
         # print([i for row in potential_moves for i in row])
 
         potential_moves = self.softmax(potential_moves)
-        print(potential_moves)
+        #print(potential_moves)
 
         row, col = np.unravel_index(
             potential_moves.argmax(),
