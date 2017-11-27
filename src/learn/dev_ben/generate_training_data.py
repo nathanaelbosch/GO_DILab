@@ -67,6 +67,9 @@ for path in sgf_files:
 
         loc_str = 'PASS'
 
+        # the last column is just to identify the transformation (might be relevant for debugging)
+        # since learn parses the .csv as float arrays, it needs to be number as identifier
+
         if loc is not None:
             # from matrix coords to origin at 4/4
             row = loc[0]
@@ -74,8 +77,8 @@ for path in sgf_files:
             y = 4 - row
             x = col - 4
             loc_str = str(loc[0] * 9 + loc[1])
-        lines.append(serialize_matrix(original) + ';' + loc_str + ';original')
-        lines.append(serialize_matrix(original, True) + ';' + loc_str + ';original_inv')
+        lines.append(serialize_matrix(original) + ';' + loc_str + ';360')  # original
+        lines.append(serialize_matrix(original, True) + ';' + loc_str + ';-360')  # original inv
 
         rot90 = np.rot90(original)
         if loc is not None:  # 90° means x/y becomes -y/x
@@ -85,16 +88,16 @@ for path in sgf_files:
             row_transf = 4 - y_rot
             col_transf = x_rot + 4
             loc_str = str(row_transf * 9 + col_transf)
-        lines.append(serialize_matrix(rot90) + ';' + loc_str + ';90ccw')
-        lines.append(serialize_matrix(rot90, True) + ';' + loc_str + ';90ccw_inv')
+        lines.append(serialize_matrix(rot90) + ';' + loc_str + ';90')  # 90 ccw
+        lines.append(serialize_matrix(rot90, True) + ';' + loc_str + ';-90')  # 90 ccw inv
 
         rot180 = np.rot90(rot90)
         if loc is not None:  # 180° means x/y becomes -y/x
             row_transf = 8 - row
             col_transf = 8 - col
             loc_str = str(row_transf * 9 + col_transf)
-        lines.append(serialize_matrix(rot180) + ';' + loc_str + ';180')
-        lines.append(serialize_matrix(rot180, True) + ';' + loc_str + ';180_inv')
+        lines.append(serialize_matrix(rot180) + ';' + loc_str + ';180')  # 180
+        lines.append(serialize_matrix(rot180, True) + ';' + loc_str + ';-180')  # 180 inv
 
         rot270 = np.rot90(rot180)
         if loc is not None:   # 270° means x/y becomes y/-x
@@ -103,8 +106,8 @@ for path in sgf_files:
             row_transf = 4 - y_rot
             col_transf = x_rot + 4
             loc_str = str(row_transf * 9 + col_transf)
-        lines.append(serialize_matrix(rot270) + ';' + loc_str + ';270ccw')
-        lines.append(serialize_matrix(rot270, True) + ';' + loc_str + ';270ccw_inv')
+        lines.append(serialize_matrix(rot270) + ';' + loc_str + ';270')  # 270 ccw
+        lines.append(serialize_matrix(rot270, True) + ';' + loc_str + ';-270')  # 270 ccw inv
 
         hflip = np.fliplr(original)
         if loc is not None:  # invert col
@@ -113,8 +116,8 @@ for path in sgf_files:
             y = 4 - row
             x = col - 4
             loc_str = str(row * 9 + col)
-        lines.append(serialize_matrix(hflip) + ';' + loc_str + ';hflip')
-        lines.append(serialize_matrix(hflip, True) + ';' + loc_str + ';hflip_inv')
+        lines.append(serialize_matrix(hflip) + ';' + loc_str + ';360.5')  # hflip
+        lines.append(serialize_matrix(hflip, True) + ';' + loc_str + ';-360.5')  # hflip inv
 
         hflip_rot90 = np.rot90(hflip)
         if loc is not None:
@@ -123,16 +126,16 @@ for path in sgf_files:
             row_transf = 4 - y_rot
             col_transf = x_rot + 4
             loc_str = str(row_transf * 9 + col_transf)
-        lines.append(serialize_matrix(hflip_rot90) + ';' + loc_str + ';hflip90ccw')
-        lines.append(serialize_matrix(hflip_rot90, True) + ';' + loc_str + ';hflip90ccw_inv')
+        lines.append(serialize_matrix(hflip_rot90) + ';' + loc_str + ';90.5')  # hflip 90 ccw
+        lines.append(serialize_matrix(hflip_rot90, True) + ';' + loc_str + ';-90.5')  # hflip 90 ccw inv
 
         hflip_rot180 = np.rot90(hflip_rot90)
         if loc is not None:
             row_transf = 8 - row
             col_transf = 8 - col
             loc_str = str(row_transf * 9 + col_transf)
-        lines.append(serialize_matrix(hflip_rot180) + ';' + loc_str + ';hflip180')
-        lines.append(serialize_matrix(hflip_rot180, True) + ';' + loc_str + ';hflip180_inv')
+        lines.append(serialize_matrix(hflip_rot180) + ';' + loc_str + ';180.5')  # hflip 180
+        lines.append(serialize_matrix(hflip_rot180, True) + ';' + loc_str + ';-180.5')  # hflip 180 inv
 
         hflip_rot270 = np.rot90(hflip_rot180)
         if loc is not None:
@@ -141,8 +144,8 @@ for path in sgf_files:
             row_transf = 4 - y_rot
             col_transf = x_rot + 4
             loc_str = str(row_transf * 9 + col_transf)
-        lines.append(serialize_matrix(hflip_rot270) + ';' + loc_str + ';hflip270ccw')
-        lines.append(serialize_matrix(hflip_rot270, True) + ';' + loc_str + ';hflip270ccw_inv')
+        lines.append(serialize_matrix(hflip_rot270) + ';' + loc_str + ';270.5')  # hflip 270 ccw
+        lines.append(serialize_matrix(hflip_rot270, True) + ';' + loc_str + ';-270.5')  # hflip 270 ccw inv
 
         lines.append('')
 
