@@ -252,6 +252,22 @@ class Game:
                 pass
         return valid_moves
 
+    def get_invalid_locations(self, color) -> []:
+        invalid_moves = []
+        for location in np.argwhere(self.board == BLACK):
+            invalid_moves.append(Move.from_matrix_location(location))
+        for location in np.argwhere(self.board == WHITE):
+            invalid_moves.append(Move.from_matrix_location(location))
+        empty_locations = np.argwhere(self.board == EMPTY)
+        empty_locations = [(l[0], l[1]) for l in empty_locations]
+        for location in empty_locations:
+            move = Move.from_matrix_location(location)
+            try:
+                self.play(move, color, testing=True)
+            except InvalidMove_Error as e:
+                invalid_moves.append(move)
+        return invalid_moves
+
 
 if __name__ == '__main__':
     import doctest
