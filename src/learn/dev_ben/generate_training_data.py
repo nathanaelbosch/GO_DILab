@@ -70,7 +70,7 @@ for path in sgf_files:
             opponent_val = WHITE_val if player_color == 'B' else BLACK_val
             board.place_stone_and_capture_if_applicable(loc, player_val, opponent_val, EMPTY_val)
 
-        loc_str = 'PASS'
+        loc_str = '-1'
 
         # the last column is just to identify the transformation (might be relevant for debugging)
         # since learn parses the .csv as float arrays, it needs to be number as identifier
