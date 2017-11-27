@@ -12,6 +12,7 @@ from src.play.controller.bots.HumanGui import HumanGui
 from src.play.controller.bots.RandomBot import RandomBot
 from src.play.controller.bots.RandomGroupingBot import RandomGroupingBot
 from src.learn.dev_nath.SimplestNNBot import SimplestNNBot
+from src.learn.dev_ben.NNBot import NNBot
 
 
 class GTPengine:
@@ -53,15 +54,16 @@ class GTPengine:
             RandomBot,
             RandomGroupingBot,
             SimplestNNBot,
+            NNBot
         ]
         for player_type in player_types_arr:
-            self.player_types[player_type.__name__] = player_type
+            self.player_types[player_type.__name__.lower()] = player_type
 
     def set_player_type(self, args):
         if len(args) == 0:
             self.send_failure_response('no player type passed')
             return
-        player_type = args[0]
+        player_type = args[0].lower()
         if player_type not in self.player_types:
             self.send_failure_response('player type ' + player_type + ' unknown')
             return
@@ -197,8 +199,11 @@ class GTPengine:
             self.send_failure_response('invalid color ' + args[0])
             return
         move = self.bot.genmove(color, self.game)
-        self.game.play(move, color)
-        self.send_success_response(move.to_gtp(self.game.size))
+        try:
+            self.game.play(move, color)
+            self.send_success_response(move.to_gtp(self.game.size))
+        except InvalidMove_Error as e:
+            self.send_failure_response('Sorry, I generated an invalid move: ' + str(e))
 
     def showboard(self, args):
         print(self.game.board.__str__())

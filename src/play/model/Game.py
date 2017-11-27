@@ -120,7 +120,7 @@ class Game:
         if checking:
             if test_board[loc] != EMPTY:
                 raise InvalidMove_Error(
-                    'There is already a stone at that location')
+                    'There is already a stone at location ' + move.to_gtp(self.size))
         # "Play the stone" at the location
         test_board[loc] = color
 
@@ -251,6 +251,22 @@ class Game:
             except InvalidMove_Error as e:
                 pass
         return valid_moves
+
+    def get_invalid_locations(self, color) -> []:
+        invalid_moves = []
+        for location in np.argwhere(self.board == BLACK):
+            invalid_moves.append(Move.from_matrix_location(location))
+        for location in np.argwhere(self.board == WHITE):
+            invalid_moves.append(Move.from_matrix_location(location))
+        empty_locations = np.argwhere(self.board == EMPTY)
+        empty_locations = [(l[0], l[1]) for l in empty_locations]
+        for location in empty_locations:
+            move = Move.from_matrix_location(location)
+            try:
+                self.play(move, color, testing=True)
+            except InvalidMove_Error as e:
+                invalid_moves.append(move)
+        return invalid_moves
 
 
 if __name__ == '__main__':
