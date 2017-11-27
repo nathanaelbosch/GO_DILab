@@ -199,8 +199,11 @@ class GTPengine:
             self.send_failure_response('invalid color ' + args[0])
             return
         move = self.bot.genmove(color, self.game)
-        self.game.play(move, color)
-        self.send_success_response(move.to_gtp(self.game.size))
+        try:
+            self.game.play(move, color)
+            self.send_success_response(move.to_gtp(self.game.size))
+        except InvalidMove_Error as e:
+            self.send_failure_response('Sorry, I generated an invalid move: ' + str(e))
 
     def showboard(self, args):
         print(self.game.board.__str__())
