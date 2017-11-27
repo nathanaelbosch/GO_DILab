@@ -45,6 +45,7 @@ def running_run_script():
     return str(sys.argv[0]).endswith('run.py')
 
 
+# ported to Python 3 from stackoverflow.com/a/44446822
 def set_keras_backend(backend):
     from keras import backend as K
     if K.backend() != backend:
