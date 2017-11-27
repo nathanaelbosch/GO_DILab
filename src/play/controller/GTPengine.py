@@ -57,13 +57,13 @@ class GTPengine:
             NNBot
         ]
         for player_type in player_types_arr:
-            self.player_types[player_type.__name__] = player_type
+            self.player_types[player_type.__name__.lower()] = player_type
 
     def set_player_type(self, args):
         if len(args) == 0:
             self.send_failure_response('no player type passed')
             return
-        player_type = args[0]
+        player_type = args[0].lower()
         if player_type not in self.player_types:
             self.send_failure_response('player type ' + player_type + ' unknown')
             return
