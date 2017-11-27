@@ -120,7 +120,7 @@ class Game:
         if checking:
             if test_board[loc] != EMPTY:
                 raise InvalidMove_Error(
-                    'There is already a stone at that location')
+                    'There is already a stone at location ' + move.to_gtp(self.size))
         # "Play the stone" at the location
         test_board[loc] = color
 
