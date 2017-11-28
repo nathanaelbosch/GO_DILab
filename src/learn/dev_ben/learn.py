@@ -58,3 +58,7 @@ print("\n%s: %.2f%%" % (model.metrics_names[1], scores[1] * 100))
 
 # STORE TRAINED NN
 model.save(os.path.join(project_dir, 'src/learn/dev_ben/model.h5'))
+
+# get human readable model architecture using:
+# json_string = model.to_json()
+# via keras.io/getting-started/faq/#how-can-i-save-a-keras-model
