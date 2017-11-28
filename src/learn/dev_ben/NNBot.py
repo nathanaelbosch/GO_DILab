@@ -1,3 +1,4 @@
+import sys
 import os
 from os.path import dirname, abspath
 import math
@@ -16,6 +17,9 @@ class NNBot:
         Utils.set_keras_backend('theano')
         import keras
         model_path = os.path.join(project_dir, 'src/learn/dev_ben/model.h5')
+        if not os.path.isfile(model_path):
+            print('no model found at ' + model_path)
+            sys.exit(1)
         self.model = keras.models.load_model(model_path)
 
     @staticmethod
@@ -27,13 +31,13 @@ class NNBot:
         if entry is WHITE:
             return WHITE_val
 
-    def serialize_matrix(self, m):
+    def flatten_matrix(self, m):
         ls = m.tolist()
         ls = [self.replace_entry(entry) for row in ls for entry in row]
         return ls
 
     def genmove(self, color, game) -> Move:
-        nn_input_board = self.serialize_matrix(game.board)
+        nn_input_board = self.flatten_matrix(game.board)
         predict = self.model.predict(np.array([nn_input_board]))
         max_idx = np.argmax(predict)
         if max_idx is 0:

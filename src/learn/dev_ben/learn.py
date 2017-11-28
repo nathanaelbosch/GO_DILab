@@ -1,3 +1,4 @@
+import sys
 import os
 import numpy as np
 from os.path import dirname, abspath
@@ -10,11 +11,15 @@ from keras.layers import Dense
 
 project_dir = dirname(dirname(dirname(dirname(abspath(__file__)))))
 training_data_dir = os.path.join(project_dir, 'data/training_data')
+csv_files = os.listdir(training_data_dir)
+if len(csv_files) is 0:
+    print('no files for training found')
+    sys.exit(1)
 
 X = []
 Y = []
 
-for csv_file in os.listdir(training_data_dir):
+for csv_file in csv_files:
     if csv_file != 'some_game.sgf.csv': continue  # dev restriction
 
     path = os.path.join(training_data_dir, csv_file)
@@ -53,3 +58,7 @@ print("\n%s: %.2f%%" % (model.metrics_names[1], scores[1] * 100))
 
 # STORE TRAINED NN
 model.save(os.path.join(project_dir, 'src/learn/dev_ben/model.h5'))
+
+# get human readable model architecture using:
+# json_string = model.to_json()
+# via keras.io/getting-started/faq/#how-can-i-save-a-keras-model
