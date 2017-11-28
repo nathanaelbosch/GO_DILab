@@ -22,7 +22,7 @@ logging.basicConfig(
     format='%(levelname)s:%(name)s:%(message)s',
     datefmt='%Y-%m-%d %H:%M:%S')
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.ERROR)
+logger.setLevel(logging.INFO)
 
 
 class GO_Error(Exception):
@@ -120,7 +120,7 @@ class Game:
         if checking:
             if test_board[loc] != EMPTY:
                 raise InvalidMove_Error(
-                    'There is already a stone at that location')
+                    'There is already a stone at location ' + move.to_gtp(self.size))
         # "Play the stone" at the location
         test_board[loc] = color
 
@@ -133,6 +133,7 @@ class Game:
         #   4. If one of them (or more) is 0 they live, else they die
         neighbors = test_board.get_adjacent_coords(loc)
         groups = []
+        black_player_captured, white_player_captured = 0, 0
         for n in neighbors:
             if test_board[n] == -color:
                 groups.append(test_board.get_chain(n))
@@ -140,9 +141,9 @@ class Game:
             if test_board.check_dead(g):
                 # Capture the stones!
                 if color == BLACK:
-                    self.black_player_captured += len(g)
+                    black_player_captured += len(g)
                 if color == WHITE:
-                    self.white_player_captured += len(g)
+                    white_player_captured += len(g)
                 for c in g:
                     test_board[c] = EMPTY
 
@@ -167,6 +168,8 @@ class Game:
         if not testing:
             # Append move and board to histories
             self.board = test_board
+            self.black_player_captured += black_player_captured
+            self.white_player_captured += white_player_captured
             if checking:
                 self.board_history.add(test_board.to_number())
                 self.play_history.append(player + ':' + str(move))
@@ -251,6 +254,22 @@ class Game:
             except InvalidMove_Error as e:
                 pass
         return valid_moves
+
+    def get_invalid_locations(self, color) -> []:
+        invalid_moves = []
+        for location in np.argwhere(self.board == BLACK):
+            invalid_moves.append(Move.from_matrix_location(location))
+        for location in np.argwhere(self.board == WHITE):
+            invalid_moves.append(Move.from_matrix_location(location))
+        empty_locations = np.argwhere(self.board == EMPTY)
+        empty_locations = [(l[0], l[1]) for l in empty_locations]
+        for location in empty_locations:
+            move = Move.from_matrix_location(location)
+            try:
+                self.play(move, color, testing=True)
+            except InvalidMove_Error as e:
+                invalid_moves.append(move)
+        return invalid_moves
 
 
 if __name__ == '__main__':

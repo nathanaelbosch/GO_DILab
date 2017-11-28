@@ -4,7 +4,7 @@ import numpy as np
 
 from src import Utils
 
-if Utils.running_run_script():
+if Utils.use_scipy():
     from scipy import ndimage
 
 """Just to adjust the internal representation of color at a single location,
@@ -23,7 +23,7 @@ class Board(np.matrix):
     """
     def get_chain(self, loc: Tuple[int, int]) -> List[Tuple[int, int]]:
         # if run.py was started, we can use scipy and thereby improve performance
-        if Utils.running_run_script():
+        if Utils.use_scipy():
             # This method uses morphological operations to find out the
             # connected components ie., chains. wikipedia link to
             # morphological operation - https://en.wikipedia.org/wiki/Mathematical_morphology
@@ -82,6 +82,20 @@ class Board(np.matrix):
         # if new_roi == old_roi:
         #     return True
         # return False
+
+    # currently only used in Ben's NN-dev
+    def place_stone_and_capture_if_applicable(self, loc, player_val, opponent_val, empty_val):
+        self[loc] = player_val
+        # remove stones if this move captured them
+        neighbors = self.get_adjacent_coords(loc)
+        groups = []
+        for n in neighbors:
+            if self[n] == opponent_val:
+                groups.append(self.get_chain(n))
+        for g in groups:
+            if self.check_dead(g):
+                for c in g:
+                    self[c] = empty_val
 
     def is_on_board(self, col, row):
         return 0 <= col < self.shape[0] and 0 <= row < self.shape[1]

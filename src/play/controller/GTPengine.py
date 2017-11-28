@@ -13,6 +13,7 @@ from src.play.controller.bots.RandomBot import RandomBot
 from src.play.controller.bots.RandomGroupingBot import RandomGroupingBot
 from src.learn.dev_nath.SimplestNNBot import SimplestNNBot
 from src.learn.dev_nath_win_prediction.WinPredictionBot import WinPredictionBot
+from src.learn.dev_ben.NNBot import NNBot
 
 
 class GTPengine:
@@ -24,7 +25,8 @@ class GTPengine:
         self.stdin = None
         self.stdout = None
         self.logger = Utils.get_unique_file_logger(self, logging_level)
-        self.logger.info('  start: ' + self.bot.__class__.__name__ + ', ' + __file__)
+        self.logger.info(
+            '  start: ' + self.bot.__class__.__name__ + ', ' + __file__)
         self.gtp_commands = {}
         gtp_methods = [
             self.set_player_type,  # not a GTP-command
@@ -55,17 +57,19 @@ class GTPengine:
             RandomGroupingBot,
             SimplestNNBot,
             WinPredictionBot,
+            NNBot
         ]
         for player_type in player_types_arr:
-            self.player_types[player_type.__name__] = player_type
+            self.player_types[player_type.__name__.lower()] = player_type
 
     def set_player_type(self, args):
         if len(args) == 0:
             self.send_failure_response('no player type passed')
             return
-        player_type = args[0]
+        player_type = args[0].lower()
         if player_type not in self.player_types:
-            self.send_failure_response('player type ' + player_type + ' unknown')
+            self.send_failure_response(
+                'player type ' + player_type + ' unknown')
             return
         self.bot = self.player_types[player_type]()
         self.send_success_response('switched to player type ' + player_type)
@@ -115,7 +119,8 @@ class GTPengine:
     # ---------- COMMAND METHODS ----------
 
     def protocol_version(self, args):
-        # version of the GTP specification lysator.liu.se/~gunnar/gtp/gtp2-spec-draft2/gtp2-spec.html
+        # version of the GTP specification:
+        # lysator.liu.se/~gunnar/gtp/gtp2-spec-draft2/gtp2-spec.html
         self.send_success_response('2')
 
     def name(self, args):
@@ -128,10 +133,12 @@ class GTPengine:
         if len(args) == 0:
             self.send_failure_response('no command passed')
         else:
-            self.send_success_response(str(args[0] in self.gtp_commands).lower())
+            self.send_success_response(
+                str(args[0] in self.gtp_commands).lower())
 
     def list_commands(self, args):
-        self.send_success_response('\n'+'\n'.join(list(self.gtp_commands.keys())))
+        self.send_success_response(
+            '\n'+'\n'.join(list(self.gtp_commands.keys())))
 
     def quit(self, args):
         self.send_success_response()
@@ -176,12 +183,15 @@ class GTPengine:
             return
         gtp_move = args[1]
         if 'i' in gtp_move or 'I' in gtp_move:
-            self.send_failure_response('i is excluded from board coordinates in GTP')
+            self.send_failure_response(
+                'i is excluded from board coordinates in GTP')
             return
         move = Move().from_gtp(gtp_move, self.game.size)
 
         if not move.is_on_board(self.game.size):
-            self.send_failure_response('Location ' + gtp_move + ' is outside of board with size ' + str(self.game.size))
+            self.send_failure_response(
+                'Location ' + gtp_move + ' is outside of board with size ' +
+                str(self.game.size))
             return
         try:
             self.game.play(move, color)
@@ -199,8 +209,11 @@ class GTPengine:
             self.send_failure_response('invalid color ' + args[0])
             return
         move = self.bot.genmove(color, self.game)
-        self.game.play(move, color)
-        self.send_success_response(move.to_gtp(self.game.size))
+        try:
+            self.game.play(move, color)
+            self.send_success_response(move.to_gtp(self.game.size))
+        except InvalidMove_Error as e:
+            self.send_failure_response('Sorry, I generated an invalid move: ' + str(e))
 
     def showboard(self, args):
         print(self.game.board.__str__())

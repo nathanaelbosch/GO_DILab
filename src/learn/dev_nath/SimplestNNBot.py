@@ -1,12 +1,17 @@
 import numpy as np
 from os.path import abspath, dirname
+from src import Utils
 from src.play.model.Move import Move
 from src.play.model.Board import WHITE, BLACK, EMPTY
 import sys
 import os
+import logging
 from os.path import abspath, dirname
 
 from src.play.model.Move import Move
+
+
+bot_logger = logging.getLogger(__name__)
 
 
 class SimplestNNBot:
@@ -14,12 +19,16 @@ class SimplestNNBot:
     def __init__(self):
         project_dir = dirname(dirname(dirname(dirname(
             abspath(__file__)))))
+        Utils.set_keras_backend("theano")
         import keras
         model_path = os.path.join(
             project_dir, 'src/learn/dev_nath/model.h5')
         self.model = keras.models.load_model(model_path)
-        mean_var_path = os.path.join(project_dir, 'src/learn/dev_nath/mean_var.txt')
+        # self.model = keras.models.load_model('src/learn/dev_nath/model.h5')
+        mean_var_path = os.path.join(
+            project_dir, 'src/learn/dev_nath/mean_var.txt')
         with open(mean_var_path, 'r') as f:
+        # with open('src/learn/dev_nath/mean_var.txt', 'r') as f:
             lines = f.readlines()
         self.mean = float(lines[0])
         self.std = float(lines[1])
@@ -27,8 +36,6 @@ class SimplestNNBot:
     def board_to_input(self, color, board):
         b = board.astype(np.float64)
 
-        print(b.dtype)
-        print(type(self.mean))
         b -= self.mean
         b /= self.std
         if color == 'b':
@@ -44,13 +51,11 @@ class SimplestNNBot:
             1, my_board.shape[0]*my_board.shape[1])
         other_board_vect = other_board.reshape(
             1, other_board.shape[0]*other_board.shape[1])
-        print(my_board_vect.shape)
-        print(other_board_vect.shape)
+
         a = np.append([my_board_vect, other_board_vect], [])
         a = a.reshape(
             (1, my_board_vect.shape[1]+other_board_vect.shape[1]))
-        print(a.shape)
-        print(type(a))
+
         return a
 
     def softmax(self, x):
@@ -63,8 +68,12 @@ class SimplestNNBot:
 
         # Format the board and make predictions
         inp = self.board_to_input(color, game.board)
+        bot_logger.debug('Input shape:', inp.shape)
+        bot_logger.debug('Input:', inp)
         pred_moves = self.model.predict(inp)
-        # print(pred_moves)
+        # pred_moves = self.model.predict(np.zeros((1, 162)))
+        bot_logger.debug('This worked')
+        bot_logger.debug('Predicted moves:', pred_moves)
 
         pred_moves = pred_moves.reshape(9, 9)
         # print(pred_moves)
@@ -81,7 +90,6 @@ class SimplestNNBot:
         # print([i for row in potential_moves for i in row])
 
         potential_moves = self.softmax(potential_moves)
-        print(potential_moves)
 
         row, col = np.unravel_index(
             potential_moves.argmax(),
@@ -89,7 +97,7 @@ class SimplestNNBot:
 
         move = Move(col=col, row=row)
         if (potential_moves[move.to_matrix_location()] == dummy_value or
-                potential_moves[move.to_matrix_location()] < (1/81+0.001)):
+                potential_moves[move.to_matrix_location()] < (1/81+0.0001)):
             move = Move(is_pass=True)
 
         return move

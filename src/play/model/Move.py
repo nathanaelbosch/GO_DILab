@@ -120,6 +120,14 @@ class Move:
     def is_on_board(self, size):
         return self.is_pass is True or 0 <= self.col < size and 0 <= self.row < size
 
+    # used by NNBot to get the index in a matrix that got serialized
+    # into a single array in the following way:
+    # AA
+    # BB
+    # -> AABB
+    def to_flat_idx(self, size):
+        return self.row * size + self.col
+
 
 if __name__ == '__main__':
     import doctest

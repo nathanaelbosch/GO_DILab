@@ -4,7 +4,7 @@
 
 ## Setup
 - install _Python 3.6_ if not already present
-- create a virtual environment in the repository: `python -m venv .venv`
+- create a virtual environment in the repository: `python -m venv .venv` (or `python3`, check `python --version`)
 - activate it: `source activate .venv` on macOS, `source .venv/bin/activate` on Linux or `.\.venv\Scripts\activate` on Windows
 - run `pip install -r requirements.txt` or let your IDE help you with installing the required modules
 
