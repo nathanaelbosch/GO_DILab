@@ -31,13 +31,13 @@ class NNBot:
         if entry is WHITE:
             return WHITE_val
 
-    def serialize_matrix(self, m):
+    def flatten_matrix(self, m):
         ls = m.tolist()
         ls = [self.replace_entry(entry) for row in ls for entry in row]
         return ls
 
     def genmove(self, color, game) -> Move:
-        nn_input_board = self.serialize_matrix(game.board)
+        nn_input_board = self.flatten_matrix(game.board)
         predict = self.model.predict(np.array([nn_input_board]))
         max_idx = np.argmax(predict)
         if max_idx is 0:
