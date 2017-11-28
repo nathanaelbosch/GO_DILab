@@ -69,7 +69,8 @@ class PygameView:
         self.controller.receive_move_from_gui(Move(is_pass=True))
 
     def get_turn_label_text(self):
-        return 'It\'s ' + self.controller.current_player.name + '\'s turn'
+        return self.controller.current_player.name + '\'s (' \
+               + self.controller.current_player.color + ') turn'
 
     def render(self):
         # board

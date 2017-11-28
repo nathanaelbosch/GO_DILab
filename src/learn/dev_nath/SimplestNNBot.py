@@ -1,5 +1,6 @@
 import numpy as np
 from os.path import abspath, dirname
+from src import Utils
 from src.play.model.Move import Move
 from src.play.model.Board import WHITE, BLACK, EMPTY
 import sys
@@ -18,6 +19,7 @@ class SimplestNNBot:
     def __init__(self):
         project_dir = dirname(dirname(dirname(dirname(
             abspath(__file__)))))
+        Utils.set_keras_backend("theano")
         import keras
         model_path = os.path.join(
             project_dir, 'src/learn/dev_nath/model.h5')
@@ -49,9 +51,11 @@ class SimplestNNBot:
             1, my_board.shape[0]*my_board.shape[1])
         other_board_vect = other_board.reshape(
             1, other_board.shape[0]*other_board.shape[1])
+
         a = np.append([my_board_vect, other_board_vect], [])
         a = a.reshape(
             (1, my_board_vect.shape[1]+other_board_vect.shape[1]))
+
         return a
 
     def softmax(self, x):
@@ -86,7 +90,6 @@ class SimplestNNBot:
         # print([i for row in potential_moves for i in row])
 
         potential_moves = self.softmax(potential_moves)
-        bot_logger.debug('Potential moves:', potential_moves)
 
         row, col = np.unravel_index(
             potential_moves.argmax(),

@@ -15,6 +15,7 @@ from src.play.controller.bots.HumanGui import HumanGui
 from src.play.controller.bots.RandomBot import RandomBot
 from src.play.controller.bots.RandomGroupingBot import RandomGroupingBot
 from src.learn.dev_nath.SimplestNNBot import SimplestNNBot
+from src.learn.dev_ben.NNBot import NNBot
 
 
 def parse_args():
@@ -25,13 +26,13 @@ def parse_args():
         help='No GUI')
     parser.add_argument(
         '-p1', '--player1',
-        help=('Player 1 - black - options: "human", '+
-              '"random", "random_grouping" or "dev_nn_nath"'),
+        help=('Player 1 - black - options: "human", "random", '+
+              '"random_grouping", "dev_nn_nath" or "dev_nn_ben"'),
         default='random')
     parser.add_argument(
         '-p2', '--player2',
-        help=('Player 2 - white - options: "human", '+
-              '"random", "random_grouping" or "dev_nn_nath"'),
+        help=('Player 2 - white - options: "human", "random", '+
+              '"random_grouping", "dev_nn_nath" or "dev_nn_ben"'),
         default='random')
     parser.add_argument(
         '-r', '--replay',
@@ -65,6 +66,7 @@ def main():
         'random': RandomBot,
         'random_grouping': RandomGroupingBot,
         'dev_nn_nath': SimplestNNBot,
+        'dev_nn_ben': NNBot,
     }
     player1type = player_types[args.player1].__name__
     player2type = player_types[args.player2].__name__

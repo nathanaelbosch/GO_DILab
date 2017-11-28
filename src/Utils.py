@@ -1,3 +1,4 @@
+import importlib
 import logging
 import random
 import string
@@ -29,7 +30,7 @@ def get_unique_file_logger(cls, level=logging.INFO):
     for i in range(0, 5):
         rand_str += random.choice(string.ascii_lowercase)
     log_file = cls.__class__.__name__ + '_' + strftime('%d-%m-%Y_%H-%M-%S') + '_' + rand_str + '.log'
-    if running_run_script():  # else is GTPengine or executable, in that case we can't expect a folder
+    if use_scipy():  # else is GTPengine or executable, in that case we can't expect a folder
         project_dir = dirname(dirname(abspath(__file__)))
         log_file = os.path.join(os.path.join(project_dir, 'logs'), log_file)
     logger = setup_logger(rand_str, log_file, level)
@@ -37,8 +38,18 @@ def get_unique_file_logger(cls, level=logging.INFO):
     return logger
 
 
-# true if the current run was started using run.py
-# false if not, that's the case e.g. when running GTPengine directly and when building an executable of GTPengine
-# better name for this method?
-def running_run_script():
-    return str(sys.argv[0]).endswith('run.py')
+# true if the current run was started using run.py or generate_training_data.py
+# false if not, that's the case e.g. when running GTPengine directly and when building an executable of GTPengine.
+# then we can't use scipy because pyinstaller can't handle it. TODO find a better solution for this problem
+def use_scipy():
+    return str(sys.argv[0]).endswith('run.py') or \
+           str(sys.argv[0]).endswith('generate_training_data.py')
+
+
+# ported to Python 3 from stackoverflow.com/a/44446822
+def set_keras_backend(backend):
+    from keras import backend as K
+    if K.backend() != backend:
+        os.environ['KERAS_BACKEND'] = backend
+        importlib.reload(K)
+        assert K.backend() == backend
