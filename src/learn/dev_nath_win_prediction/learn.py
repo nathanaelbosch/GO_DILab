@@ -36,13 +36,10 @@ def list_all_csv_files(dir):
 
 
 def main():
-    # all_files = list_all_csv_files(DIR)
-    # all_files = rn.sample(all_files, 1000)
-    file = os.path.join(DEV_PATH, '5000_games.csv')
+    file = os.path.join(DEV_PATH, '5000_games.npy')
 
     in_size = 2*9*9
-    # data = pd.read_csv(file, sep=',', header=None)
-    data = np.genfromtxt(file, delimiter=',')
+    data = np.load(file)
     print(data.shape)
     X = data[:, :(in_size)]
     y = data[:, in_size:]
@@ -56,33 +53,30 @@ def main():
     #     f.write('\n')
     #     X /= np.std(X)
 
-    # split into 67% for train and 33% for test
+    # Split into 67% for train and 33% for test
     X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.3)
+        X, y, test_size=0.1)
     print(X_train[0].shape)
     print(y_train[0].shape)
 
-    # create model
+    # Create model
     in_dim = X_train.shape[1]
     out_dim = y_train.shape[1]
     model = Sequential()
     model.add(Dense(100, input_dim=in_dim, activation='relu'))
-    # model.add(Dropout(0.25))
-    model.add(Dense(100, input_dim=in_dim, activation='relu'))
-    # model.add(Dropout(0.25))
-    model.add(Dense(100, input_dim=in_dim, activation='relu'))
-    # model.add(Dropout(0.25))
-    # model.add(Dense(100, input_dim=in_dim, activation='relu'))
-    # model.add(Dropout(0.25))
-    model.add(Dense(out_dim, activation='sigm'))
+    model.add(Dropout(0.75))
+    model.add(Dense(100, activation='relu'))
+    model.add(Dropout(0.75))
+    model.add(Dense(out_dim, activation='softmax'))
 
-    # compile model
+    # Compile model
     model.compile(
-        loss='mean_squared_error',
+        loss='binary_crossentropy',
+        # loss='mean_squared_error',
         optimizer='adam',
         metrics=['accuracy'])
 
-    # Fit the model
+    # Fit model
     model.fit(X_train, y_train, epochs=10, batch_size=1000)
 
     # Evaluate model

@@ -6,6 +6,7 @@ import os
 import sgf
 import random as rn
 import numpy as np
+import pickle
 from src.play.model.Game import Game
 from src.play.model.Game import WHITE, BLACK, EMPTY
 from src.play.model.Move import Move
@@ -74,12 +75,18 @@ def to_numpy(game, player, black_win):
     white_board_vect = white_board.reshape(
         1, white_board.shape[0]*white_board.shape[1])
 
-    vect = np.append([black_board_vect, white_board_vect], [black_win])
+    if black_win:
+        result = [1, 0]
+    else:
+        result = [0, 1]
+
+    vect = np.append([black_board_vect, white_board_vect], result)
 
     return vect
 
 
 def foo(line):
+    """I only do this because pool.map can not work with lambda functions!"""
     return replay_game(line, to_numpy)
 
 
@@ -92,35 +99,45 @@ def main():
         lines = f.readlines()
     numgames = 5000
     lines = rn.sample(lines, numgames)
-    # print(lines)
 
-    max_batchsize = 5000
-    first = True; i=1
-    still_todo = numgames
-    filepath = os.path.join(DIR_PATH, '{}_games.csv'.format(numgames))
-    if os.path.isfile(filepath):
-        os.remove(filepath)
-    f = open(filepath, 'ab')
-    while still_todo > 0:
-        print('Batch', i); i+=1
-        batch_lines = lines[:max_batchsize]
-        still_todo = still_todo - max_batchsize
-        if still_todo > 0:
-            lines = lines[max_batchsize:]
+    if False:
+        # Do the data-generation in batches
+        max_batchsize = 5000
+        i = 1
+        still_todo = numgames
+        filepath = os.path.join(DIR_PATH, '{}_games.csv'.format(numgames))
+        if os.path.isfile(filepath):
+            os.remove(filepath)
+        f = open(filepath, 'ab')
+        while still_todo > 0:
+            print('Batch', i)
+            i += 1
+            batch_lines = lines[:max_batchsize]
+            still_todo = still_todo - max_batchsize
+            if still_todo > 0:
+                lines = lines[max_batchsize:]
 
-        data = pool.map(foo, batch_lines)
+            data = pool.map(foo, batch_lines)
 
-        # data = map(lambda x: replay_game(x, to_numpy), lines)
+            data = [d for d in data if d is not None]
+            data = np.concatenate(data)
+            print(data.shape)
+            print('White wins {}'.format(data[:, -1].sum() / data.shape[0]))
+            print('Black wins {}'.format(data[:, -2].sum() / data.shape[0]))
+            np.savetxt(f, data, delimiter=',', fmt='%d')
+        f.close()
+    else:
+        data = pool.map(foo, lines)
+
         data = [d for d in data if d is not None]
         data = np.concatenate(data)
         print(data.shape)
-        np.savetxt(f, data, delimiter=',', fmt='%d')
+        print('White wins {}'.format(data[:, -1].sum() / data.shape[0]))
+        print('Black wins {}'.format(data[:, -2].sum() / data.shape[0]))
 
-        # print(data[0].shape)
-        # print(data[1].shape)
-        # print(data[0][0].shape)
-
-    f.close()
+        np.save(os.path.join(
+            DIR_PATH, '{}_games.npy'.format(numgames)),
+            data)
 
 
 if __name__ == '__main__':

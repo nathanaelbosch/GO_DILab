@@ -26,11 +26,14 @@ class WinPredictionBot:
         # self.model = keras.models.load_model('src/learn/dev_nath/model.h5')
         mean_var_path = os.path.join(
             project_dir, 'src/learn/dev_nath_win_prediction/mean_var.txt')
-        with open(mean_var_path, 'r') as f:
-        # with open('src/learn/dev_nath/mean_var.txt', 'r') as f:
-            lines = f.readlines()
-        self.mean = float(lines[0])
-        self.std = float(lines[1])
+        # with open(mean_var_path, 'r') as f:
+        # # with open('src/learn/dev_nath/mean_var.txt', 'r') as f:
+        #     lines = f.readlines()
+        # self.mean = float(lines[0])
+        # self.std = float(lines[1])
+
+    def __str__(self):
+        return 'WinPredictionBot'
 
     def board_to_input(self, color, board):
         b = board.astype(np.float64)
@@ -51,20 +54,25 @@ class WinPredictionBot:
         return a
 
     def softmax(self, x):
-        e_x = np.exp(x - np.max(x))
-        return e_x / e_x.sum()
+        # e_x = np.exp(x - np.max(x))
+        # return e_x / e_x.sum()
+        return x / np.sum(x, axis=1)
 
     def genmove(self, color, game) -> Move:
+        my_index = 0 if color == 'b' else 1
+
         # We're still interested in the playable locations
         playable_locations = game.get_playable_locations(color)
 
         inp = self.board_to_input(color, game.board)
-        current_black_win = self.model.predict(inp)
+        current_pred = self.model.predict(inp)
+        # print('Current outcome prediction:', current_pred)
+        assert (self.softmax(current_pred) == current_pred).all()
+        my_pred = current_pred[0, my_index]
 
         my_value = BLACK if color == 'b' else WHITE
+
         results = np.zeros(game.board.shape)
-        if color == 'w':
-            results = 1 - results
 
         for move in playable_locations:
             if move.is_pass:
@@ -74,19 +82,20 @@ class WinPredictionBot:
             test_board[move.to_matrix_location()] = my_value
             inp = self.board_to_input(color, test_board)
             pred_result = self.model.predict(inp)
+            pred_result = self.softmax(pred_result)
 
-            results[move.to_matrix_location()] = pred_result
+            results[move.to_matrix_location()] = pred_result[0, my_index]
 
-        results -= current_black_win
+        # print(results>0)
+        # print(my_pred)
+        results -= my_pred
+        # print(results>0)
 
-        """ `results` now contains our prediction of blacks win probabilities
-        for each move, adjusted by blacks current win probability. We can now
-        easily check if a move is worth playing (as black) by checking the
-        sign; If it is negative, our probability to win gets wors. In general
-        the higher the number in `results` the better the move if we are black
-        If we are white we swap the sign and we get the same behaviour"""
-        if color == 'w':
-            results = -results
+        """ `results` now contains our prediction of our win probabilities
+        for each move, adjusted by our current win probability. We can now
+        easily check if a move is worth playing by checking the
+        sign; If it is negative, our probability to win gets worse. In general
+        the higher the number in `results` the better the move."""
 
         row, col = np.unravel_index(
             results.argmax(),
