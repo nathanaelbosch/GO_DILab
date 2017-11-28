@@ -25,11 +25,13 @@ def parse_args():
         help='No GUI')
     parser.add_argument(
         '-p1', '--player1',
-        help='Player 1 - black - options: "human", "random", "random_grouping" or "dev_nn_nath"',
+        help=('Player 1 - black - options: "human", '+
+              '"random", "random_grouping" or "dev_nn_nath"'),
         default='random')
     parser.add_argument(
         '-p2', '--player2',
-        help='Player 2 - white - options: "human", "random", "random_grouping" or "dev_nn_nath"',
+        help=('Player 2 - white - options: "human", '+
+              '"random", "random_grouping" or "dev_nn_nath"'),
         default='random')
     parser.add_argument(
         '-r', '--replay',
@@ -67,8 +69,10 @@ def main():
     player1type = player_types[args.player1].__name__
     player2type = player_types[args.player2].__name__
 
-    # if you don't want logfiles: change the logging-level to something more critical than INFO (e.g. WARNING)
-    controller = GTPcontroller(player1type, player2type, logging.INFO, float(args.sleep))
+    # if you don't want logfiles: change the logging-level to something
+    # more critical than INFO (e.g. WARNING)
+    controller = GTPcontroller(
+        player1type, player2type, logging.INFO, float(args.sleep))
     controller.start()
     if not args.no_gui:
         PygameView(controller).open()

@@ -23,7 +23,8 @@ class GTPengine:
         self.stdin = None
         self.stdout = None
         self.logger = Utils.get_unique_file_logger(self, logging_level)
-        self.logger.info('  start: ' + self.bot.__class__.__name__ + ', ' + __file__)
+        self.logger.info(
+            '  start: ' + self.bot.__class__.__name__ + ', ' + __file__)
         self.gtp_commands = {}
         gtp_methods = [
             self.set_player_type,  # not a GTP-command
@@ -63,7 +64,8 @@ class GTPengine:
             return
         player_type = args[0]
         if player_type not in self.player_types:
-            self.send_failure_response('player type ' + player_type + ' unknown')
+            self.send_failure_response(
+                'player type ' + player_type + ' unknown')
             return
         self.bot = self.player_types[player_type]()
         self.send_success_response('switched to player type ' + player_type)
@@ -113,7 +115,8 @@ class GTPengine:
     # ---------- COMMAND METHODS ----------
 
     def protocol_version(self, args):
-        # version of the GTP specification lysator.liu.se/~gunnar/gtp/gtp2-spec-draft2/gtp2-spec.html
+        # version of the GTP specification:
+        # lysator.liu.se/~gunnar/gtp/gtp2-spec-draft2/gtp2-spec.html
         self.send_success_response('2')
 
     def name(self, args):
@@ -126,10 +129,12 @@ class GTPengine:
         if len(args) == 0:
             self.send_failure_response('no command passed')
         else:
-            self.send_success_response(str(args[0] in self.gtp_commands).lower())
+            self.send_success_response(
+                str(args[0] in self.gtp_commands).lower())
 
     def list_commands(self, args):
-        self.send_success_response('\n'+'\n'.join(list(self.gtp_commands.keys())))
+        self.send_success_response(
+            '\n'+'\n'.join(list(self.gtp_commands.keys())))
 
     def quit(self, args):
         self.send_success_response()
@@ -174,12 +179,15 @@ class GTPengine:
             return
         gtp_move = args[1]
         if 'i' in gtp_move or 'I' in gtp_move:
-            self.send_failure_response('i is excluded from board coordinates in GTP')
+            self.send_failure_response(
+                'i is excluded from board coordinates in GTP')
             return
         move = Move().from_gtp(gtp_move, self.game.size)
 
         if not move.is_on_board(self.game.size):
-            self.send_failure_response('Location ' + gtp_move + ' is outside of board with size ' + str(self.game.size))
+            self.send_failure_response(
+                'Location ' + gtp_move + ' is outside of board with size ' +
+                str(self.game.size))
             return
         try:
             self.game.play(move, color)
