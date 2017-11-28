@@ -1,3 +1,4 @@
+import sys
 import os
 from os.path import dirname, abspath
 import math
@@ -16,6 +17,9 @@ class NNBot:
         Utils.set_keras_backend('theano')
         import keras
         model_path = os.path.join(project_dir, 'src/learn/dev_ben/model.h5')
+        if not os.path.isfile(model_path):
+            print('no model found at ' + model_path)
+            sys.exit(1)
         self.model = keras.models.load_model(model_path)
 
     @staticmethod
