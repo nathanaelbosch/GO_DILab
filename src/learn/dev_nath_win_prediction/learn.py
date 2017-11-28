@@ -47,14 +47,14 @@ def main():
     X = data[:, :(in_size)]
     y = data[:, in_size:]
 
-    with open(os.path.join(DEV_PATH, 'mean_var.txt'), 'w') as f:
-        f.write(str(np.mean(X)))
-        f.write('\n')
-        X -= np.mean(X)
-        # print(np.std(X))
-        f.write(str(np.std(X)))
-        f.write('\n')
-        X /= np.std(X)
+    # with open(os.path.join(DEV_PATH, 'mean_var.txt'), 'w') as f:
+    #     f.write(str(np.mean(X)))
+    #     f.write('\n')
+    #     X -= np.mean(X)
+    #     # print(np.std(X))
+    #     f.write(str(np.std(X)))
+    #     f.write('\n')
+    #     X /= np.std(X)
 
     # split into 67% for train and 33% for test
     X_train, X_test, y_train, y_test = train_test_split(
@@ -74,7 +74,7 @@ def main():
     # model.add(Dropout(0.25))
     # model.add(Dense(100, input_dim=in_dim, activation='relu'))
     # model.add(Dropout(0.25))
-    model.add(Dense(out_dim, activation='sigmoid'))
+    model.add(Dense(out_dim, activation='sigm'))
 
     # compile model
     model.compile(
