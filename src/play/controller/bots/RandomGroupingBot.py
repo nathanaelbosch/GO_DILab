@@ -36,3 +36,6 @@ class RandomGroupingBot:
                 return random.choice(playable_locations_touching_groups)
 
         return random.choice(playable_locations)
+
+    def __str__(self):
+        return 'RandomGroupingBot'

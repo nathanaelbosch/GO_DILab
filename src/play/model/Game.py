@@ -22,7 +22,7 @@ logging.basicConfig(
     format='%(levelname)s:%(name)s:%(message)s',
     datefmt='%Y-%m-%d %H:%M:%S')
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
+logger.setLevel(logging.DEBUG)
 
 
 class GO_Error(Exception):
@@ -55,7 +55,7 @@ class Game:
 
         self.komi = float(setup.get('KM', 7))
         self.size = int(setup.get('SZ', 9))
-        self.rules = setup.get('RU', 'japanese').lower()
+        self.rules = setup.get('RU', 'chinese').lower()
         self.result = setup.get('RE')
         self.time = int(setup.get('TM', 0))
         self.show_each_turn = show_each_turn
@@ -235,12 +235,14 @@ class Game:
             logger.debug('White: {}'.format(white_score))
         if black_score == white_score:
             logger.info('Same score: Draw!')
-            return
+            return 'Draw'
         winner = 'Black' if black_score > white_score else 'White'
         logger.info('{} won by {} points!'.format(
             winner, abs(black_score - white_score)))
         if self.result:
             logger.debug('Result according to the sgf: {}'.format(self.result))
+        result_string = winner[0]+'+'+str(abs(black_score - white_score))
+        return result_string
 
     def get_playable_locations(self, color) -> []:
         empty_locations = np.argwhere(self.board == 0)

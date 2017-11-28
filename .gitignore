@@ -4,6 +4,8 @@ data/*
 logs/*
 !logs/.gitkeep
 !data/some_game.sgf
+*.csv
+*.npy
 
 # ignore log files
 *.log

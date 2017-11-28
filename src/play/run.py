@@ -15,6 +15,7 @@ from src.play.controller.bots.HumanGui import HumanGui
 from src.play.controller.bots.RandomBot import RandomBot
 from src.play.controller.bots.RandomGroupingBot import RandomGroupingBot
 from src.learn.dev_nath.SimplestNNBot import SimplestNNBot
+from src.learn.dev_nath_win_prediction.WinPredictionBot import WinPredictionBot
 from src.learn.dev_ben.NNBot import NNBot
 
 
@@ -66,6 +67,7 @@ def main():
         'random': RandomBot,
         'random_grouping': RandomGroupingBot,
         'dev_nn_nath': SimplestNNBot,
+        'win_prediction': WinPredictionBot,
         'dev_nn_ben': NNBot,
     }
     player1type = player_types[args.player1].__name__

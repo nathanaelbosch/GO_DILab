@@ -12,6 +12,7 @@ from src.play.controller.bots.HumanGui import HumanGui
 from src.play.controller.bots.RandomBot import RandomBot
 from src.play.controller.bots.RandomGroupingBot import RandomGroupingBot
 from src.learn.dev_nath.SimplestNNBot import SimplestNNBot
+from src.learn.dev_nath_win_prediction.WinPredictionBot import WinPredictionBot
 from src.learn.dev_ben.NNBot import NNBot
 
 
@@ -55,6 +56,7 @@ class GTPengine:
             RandomBot,
             RandomGroupingBot,
             SimplestNNBot,
+            WinPredictionBot,
             NNBot
         ]
         for player_type in player_types_arr:
