@@ -22,7 +22,7 @@ logging.basicConfig(
     format='%(levelname)s:%(name)s:%(message)s',
     datefmt='%Y-%m-%d %H:%M:%S')
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.ERROR)
+logger.setLevel(logging.INFO)
 
 
 class GO_Error(Exception):
@@ -133,6 +133,7 @@ class Game:
         #   4. If one of them (or more) is 0 they live, else they die
         neighbors = test_board.get_adjacent_coords(loc)
         groups = []
+        black_player_captured, white_player_captured = 0, 0
         for n in neighbors:
             if test_board[n] == -color:
                 groups.append(test_board.get_chain(n))
@@ -140,9 +141,9 @@ class Game:
             if test_board.check_dead(g):
                 # Capture the stones!
                 if color == BLACK:
-                    self.black_player_captured += len(g)
+                    black_player_captured += len(g)
                 if color == WHITE:
-                    self.white_player_captured += len(g)
+                    white_player_captured += len(g)
                 for c in g:
                     test_board[c] = EMPTY
 
@@ -167,6 +168,8 @@ class Game:
         if not testing:
             # Append move and board to histories
             self.board = test_board
+            self.black_player_captured += black_player_captured
+            self.white_player_captured += white_player_captured
             if checking:
                 self.board_history.add(test_board.to_number())
                 self.play_history.append(player + ':' + str(move))
