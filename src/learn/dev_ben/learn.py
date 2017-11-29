@@ -12,6 +12,8 @@ from keras.layers import Dense
 
 project_dir = dirname(dirname(dirname(dirname(abspath(__file__)))))
 training_data_dir = os.path.join(project_dir, 'data/training_data')
+project_root_dir = dirname(dirname(dirname(dirname(abspath(__file__)))))
+training_data_dir = os.path.join(project_root_dir, 'data/training_data')
 csv_files = glob.glob(os.path.join(training_data_dir, '*'))
 if len(csv_files) is 0:
     print('no files for training found')
@@ -50,7 +52,7 @@ model.add(Dense(82, activation='softmax'))
 model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
 
 # TRAIN
-model.fit(X, Y, epochs=1)
+model.fit(X, Y, epochs=20)
 
 # EVALUATE
 scores = model.evaluate(X, Y)

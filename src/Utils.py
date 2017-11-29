@@ -31,8 +31,8 @@ def get_unique_file_logger(cls, level=logging.INFO):
         rand_str += random.choice(string.ascii_lowercase)
     log_file = cls.__class__.__name__ + '_' + strftime('%d-%m-%Y_%H-%M-%S') + '_' + rand_str + '.log'
     if use_scipy():  # else is GTPengine or executable, in that case we can't expect a folder
-        project_dir = dirname(dirname(abspath(__file__)))
-        log_file = os.path.join(os.path.join(project_dir, 'logs'), log_file)
+        project_root_dir = dirname(dirname(abspath(__file__)))
+        log_file = os.path.join(os.path.join(project_root_dir, 'logs'), log_file)
     logger = setup_logger(rand_str, log_file, level)
     logger.propagate = False  # via stackoverflow.com/a/2267567/2474159
     return logger

@@ -16,10 +16,10 @@ WHITE_val = 1.05
 class NNBot:
 
     def __init__(self):
-        project_dir = dirname(dirname(dirname(dirname(abspath(__file__)))))
+        project_root_dir = dirname(dirname(dirname(dirname(abspath(__file__)))))
         Utils.set_keras_backend('theano')
         from keras.models import model_from_json
-        model_dir = os.path.join(project_dir, 'src/learn/dev_ben')
+        model_dir = os.path.join(project_root_dir, 'src/learn/dev_ben')
         model_architecture_path = os.path.join(model_dir, 'model_architecture.json')
         if not os.path.isfile(model_architecture_path):
             print('model architecture not found: ' + model_architecture_path)

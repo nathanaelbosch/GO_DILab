@@ -11,8 +11,8 @@ EMPTY_val = 0.45
 BLACK_val = -1.35
 WHITE_val = 1.05
 
-project_root = dirname(dirname(dirname(dirname(abspath(__file__)))))  # GO_DILab
-data_dir = os.path.join(project_root, 'data')
+project_root_dir = dirname(dirname(dirname(dirname(abspath(__file__)))))  # GO_DILab
+data_dir = os.path.join(project_root_dir, 'data')
 sgf_dir = os.path.join(data_dir, 'dgs_sample')
 if not os.path.exists(sgf_dir):
     print(sgf_dir + ' does not exist')
