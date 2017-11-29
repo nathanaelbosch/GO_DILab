@@ -1,6 +1,8 @@
 import glob
 import sys
 import os
+from time import strftime
+
 import numpy as np
 from os.path import dirname, abspath
 
@@ -11,7 +13,8 @@ from keras.models import Sequential
 from keras.layers import Dense
 
 project_root_dir = dirname(dirname(dirname(dirname(abspath(__file__)))))
-training_data_dir = os.path.join(project_root_dir, 'data/training_data')
+data_dir = os.path.join(project_root_dir, 'data')
+training_data_dir = os.path.join(data_dir, 'training_data')
 csv_files = glob.glob(os.path.join(training_data_dir, '*'))
 if len(csv_files) is 0:
     print('no files for training found')
@@ -20,12 +23,18 @@ if len(csv_files) is 0:
 X = []
 Y = []
 
+report_filename = 'learn_report_' + strftime('%d-%m-%Y_%H-%M-%S') + '.csv'
+report = open(os.path.join(data_dir, report_filename), 'w')
+
+total_lines = 0
+
 for i, path in enumerate(csv_files):
     filename = os.path.basename(path)
     data = np.genfromtxt(path, dtype=float, delimiter=';')
     print('importing ' + str(len(data)) + ' lines from ' + filename + ' (' + str(i+1) + '/' + str(len(csv_files)) + ')')
 
     for line in data:
+        total_lines += 1
         x = line[:-2]
         y = [0 for _i in range(82)]  # pos zero is PASS, so we need 1+81
         move_idx = int(line[81])
@@ -67,3 +76,7 @@ model.save_weights('model_weights.h5')
 # from keras.utils import plot_model
 # requires pydot and graphviz to be installed
 # plot_model(model, to_file='model.png', show_shapes=True)
+
+report.write('model trained on ' + str(len(csv_files)) + ' files\n')
+report.write('containing a total of ' + str(total_lines) + ' input-output pairs\n')
+report.close()
