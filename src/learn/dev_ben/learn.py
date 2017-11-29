@@ -20,11 +20,10 @@ if len(csv_files) is 0:
 X = []
 Y = []
 
-for csv_file in csv_files:
-    if csv_file != 'some_game.sgf.csv': continue  # dev restriction
-
-    path = os.path.join(training_data_dir, csv_file)
+for i, path in enumerate(csv_files):
+    filename = os.path.basename(path)
     data = np.genfromtxt(path, dtype=float, delimiter=';')
+    print('importing ' + str(len(data)) + ' lines from ' + filename + ' (' + str(i+1) + '/' + str(len(csv_files)) + ')')
 
     for line in data:
         x = line[:-2]
