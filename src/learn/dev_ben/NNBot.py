@@ -18,12 +18,21 @@ class NNBot:
     def __init__(self):
         project_dir = dirname(dirname(dirname(dirname(abspath(__file__)))))
         Utils.set_keras_backend('theano')
-        import keras
-        model_path = os.path.join(project_dir, 'src/learn/dev_ben/model.h5')
-        if not os.path.isfile(model_path):
-            print('no model found at ' + model_path)
+        from keras.models import model_from_json
+        model_dir = os.path.join(project_dir, 'src/learn/dev_ben')
+        model_architecture_path = os.path.join(model_dir, 'model_architecture.json')
+        if not os.path.isfile(model_architecture_path):
+            print('model architecture not found: ' + model_architecture_path)
             sys.exit(1)
-        self.model = keras.models.load_model(model_path)
+        model_weights_path = os.path.join(model_dir, 'model_weights.h5')
+        if not os.path.isfile(model_weights_path):
+            print('model weights not found: ' + model_weights_path)
+            sys.exit(1)
+        # self.model = keras.models.load_model(model_path)
+        json_file = open(model_architecture_path, 'r')
+        self.model = model_from_json(json_file.read())
+        json_file.close()
+        self.model.load_weights(model_weights_path)
 
     @staticmethod
     def replace_entry(entry):
