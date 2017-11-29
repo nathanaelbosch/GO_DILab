@@ -57,8 +57,15 @@ scores = model.evaluate(X, Y)
 print("\n%s: %.2f%%" % (model.metrics_names[1], scores[1] * 100))
 
 # STORE TRAINED NN
-model.save(os.path.join(project_dir, 'src/learn/dev_ben/model.h5'))
+model.save('model.h5')
 
 # get human readable model architecture using:
-# json_string = model.to_json()
 # via keras.io/getting-started/faq/#how-can-i-save-a-keras-model
+file = open(os.path.join(project_dir, 'src/learn/dev_ben/model_architecture.json'), 'w')
+file.write(model.to_json())
+file.close()
+model.save_weights('weights.h5')
+
+# from keras.utils import plot_model
+# requires pydot and graphviz to be installed
+# plot_model(model, to_file='model.png', show_shapes=True)
