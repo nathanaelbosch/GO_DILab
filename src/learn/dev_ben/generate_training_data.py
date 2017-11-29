@@ -2,6 +2,7 @@ import sys
 import glob
 import os
 import sgf
+from time import strftime
 from os.path import dirname, abspath
 import numpy as np
 
@@ -13,7 +14,7 @@ WHITE_val = 1.05
 
 project_root_dir = dirname(dirname(dirname(dirname(abspath(__file__)))))  # GO_DILab
 data_dir = os.path.join(project_root_dir, 'data')
-sgf_dir = os.path.join(data_dir, 'dgs_sample')
+sgf_dir = os.path.join(data_dir, 'dgs')
 if not os.path.exists(sgf_dir):
     print(sgf_dir + ' does not exist')
     exit(1)
@@ -46,7 +47,15 @@ def flatten_matrix(m, invert_color=False):  # Board.matrix2csv(), but with inver
     return ';'.join(ls)
 
 
+count = 0
+cancelled = 0
+report_filename = 'gendata_report_' + strftime('%d-%m-%Y_%H-%M-%S') + '.csv'
+report = open(os.path.join(data_dir, report_filename), 'w')
+
+
 for i, path in enumerate(sgf_files):
+    if i > 10000: break  # dev-restriction
+    count += 1
     # not ignoring errors caused UnicodeDecodeError: 'ascii' codec can't decode byte 0xf6
     sgf_file = open(path, 'r', errors='ignore')  # via stackoverflow.com/a/12468274/2474159
     filename = os.path.basename(path)
@@ -73,6 +82,7 @@ for i, path in enumerate(sgf_files):
         if 'B' not in keys and 'W' not in keys:  # don't know how to deal with special stuff yet
             print('aborted processing ' + filename + ' at move ' + str(j) +
                   ' because the move contains no B or W: ' + str(move.properties))
+            cancelled += 1
             break
         # can't rely on the order in keys(), apparently must extract it like this
         player_color = 'B' if 'B' in move.properties.keys() else 'W'
@@ -175,3 +185,7 @@ for i, path in enumerate(sgf_files):
     for line in lines:
         training_data_file.write(line + '\n')
     training_data_file.close()
+
+report.write('processed files: ' + str(count) + '\n')
+report.write('from those were cancelled: ' + str(cancelled) + '\n')
+report.close()
