@@ -171,6 +171,7 @@ for i, path in enumerate(sgf_files):
 
         lines.append('')
 
+    # np.save(os.path.join(training_data_dir, filename + '.npy'), lines)
     for line in lines:
         training_data_file.write(line + '\n')
     training_data_file.close()
