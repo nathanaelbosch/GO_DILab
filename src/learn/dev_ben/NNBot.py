@@ -6,8 +6,11 @@ import numpy as np
 
 from src import Utils
 from src.play.model.Move import Move
-from src.learn.dev_ben.generate_training_data import EMPTY_val, BLACK_val, WHITE_val
 from src.play.model.Board import EMPTY, BLACK, WHITE
+
+EMPTY_val = 0.45
+BLACK_val = -1.35
+WHITE_val = 1.05
 
 
 class NNBot:
