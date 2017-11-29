@@ -10,7 +10,7 @@ import time
 from scipy import ndimage
 from src.play.model.Game import Game
 from src.play.model.Game import WHITE, BLACK, EMPTY
-from src.play.model.Move import Move
+from src.play.utils.Move import Move
 
 
 
@@ -152,9 +152,12 @@ def main():
             lines = lines[max_batchsize:]
 
         data = pool.map(foo, batch_lines)
-
         # data = map(lambda x: replay_game(x, to_numpy), lines)
         data = [d for d in data if d is not None]
+        for d in data:
+            print(d)
+            time.sleep(10)
+
         data = np.concatenate(data)
         print(data.shape)
         print (data.dtype)
