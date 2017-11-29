@@ -46,10 +46,16 @@ def flatten_matrix(m, invert_color=False):  # Board.matrix2csv(), but with inver
     return ';'.join(ls)
 
 
-for path in sgf_files:
-    sgf_file = open(path, 'r')
-    training_data_file = open(os.path.join(training_data_dir, os.path.basename(path) + '.csv'), 'w')
-    collection = sgf.parse(sgf_file.read())
+for i, path in enumerate(sgf_files):
+    # not ignoring errors caused UnicodeDecodeError: 'ascii' codec can't decode byte 0xf6
+    sgf_file = open(path, 'r', errors='ignore')  # via stackoverflow.com/a/12468274/2474159
+    filename = os.path.basename(path)
+    training_data_file = open(os.path.join(training_data_dir, filename + '.csv'), 'w')
+
+    sgf_file_content = sgf_file.read().replace('\n', '')
+    sgf_file.close()
+
+    collection = sgf.parse(sgf_file_content)
     game_tree = collection.children[0]
     moves = game_tree.nodes[1:]
     # meta = game_tree.nodes[0].properties
@@ -58,12 +64,16 @@ for path in sgf_files:
     board = Board([[EMPTY_val] * 9] * 9)
     lines = []
 
-    for move in moves:
+    print('processing ' + filename + ' (' + str(i+1) + '/' + str(len(sgf_files)) + ')')
+
+    for j, move in enumerate(moves):
         original = board.copy()
 
         keys = move.properties.keys()
         if 'B' not in keys and 'W' not in keys:  # don't know how to deal with special stuff yet
-            continue
+            print('aborted processing ' + filename + ' at move ' + str(j) +
+                  ' because the move contains no B or W: ' + str(move.properties))
+            break
         # can't rely on the order in keys(), apparently must extract it like this
         player_color = 'B' if 'B' in move.properties.keys() else 'W'
         sgf_move = move.properties[player_color][0]
