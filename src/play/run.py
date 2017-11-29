@@ -5,8 +5,8 @@ from os.path import dirname, abspath
 import argparse
 
 
-project_dir = dirname(dirname(dirname(abspath(__file__))))
-sys.path.append(project_dir)
+project_root_dir = dirname(dirname(dirname(abspath(__file__))))
+sys.path.append(project_root_dir)
 
 from src.play.controller.GTPcontroller import GTPcontroller
 from src.play.view.PygameView import PygameView
