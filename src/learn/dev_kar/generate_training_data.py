@@ -1,6 +1,9 @@
 """Replay game from sgf, then generate the training data out of it
 
 On each move we can create a new datapoint, or even 8 adding symmetries!
+
+Please change file paths. Massive noob alert! :D
+
 """
 import os
 import sgf
@@ -145,7 +148,7 @@ def main():
     filepath = '/Users/karthikeyakaushik/Documents/GO_DILab/src/learn/dev_kar/{}_games.csv'.format(numgames)
     if os.path.isfile(filepath):
         os.remove(filepath)
-    f = open('/Users/karthikeyakaushik/Documents/GO_DILab/src/learn/dev_kar/{}_games.csv'.format(numgames), 'w')
+    f = open('/Users/karthikeyakaushik/Documents/GO_DILab/src/learn/dev_kar/{}_games.csv'.format(numgames), 'ab')
     while still_todo > 0:
         print('Batch', i); i+=1
         batch_lines = lines[:max_batchsize]
@@ -157,7 +160,6 @@ def main():
         data = pool.map(foo, batch_lines)
         # data = map(lambda x: replay_game(x, to_numpy), lines)
         data = [d for d in data if d is not None]
-
         data = np.concatenate(data)
         print(data.shape)
         print (data.dtype)
@@ -166,7 +168,7 @@ def main():
         print(data[0][0].shape)
 
 
-        np.savetxt(f, data, delimiter=',', fmt='%10.5f')
+        np.savetxt(f, data, delimiter=',', fmt='%f')
 
         print(data[0].shape)
         print(data[1].shape)
