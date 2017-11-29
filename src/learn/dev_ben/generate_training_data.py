@@ -1,19 +1,27 @@
+import sys
+import glob
 import os
 import sgf
 from os.path import dirname, abspath
 import numpy as np
+
 from src.play.model.Board import Board
 
 EMPTY_val = 0.45
 BLACK_val = -1.35
 WHITE_val = 1.05
 
-data_dir = os.path.join(dirname(dirname(dirname(dirname(abspath(__file__))))), 'data')
-sgf_files = [
-    # os.path.join(data_dir, 'game_57083.sgf'),
-    # os.path.join(data_dir, 'game_100672.sgf'),
-    os.path.join(data_dir, 'some_game.sgf'),
-]
+project_root = dirname(dirname(dirname(dirname(abspath(__file__)))))  # GO_DILab
+data_dir = os.path.join(project_root, 'data')
+sgf_dir = os.path.join(data_dir, 'dgs_sample')
+if not os.path.exists(sgf_dir):
+    print(sgf_dir + ' does not exist')
+    exit(1)
+sgf_files = glob.glob(os.path.join(sgf_dir, '*'))  # better than os.listdir: excludes hidden files & gives full path
+# sgf_files = [os.path.join(data_dir, 'some_game.sgf')]  # just one file for dev
+if len(sgf_files) is 0:
+    print('no sgf files in ' + sgf_dir)
+    sys.exit(1)
 
 training_data_dir = os.path.join(data_dir, 'training_data')
 if not os.path.exists(training_data_dir):  # create the folder if it does not exist yet
