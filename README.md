@@ -3,12 +3,14 @@
 ### :game_die: TUM Data Innovation Lab WS2017/18, Team Hikaru
 
 ## Setup
-- We use **pygame** for the GUI. Because of thread-issues (known and unresolved according to some forums online) this doesn't work properly when run from a virtual python environment (at least for the an anaconda environment that's the case), so it must be a normal installation.
-- Install _Python 3.6_ if not already present
-- Run `pip install -r requirements.txt` (or `pip3` on macOS sometimes) or let your favorite IDE help you with installing the required modules. If a module fails to install via the IDE, try to install it via `pip`/`pip3`.
+- install _Python 3.6_ if not already present
+- create a virtual environment in the repository: `python -m venv .venv` (or `python3`, check `python --version`)
+- activate it: `source activate .venv` on macOS, `source .venv/bin/activate` on Linux or `.\.venv\Scripts\activate` on Windows
+- run `pip install -r requirements.txt` or let your IDE help you with installing the required modules
 
 ## Usage
-- In `run.py` you can configure the type of GUI and the type of players.
-- run `src/play/run.py` either via a run configuration in your IDE or via command line (the location from which you run doesn't matter, the path gets set correctly by the script).
+To start up a controller with two engines run `src/play/run.py` either via a run configuration in your IDE or via command line. In `run.py` you can configure the type of players.
 
-![](https://user-images.githubusercontent.com/5141792/32337814-4fe3d76c-bff3-11e7-9d66-ddaa1e2f4faa.png)
+To start just one engine, run `src/play/controller/GTPengine.py` and use GTP commands to communicate with it.
+
+To build an executable engine (to attach it to a Go GUI or run it by double-clicking), install _pyinstaller_ (`pip install pyinstaller`) and run `pyinstaller --onefile src/play/controller/GTPengine.py`. On Windows this will create an `.exe` in a new `dist/` folder.

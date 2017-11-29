@@ -34,7 +34,7 @@ class Move:
             return cls(col, row)
 
     @classmethod
-    def from_gtp(cls, string):
+    def from_gtp(cls, string, size):
         """Create instance from string using the SGF standard
 
         Examples
@@ -48,8 +48,13 @@ class Move:
         if string == 'pass':
             return cls(is_pass=True)
         else:
-            col = ord(string[0]) - ord('a')
-            row = int(string[1]) - 1
+            _ord = ord(string[0])
+            # i is excluded from board coordinates in GTP
+            if _ord >= ord('j'):
+                _ord -= 1
+            col = _ord - ord('a')
+            row = size - int(string[1])
+            # raise possible parsing errors here TODO
             return cls(col, row)
 
     @classmethod
@@ -80,7 +85,7 @@ class Move:
             row = chr(self.row + ord('a'))
             return col+row
 
-    def to_gtp(self):
+    def to_gtp(self, size):
         """Output move following the GTP standard
 
         Examples
@@ -93,9 +98,13 @@ class Move:
         if self.is_pass:
             return 'pass'
         else:
-            col = str(chr(self.col + ord('A')))
-            row = str(self.row + 1)
-            return col+row
+            _chr = self.col + ord('A')
+            # i is excluded from board coordinates in GTP
+            if self.col >= 8:
+                _chr += 1
+            col = str(chr(_chr))
+            row = str(size - self.row)
+            return col + row
 
     def to_matrix_location(self):
         return self.row, self.col  # row/col instead of col/row
@@ -104,6 +113,20 @@ class Move:
         if self.is_pass:
             return 'pass'
         return '(' + str(self.col) + '/' + str(self.row) + ')'
+
+    # TODO
+    # it would be better style if this would throw an InvalidMove_Error, that creates
+    # circular import-errors though, the error class would have to be moved out of Game
+    def is_on_board(self, size):
+        return self.is_pass is True or 0 <= self.col < size and 0 <= self.row < size
+
+    # used by NNBot to get the index in a matrix that got serialized
+    # into a single array in the following way:
+    # AA
+    # BB
+    # -> AABB
+    def to_flat_idx(self, size):
+        return self.row * size + self.col
 
 
 if __name__ == '__main__':
