@@ -1,5 +1,8 @@
+import glob
 import sys
 import os
+from time import strftime
+
 import numpy as np
 from os.path import dirname, abspath
 
@@ -9,9 +12,10 @@ Utils.set_keras_backend("tensorflow")
 from keras.models import Sequential
 from keras.layers import Dense
 
-project_dir = dirname(dirname(dirname(dirname(abspath(__file__)))))
-training_data_dir = os.path.join(project_dir, 'data/training_data')
-csv_files = os.listdir(training_data_dir)
+project_root_dir = dirname(dirname(dirname(dirname(abspath(__file__)))))
+data_dir = os.path.join(project_root_dir, 'data')
+training_data_dir = os.path.join(data_dir, 'training_data')
+csv_files = glob.glob(os.path.join(training_data_dir, '*'))
 if len(csv_files) is 0:
     print('no files for training found')
     sys.exit(1)
@@ -19,13 +23,18 @@ if len(csv_files) is 0:
 X = []
 Y = []
 
-for csv_file in csv_files:
-    if csv_file != 'some_game.sgf.csv': continue  # dev restriction
+report_filename = 'learn_report_' + strftime('%d-%m-%Y_%H-%M-%S') + '.csv'
+report = open(os.path.join(data_dir, report_filename), 'w')
 
-    path = os.path.join(training_data_dir, csv_file)
+total_lines = 0
+
+for i, path in enumerate(csv_files):
+    filename = os.path.basename(path)
     data = np.genfromtxt(path, dtype=float, delimiter=';')
+    print('importing ' + str(len(data)) + ' lines from ' + filename + ' (' + str(i+1) + '/' + str(len(csv_files)) + ')')
 
     for line in data:
+        total_lines += 1
         x = line[:-2]
         y = [0 for _i in range(82)]  # pos zero is PASS, so we need 1+81
         move_idx = int(line[81])
@@ -50,15 +59,24 @@ model.add(Dense(82, activation='softmax'))
 model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
 
 # TRAIN
-model.fit(X, Y, epochs=1)
+model.fit(X, Y, epochs=20)
 
 # EVALUATE
 scores = model.evaluate(X, Y)
 print("\n%s: %.2f%%" % (model.metrics_names[1], scores[1] * 100))
 
 # STORE TRAINED NN
-model.save(os.path.join(project_dir, 'src/learn/dev_ben/model.h5'))
-
-# get human readable model architecture using:
-# json_string = model.to_json()
+# model.save('model.h5')
 # via keras.io/getting-started/faq/#how-can-i-save-a-keras-model
+json_file = open('model_architecture.json', 'w')
+json_file.write(model.to_json())
+json_file.close()
+model.save_weights('model_weights.h5')
+
+# from keras.utils import plot_model
+# requires pydot and graphviz to be installed
+# plot_model(model, to_file='model.png', show_shapes=True)
+
+report.write('model trained on ' + str(len(csv_files)) + ' files\n')
+report.write('containing a total of ' + str(total_lines) + ' input-output pairs\n')
+report.close()
