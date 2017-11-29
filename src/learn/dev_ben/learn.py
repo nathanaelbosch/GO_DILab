@@ -10,8 +10,6 @@ Utils.set_keras_backend("tensorflow")
 from keras.models import Sequential
 from keras.layers import Dense
 
-project_dir = dirname(dirname(dirname(dirname(abspath(__file__)))))
-training_data_dir = os.path.join(project_dir, 'data/training_data')
 project_root_dir = dirname(dirname(dirname(dirname(abspath(__file__)))))
 training_data_dir = os.path.join(project_root_dir, 'data/training_data')
 csv_files = glob.glob(os.path.join(training_data_dir, '*'))
