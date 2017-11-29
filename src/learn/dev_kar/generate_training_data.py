@@ -13,7 +13,7 @@ import time
 from scipy import ndimage
 from src.play.model.Game import Game
 from src.play.model.Game import WHITE, BLACK, EMPTY
-from src.play.utils.Move import Move
+from src.play.model.Move import Move
 
 
 
