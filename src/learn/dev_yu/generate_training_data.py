@@ -52,7 +52,15 @@ for path in sgf_files:
 
     for i in range(0, 1):
         moves = game_trees[i].nodes[1:]
-        # meta = game_trees[i].nodes[0].properties
+        meta = game_trees[i].nodes[0].properties
+        if meta.get('RE')[0][0] == 'B':
+            winner = BLACK_VAL
+        elif meta.get('RE')[0][0] == 'W':
+            winner = WHITE_VAL
+        elif meta.get('RE')[0][0] == '0' or meta.get('RE')[0][0] == 'D':
+            winner = EMPTY_VAL
+        else:  # no result or unknown result
+            winner = -1
 
         board = Board([[EMPTY_VAL]*9]*9)
 
@@ -67,76 +75,77 @@ for path in sgf_files:
 
             loc = None
             if len(sgf_move) is 2:  # otherwise it's a pass
-                coord = string.ascii_lowercase.index(sgf_move[0]), -string.ascii_lowercase.index(sgf_move[1]) #  as coordinate (column, -row)
-                loc = string.ascii_lowercase.index(sgf_move[1]), string.ascii_lowercase.index(sgf_move[0]) #  (row, column)
+                coord = string.ascii_lowercase.index(sgf_move[0]), -string.ascii_lowercase.index(sgf_move[1]) # as coordinate (column, -row)
+                loc = string.ascii_lowercase.index(sgf_move[1]), string.ascii_lowercase.index(sgf_move[0]) # (row, column)
                 player_val = BLACK_VAL if player_color == 'B' else WHITE_VAL
                 opponent_val = WHITE_VAL if player_color == 'B' else BLACK_VAL
                 board.place_stone_and_capture_if_applicable(loc, player_val, opponent_val, EMPTY_VAL)
 
             loc_str = '0'
 
+        # line contains board representation (row-wise), next move, current player, winner of the game, symmetry state
         # 8 symmetries (dihedral group D4)
         # ----- 1
             if loc is not None:
                 loc_str = str(-coord[1] * 9 + coord[0])
-            lines.append(flatten_matrix(board_cur) + ';' + loc_str + ';' + str(player_val) + ';0')  # original
-            lines.append(flatten_matrix(board_cur, True) + ';' + loc_str + ';' + str(opponent_val) + ';-0')  # original inv
+            lines.append(flatten_matrix(board_cur) + ';' + loc_str + ';' + str(player_val) + ';' + str(winner) + ';0')  # original
+            lines.append(flatten_matrix(board_cur, True) + ';' + loc_str + ';' + str(opponent_val) + ';' +str(invert_entry(winner)) + ';-0')  # original inv
         # ----- 2
             if loc is not None:
                 r = np.array([[0,-1], [1,0]])
                 coord_new = np.dot(r, coord - CENTER) + CENTER
                 loc_str = str(-coord_new[1] * 9 + coord_new[0])
             board_cur = np.rot90(board_cur)
-            lines.append(flatten_matrix(board_cur) + ';' + loc_str + ';' + str(player_val) + ';90')  # rot90
-            lines.append(flatten_matrix(board_cur, True) + ';' + loc_str + ';' + str(opponent_val) + ';-90')  # rot90 inv
+            lines.append(flatten_matrix(board_cur) + ';' + loc_str + ';' + str(player_val) + ';' + str(winner) + ';90')  # rot90
+            lines.append(flatten_matrix(board_cur, True) + ';' + loc_str + ';' + str(opponent_val) + ';' +str(invert_entry(winner)) + ';-90')  # rot90 inv
         # ----- 3
             if loc is not None:
                 r = np.array([[-1,0], [0,-1]])
                 coord_new = np.dot(r, coord - CENTER) + CENTER
                 loc_str = str(-coord_new[1] * 9 + coord_new[0])
             board_cur = np.rot90(board_cur, 2)
-            lines.append(flatten_matrix(board_cur) + ';' + loc_str + ';' + str(player_val) + ';180')  # rot180
-            lines.append(flatten_matrix(board_cur, True) + ';' + loc_str + ';' + str(opponent_val) + ';-180')  # rot180 inv
+            lines.append(flatten_matrix(board_cur) + ';' + loc_str + ';' + str(player_val) + ';' + str(winner) + ';180')  # rot180
+            lines.append(flatten_matrix(board_cur, True) + ';' + loc_str + ';' + str(opponent_val) + ';' +str(invert_entry(winner)) + ';-180')  # rot180 inv
         # ----- 4
             if loc is not None:
                 r = np.array([[0,1], [-1,0]])
                 coord_new = np.dot(r, coord - CENTER) + CENTER
                 loc_str = str(-coord_new[1] * 9 + coord_new[0])
             board_cur = np.rot90(board_cur, 3)
-            lines.append(flatten_matrix(board_cur) + ';' + loc_str + ';' + str(player_val) + ';270')  # rot270
-            lines.append(flatten_matrix(board_cur, True) + ';' + loc_str + ';' + str(opponent_val) + ';-270')  # rot270 inv
+            lines.append(flatten_matrix(board_cur) + ';' + loc_str + ';' + str(player_val) + ';' + str(winner) + ';270')  # rot270
+            lines.append(flatten_matrix(board_cur, True) + ';' + loc_str + ';' + str(opponent_val) + ';' +str(invert_entry(winner)) + ';-270')  # rot270 inv
         # ----- 5
             if loc is not None:
                 r = np.array([[-1,0], [0,1]])
                 coord_new = np.dot(r, coord - CENTER) + CENTER
                 loc_str = str(-coord_new[1] * 9 + coord_new[0])
             board_cur = np.fliplr(board_cur)
-            lines.append(flatten_matrix(board_cur) + ';' + loc_str + ';' + str(player_val) + ';0.5')  # hflip
-            lines.append(flatten_matrix(board_cur, True) + ';' + loc_str + ';' + str(opponent_val) + ';-0.5')  # hflip inv
+            lines.append(flatten_matrix(board_cur) + ';' + loc_str + ';' + str(player_val) + ';' + str(winner) + ';0.5')  # hflip
+            lines.append(flatten_matrix(board_cur, True) + ';' + loc_str + ';' + str(opponent_val) + ';' +str(invert_entry(winner)) + ';-0.5')  # hflip inv
         # ----- 6
             if loc is not None:
                 r = np.array([[0,-1], [-1,0]])
                 coord_new = np.dot(r, coord - CENTER) + CENTER
                 loc_str = str(-coord_new[1] * 9 + coord_new[0])
             board_cur = np.rot90(np.fliplr(board_cur))
-            lines.append(flatten_matrix(board_cur) + ';' + loc_str + ';' + str(player_val) + ';90.5')  # hflip rot90
-            lines.append(flatten_matrix(board_cur, True) + ';' + loc_str + ';' + str(opponent_val) + ';-90.5')  # hflip rot90 inv
+            lines.append(flatten_matrix(board_cur) + ';' + loc_str + ';' + str(player_val) + ';' + str(winner) + ';90.5')  # hflip rot90
+            lines.append(flatten_matrix(board_cur, True) + ';' + loc_str + ';' + str(opponent_val) + ';' +str(invert_entry(winner)) + ';-90.5')  # hflip rot90 inv
         # ----- 7
             if loc is not None:
                 r = np.array([[1,0], [0,-1]])
                 coord_new = np.dot(r, coord - CENTER) + CENTER
                 loc_str = str(-coord_new[1] * 9 + coord_new[0])
             board_cur = np.rot90(np.fliplr(board_cur), 2)
-            lines.append(flatten_matrix(board_cur) + ';' + loc_str + ';' + str(player_val) + ';180.5')  # hflip rot180
-            lines.append(flatten_matrix(board_cur, True) + ';' + loc_str + ';' + str(opponent_val) + ';-180.5')  # hflip rot180 inv
+            lines.append(flatten_matrix(board_cur) + ';' + loc_str + ';' + str(player_val) + ';' + str(winner) + ';180.5')  # hflip rot180
+            lines.append(flatten_matrix(board_cur, True) + ';' + loc_str + ';' + str(opponent_val) + ';' +str(invert_entry(winner)) + ';-180.5')  # hflip rot180 inv
         # ----- 8
             if loc is not None:
                 r = np.array([[0,1], [1,0]])
                 coord_new = np.dot(r, coord - CENTER) + CENTER
                 loc_str = str(-coord_new[1] * 9 + coord_new[0])
             board_cur = np.rot90(np.fliplr(board_cur), 3)
-            lines.append(flatten_matrix(board_cur) + ';' + loc_str + ';' + str(player_val) + ';270.5')  # hflip rot270
-            lines.append(flatten_matrix(board_cur, True) + ';' + loc_str + ';' + str(opponent_val) + ';-270.5')  # hflip rot270 inv
+            lines.append(flatten_matrix(board_cur) + ';' + loc_str + ';' + str(player_val) + ';' + str(winner) + ';270.5')  # hflip rot270
+            lines.append(flatten_matrix(board_cur, True) + ';' + loc_str + ';' + str(opponent_val) + ';' +str(invert_entry(winner)) + ';-270.5')  # hflip rot270 inv
 
 
         for line in lines:
