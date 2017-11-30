@@ -81,7 +81,7 @@ for path in sgf_files:
                 opponent_val = WHITE_VAL if player_color == 'B' else BLACK_VAL
                 board.place_stone_and_capture_if_applicable(loc, player_val, opponent_val, EMPTY_VAL)
 
-            loc_str = '0'
+            loc_str = '-1'
 
         # line contains board representation (row-wise), next move, current player, winner of the game, symmetry state
         # 8 symmetries (dihedral group D4)
