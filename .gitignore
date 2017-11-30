@@ -1,6 +1,7 @@
 # Don't git data
 
 data/dgs/
+data/full_file.txt
 
 logs/*
 !logs/.gitkeep

@@ -1,4 +1,0 @@
-Files to put into this folder that are intentionally not being placed under version control:
-
-dgs/ directory, containing 10903 .sgf files on 9x9 boards, via Bernhard
-full_file.txt, containing 344374 sgf games (one per line) on 9x9 boards, via Nath
