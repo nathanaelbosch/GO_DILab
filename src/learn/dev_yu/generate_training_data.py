@@ -15,7 +15,7 @@ EMPTY_VAL = 0.25
 CENTER = np.array([4,-4])
 
 data_dir = os.path.join(dirname(dirname(dirname(dirname(abspath(__file__))))), 'data')
-sgf_files = [os.path.join(data_dir, 'some_game.sgf')]
+sgf_files = [os.path.join(data_dir, 'games_b_100.sgf')]
 
 
 training_set_dir = os.path.join(data_dir, 'training_set')
@@ -50,7 +50,7 @@ for path in sgf_files:
     game_trees = collection.children
 
 
-    for i in range(0, 1):
+    for i in range(0, 10):
         moves = game_trees[i].nodes[1:]
         meta = game_trees[i].nodes[0].properties
         if meta.get('RE')[0][0] == 'B':
@@ -82,6 +82,7 @@ for path in sgf_files:
                 board.place_stone_and_capture_if_applicable(loc, player_val, opponent_val, EMPTY_VAL)
 
             loc_str = '-1'
+
 
         # line contains board representation (row-wise), next move, current player, winner of the game, symmetry state
         # 8 symmetries (dihedral group D4)

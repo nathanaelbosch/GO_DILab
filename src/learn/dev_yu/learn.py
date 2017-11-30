@@ -10,10 +10,10 @@ from keras.utils.np_utils import to_categorical
 # fix random seed for reproducibility
 np.random.seed(100)
 
-project_root_dir = dirname(dirname(dirname(dirname(abspath(__file__)))))
-data_dir = os.path.join(project_root_dir, 'data')
+project_dir = dirname(dirname(dirname(dirname(abspath(__file__)))))
+data_dir = os.path.join(project_dir, 'data')
 training_set_dir = os.path.join(data_dir, 'training_set')
-csv_file = os.path.join(training_set_dir, 'some_game.sgf.csv')
+csv_file = os.path.join(training_set_dir, 'games_b_100.sgf.csv')
 
 
 # 1. Load data
@@ -36,7 +36,7 @@ model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accur
 
 
 # 4. Fit model
-model.fit(X, Y, epochs=50, batch_size=50)
+model.fit(X, Y, epochs=30, batch_size=100)
 
 
 # 5. Evaluate model
@@ -45,4 +45,7 @@ print("\n%s: %.2f%%" % (model.metrics_names[1], scores[1]*100))
 
 
 #6. Make predictions
-# pred = model.predict(X)
+# pred = model.predict(X[0].reshape(1,-1))
+
+
+model.save('model.h5')
