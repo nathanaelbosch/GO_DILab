@@ -15,9 +15,8 @@ EMPTY_VAL = 0.25
 CENTER = np.array([4,-4])
 
 data_dir = os.path.join(dirname(dirname(dirname(dirname(abspath(__file__))))), 'data')
-sgf_files = [
-    os.path.join(data_dir, 'some_game.sgf'),
-]
+sgf_files = [os.path.join(data_dir, 'some_game.sgf')]
+
 
 training_set_dir = os.path.join(data_dir, 'training_set')
 if not os.path.exists(training_set_dir):  # create the folder if it does not exist yet
@@ -43,6 +42,7 @@ def flatten_matrix(m, invert_color=False):  # Board.matrix2csv(), with inversion
 lines = []
 
 # see https://github.com/jtauber/sgf
+# see http://www.red-bean.com/sgf/properties.html
 for path in sgf_files:
     sgf_file = open(path, 'r')
     training_set_file = open(os.path.join(training_set_dir, os.path.basename(path) + '.csv'), 'w')
