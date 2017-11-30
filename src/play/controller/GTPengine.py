@@ -1,10 +1,9 @@
 import sys
 from os.path import dirname, abspath
 
-project_dir = dirname(dirname(dirname(dirname(abspath(__file__)))))
-sys.path.append(project_dir)
+project_root_dir = dirname(dirname(dirname(dirname(abspath(__file__)))))
+sys.path.append(project_root_dir)
 
-from src import Utils
 from src.play.model.Game import *
 
 from src.play.controller.bots.HumanConsole import HumanConsole

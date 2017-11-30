@@ -1,19 +1,28 @@
+import sys
+import glob
 import os
 import sgf
+from time import strftime
 from os.path import dirname, abspath
 import numpy as np
+
 from src.play.model.Board import Board
 
 EMPTY_val = 0.45
 BLACK_val = -1.35
 WHITE_val = 1.05
 
-data_dir = os.path.join(dirname(dirname(dirname(dirname(abspath(__file__))))), 'data')
-sgf_files = [
-    # os.path.join(data_dir, 'game_57083.sgf'),
-    # os.path.join(data_dir, 'game_100672.sgf'),
-    os.path.join(data_dir, 'some_game.sgf'),
-]
+project_root_dir = dirname(dirname(dirname(dirname(abspath(__file__)))))  # GO_DILab
+data_dir = os.path.join(project_root_dir, 'data')
+sgf_dir = os.path.join(data_dir, 'dgs')
+if not os.path.exists(sgf_dir):
+    print(sgf_dir + ' does not exist')
+    exit(1)
+sgf_files = glob.glob(os.path.join(sgf_dir, '*'))  # better than os.listdir: excludes hidden files & gives full path
+# sgf_files = [os.path.join(data_dir, 'some_game.sgf')]  # just one file for dev
+if len(sgf_files) is 0:
+    print('no sgf files in ' + sgf_dir)
+    sys.exit(1)
 
 training_data_dir = os.path.join(data_dir, 'training_data')
 if not os.path.exists(training_data_dir):  # create the folder if it does not exist yet
@@ -38,10 +47,24 @@ def flatten_matrix(m, invert_color=False):  # Board.matrix2csv(), but with inver
     return ';'.join(ls)
 
 
-for path in sgf_files:
-    sgf_file = open(path, 'r')
-    training_data_file = open(os.path.join(training_data_dir, os.path.basename(path) + '.csv'), 'w')
-    collection = sgf.parse(sgf_file.read())
+count = 0
+cancelled = 0
+report_filename = 'gendata_report_' + strftime('%d-%m-%Y_%H-%M-%S') + '.csv'
+report = open(os.path.join(data_dir, report_filename), 'w')
+
+
+for i, path in enumerate(sgf_files):
+    if i > 10000: break  # dev-restriction
+    count += 1
+    # not ignoring errors caused UnicodeDecodeError: 'ascii' codec can't decode byte 0xf6
+    sgf_file = open(path, 'r', errors='ignore')  # via stackoverflow.com/a/12468274/2474159
+    filename = os.path.basename(path)
+    training_data_file = open(os.path.join(training_data_dir, filename + '.csv'), 'w')
+
+    sgf_file_content = sgf_file.read().replace('\n', '')
+    sgf_file.close()
+
+    collection = sgf.parse(sgf_file_content)
     game_tree = collection.children[0]
     moves = game_tree.nodes[1:]
     # meta = game_tree.nodes[0].properties
@@ -50,12 +73,17 @@ for path in sgf_files:
     board = Board([[EMPTY_val] * 9] * 9)
     lines = []
 
-    for move in moves:
+    print('processing ' + filename + ' (' + str(i+1) + '/' + str(len(sgf_files)) + ')')
+
+    for j, move in enumerate(moves):
         original = board.copy()
 
         keys = move.properties.keys()
         if 'B' not in keys and 'W' not in keys:  # don't know how to deal with special stuff yet
-            continue
+            print('aborted processing ' + filename + ' at move ' + str(j) +
+                  ' because the move contains no B or W: ' + str(move.properties))
+            cancelled += 1
+            break
         # can't rely on the order in keys(), apparently must extract it like this
         player_color = 'B' if 'B' in move.properties.keys() else 'W'
         sgf_move = move.properties[player_color][0]
@@ -153,6 +181,11 @@ for path in sgf_files:
 
         lines.append('')
 
+    # np.save(os.path.join(training_data_dir, filename + '.npy'), lines)
     for line in lines:
         training_data_file.write(line + '\n')
     training_data_file.close()
+
+report.write('processed files: ' + str(count) + '\n')
+report.write('from those were cancelled: ' + str(cancelled) + '\n')
+report.close()

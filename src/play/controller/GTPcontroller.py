@@ -56,6 +56,10 @@ class GTPcontroller(threading.Thread):
         while self.game.is_running:
             print('\nnext turn\n')
             response = self.wait_for_response(self.current_player, 'genmove ' + self.current_player.color)
+            if response.startswith('?'):
+                self.log_and_print('player ' + self.current_player.name +
+                                   ' responded with an error, aborting the game: ' + '"' + response[2:] + '"')
+                break
             move = response[2:]  # strip away the "= "
             self.send_to_player(self.other_player, 'play ' + self.current_player.color + ' ' + move)
 
