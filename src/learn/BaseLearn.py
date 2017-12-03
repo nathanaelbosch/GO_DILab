@@ -1,6 +1,7 @@
 import os
 import sqlite3
 import numpy as np
+import time
 from time import strftime
 from os.path import dirname, abspath
 from abc import ABC, abstractmethod
@@ -51,10 +52,15 @@ class BaseLearn(ABC):
         pass
 
     @abstractmethod
-    def get_model_store_dir(self):
+    def get_path_to_self(self):
         pass
 
     def run(self):
+        start_time = time.time()
+        self.log(strftime('%d.%m.%Y %H:%M:%S'))
+        self.log('starting the training with moves from ' + str(self.numb_games_to_learn_from)
+                 + ' as input: ' + self.get_path_to_self())
+
         X = []
         Y = []
         cursor = self.db.cursor()
@@ -80,14 +86,14 @@ class BaseLearn(ABC):
 
         # SET UP AND STORE NETWORK TOPOLOGY
         model = self.setup_and_compile_model()
-        architecture_path = os.path.join(self.get_model_store_dir(), 'model_architecture.json')
+        architecture_path = os.path.join(dirname(self.get_path_to_self()), 'model_architecture.json')
         json_file = open(architecture_path, 'w')
         json_file.write(model.to_json())
         json_file.close()
 
         # TRAIN AND STORE WEIGHTS
         self.train(model, X, Y)
-        weights_path = os.path.join(self.get_model_store_dir(), 'model_weights.h5')
+        weights_path = os.path.join(dirname(self.get_path_to_self()), 'model_weights.h5')
         model.save_weights(weights_path)
 
         # EVALUATE
@@ -95,6 +101,8 @@ class BaseLearn(ABC):
         print("\n%s: %.2f%%" % (model.metrics_names[1], scores[1] * 100))
 
         # DONE
+        elapsed_time = time.time() - start_time
+        self.log('training ended after ' + '{0:.0f}'.format(elapsed_time) + 's')
         self.log('model trained on ' + str(len(X)) + ' moves from ' + str(self.numb_games_to_learn_from) + ' games')
         self.log('model architecture saved to: ' + architecture_path)
         self.log('model weights saved to: ' + weights_path)

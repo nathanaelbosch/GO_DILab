@@ -24,8 +24,8 @@ class Learn(BaseLearn):
     def train(self, model, X, Y):
         model.fit(X, Y, epochs=20)
 
-    def get_model_store_dir(self):
-        return dirname(abspath(__file__))
+    def get_path_to_self(self):
+        return abspath(__file__)
 
 
 if __name__ == '__main__':
