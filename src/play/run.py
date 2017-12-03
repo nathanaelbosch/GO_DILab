@@ -20,7 +20,6 @@ from src.learn.dev_ben.NNBot_ben1 import NNBot_ben1
 from src.learn.dev_yu.MovePredictionBot import MovePredictionBot
 
 
-
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -38,24 +37,14 @@ def parse_args():
               '"random_grouping", "dev_nn_nath", "win_prediction", "dev_nn_ben" or "dev_nn_yu"'),
         default='random')
     parser.add_argument(
-        '-r', '--replay',
-        help='replays the game in .sgf format that is being passed as path')
-    parser.add_argument(
         '-s', '--sleep',
         help='time in seconds to sleep at the end of each turn',
-        default='0.5')
+        default='0.2')
     return parser.parse_args()
 
 
 def main():
     args = parse_args()
-
-    if args.replay:
-        sgf_path = args.replay
-        if not os.path.isfile(sgf_path):
-            print('invalid path to .sgf file: ' + sgf_path)
-            sys.exit(1)
-        # TODO
 
     if args.no_gui:
         if args.player1 == 'human':
