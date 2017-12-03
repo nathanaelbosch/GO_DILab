@@ -12,17 +12,21 @@ class Learn(BaseLearn):
         super().__init__()
 
     def handle_row(self, X, Y, game_id, color, flat_move, board):
-        pass
+        x = board
+        y = [0 for _i in range(81)]
+        y[flat_move] = 1
+        X.append(x)
+        Y.append(y)
 
     def setup_and_compile_model(self):
         model = Sequential()
         model.add(Dense(162, input_dim=81, activation='relu'))  # first parameter of Dense is number of neurons
-        model.add(Dense(82, activation='softmax'))
+        model.add(Dense(81, activation='softmax'))
         model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
         return model
 
     def train(self, model, X, Y):
-        model.fit(X, Y, epochs=20)
+        model.fit(X, Y, epochs=1)
 
     def get_path_to_self(self):
         return abspath(__file__)
