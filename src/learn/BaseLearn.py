@@ -73,7 +73,7 @@ class BaseLearn(ABC):
     def run(self):
         start_time = time.time()
         self.log('starting the training with moves from '
-                 + (' all' if self.numb_games_to_learn_from == self.numb_all_games else '')
+                 + ('all ' if self.numb_games_to_learn_from == self.numb_all_games else '')
                  + str(self.numb_games_to_learn_from) + ' games as input ' + self.get_path_to_self())
         X = None
         Y = None
@@ -83,6 +83,9 @@ class BaseLearn(ABC):
         last_game_id = None
         for i, row in enumerate(cursor):
             game_id = row[0]
+            if i % 100 == 0:
+                print(str(i) + ' moves imported from ' + str(len(game_ids_learned_from)) + ' games\t'
+                      + '{0:.1f}'.format((len(game_ids_learned_from) / self.numb_games_to_learn_from) * 100) + '%')
             if game_id in self.invalid_game_ids:
                 continue
             if last_game_id != game_id:
