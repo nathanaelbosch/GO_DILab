@@ -55,6 +55,11 @@ class Learn(BaseLearn):
         X, Y = self.append_symmetry(X, Y, np.rot90(hflip_board, 1), flat_move, hflip_rot90_transf)
         X, Y = self.append_symmetry(X, Y, np.rot90(hflip_board, 2), flat_move, hflip_rot180_transf)
         X, Y = self.append_symmetry(X, Y, np.rot90(hflip_board, 3), flat_move, hflip_rot270_transf)
+
+        # TODO
+        # what to do about flipping colors? would double the 8 symmetries to 16
+        # would require komi-math... but how
+
         return X, Y
 
     def setup_and_compile_model(self):
