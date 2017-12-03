@@ -10,7 +10,15 @@ from src.play.model.Board import Board, EMPTY, BLACK, WHITE
 project_root_dir = dirname(dirname(dirname(abspath(__file__))))  # GO_DILab
 data_dir = os.path.join(project_root_dir, 'data')
 
-db = sqlite3.connect(os.path.join(data_dir, 'db.sqlite'))
+db_name = 'db.sqlite'
+db_path = os.path.join(data_dir, db_name)
+
+if os.path.exists(db_path):
+    print('connecting to existing db: ' + db_name)
+else:
+    print('creating new db and connecting to it: ' + db_name)
+
+db = sqlite3.connect(db_path)
 cursor = db.cursor()
 
 flat_matrix_table_column_names = []
@@ -20,6 +28,7 @@ for row in range(0, 9):
 
 
 def setup():
+    print('creating tables meta and games')
     cursor.execute('CREATE TABLE meta(id INTEGER PRIMARY KEY, all_moves_imported INTEGER, sgf_content TEXT)')
     db.commit()
     cursor.execute('CREATE TABLE games(id INTEGER, color INTEGER, move INTEGER'
@@ -41,12 +50,18 @@ def import_data():
                            + ''.join([', ' + _str for _str in flat_matrix_table_column_names]) + ') ' \
                            + 'VALUES(' + ''.join(['?,' for i in range(0, 84)])[:-1] + ')'
 
+    print('importing ' + str(len(sgf_files)) + ' sgf-files into ' + db_name + '...')
+
     for i, path in enumerate(sgf_files):
         if i > 5: break  # dev-restriction
 
         # not ignoring errors caused UnicodeDecodeError: 'ascii' codec can't decode byte 0xf6
         sgf_file = open(path, 'r', errors='ignore')  # via stackoverflow.com/a/12468274/2474159
         filename = os.path.basename(path)
+
+        print(filename + '\t' + str(i) + '/' + str(len(sgf_files)) + '\t'
+              + '{0:.3f}'.format((i / len(sgf_files)) * 100) + '%')
+
         game_id = int(filename.split('_')[1][:-4])  # get x in game_x.sgf
         sgf_content = sgf_file.read().replace('\n', '')
         sgf_file.close()
