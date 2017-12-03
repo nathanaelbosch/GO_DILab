@@ -28,12 +28,13 @@ class BaseLearn(ABC):
                                  cursor.execute('SELECT id FROM meta WHERE all_moves_imported=0').fetchall()]
         self.log('database contains ' + str(numb_all_games) + ' games, ' + str(len(self.invalid_game_ids))
                  + ' are invalid and won\'t be used for training')
-        self.numb_games_to_learn_from = 5
+        self.numb_games_to_learn_from = 5  # overwrite this in your extending Learn class as desired
 
     def log(self, msg):
         self.logger.info(msg)
         print(msg)
 
+    # can be used by Learn classes extending this class that require more game-info during training
     def get_sgf(self, game_id):
         return self.db.cursor().execute('SELECT sgf_content FROM meta WHERE id=?', (game_id,)).fetchone()[0]
 
@@ -57,8 +58,8 @@ class BaseLearn(ABC):
         start_time = time.time()
         self.log('starting the training with moves from ' + str(self.numb_games_to_learn_from)
                  + ' as input: ' + self.get_path_to_self())
-        X = []
-        Y = []
+        X = None
+        Y = None
         cursor = self.db.cursor()
         cursor.execute('SELECT * FROM games')
         game_ids_learned_from = []
@@ -74,11 +75,8 @@ class BaseLearn(ABC):
                 last_game_id = game_id
             color = row[1]
             flat_move = row[2]
-            board = row[3:]
-            self.handle_row(X, Y, game_id, color, flat_move, board)
-
-        X = np.array(X)
-        Y = np.array(Y)
+            flat_board = np.array(row[3:])
+            X, Y = self.handle_row(X, Y, game_id, color, flat_move, flat_board)
 
         # SET UP AND STORE NETWORK TOPOLOGY
         model = self.setup_and_compile_model()
