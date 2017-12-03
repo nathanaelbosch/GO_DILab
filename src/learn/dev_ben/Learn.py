@@ -6,6 +6,11 @@ from keras import Sequential
 from keras.layers import Dense
 
 from src.learn.BaseLearn import BaseLearn
+from src.play.model.Board import EMPTY, BLACK, WHITE
+
+EMPTY_val = 0.45
+BLACK_val = -1.35
+WHITE_val = 1.05
 
 CENTER = np.array([4, -4])
 identity_transf = np.array([[1, 0], [0, 1]])
@@ -43,6 +48,18 @@ class Learn(BaseLearn):
             flat_move_transf = self.apply_transf_and_flatten(flat_move, transf_matrix)
             y[flat_move_transf + 1] = 1
         return self.append_to_numpy_array(X, flat_board), self.append_to_numpy_array(Y, y)
+
+    @staticmethod
+    def replace_value(value):
+        if value == EMPTY:
+            return EMPTY_val
+        if value == BLACK:
+            return BLACK_val
+        if value == WHITE:
+            return WHITE_val
+
+    def customize_color_values(self, flat_board):
+        return np.array([self.replace_value(entry) for entry in flat_board])
 
     def handle_row(self, X, Y, game_id, color, flat_move, flat_board):
         board = flat_board.reshape(9, 9)

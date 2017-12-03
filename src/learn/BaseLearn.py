@@ -66,6 +66,10 @@ class BaseLearn(ABC):
     def get_path_to_self(self):
         pass
 
+    # can be overwritten by extending classes, doesn't have to though
+    def customize_color_values(self, flat_board):
+        return flat_board
+
     def run(self):
         start_time = time.time()
         self.log('starting the training with moves from ' + str(self.numb_games_to_learn_from)
@@ -87,7 +91,7 @@ class BaseLearn(ABC):
                 last_game_id = game_id
             color = row[1]
             flat_move = row[2]
-            flat_board = np.array(row[3:])
+            flat_board = self.customize_color_values(np.array(row[3:]))
             X, Y = self.handle_row(X, Y, game_id, color, flat_move, flat_board)
 
         # SET UP AND STORE NETWORK TOPOLOGY
