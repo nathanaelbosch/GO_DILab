@@ -56,8 +56,6 @@ def import_data():
     start_time = time.time()
 
     for i, path in enumerate(sgf_files):
-        if i > 5: break  # dev-restriction
-
         # not ignoring errors caused UnicodeDecodeError: 'ascii' codec can't decode byte 0xf6
         sgf_file = open(path, 'r', errors='ignore')  # via stackoverflow.com/a/12468274/2474159
         filename = os.path.basename(path)
