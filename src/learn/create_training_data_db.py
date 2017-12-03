@@ -1,10 +1,9 @@
-import glob
-import sqlite3
 import os
-import string
-from os.path import dirname, abspath
 import sgf
-
+import glob
+import string
+import sqlite3
+from os.path import dirname, abspath
 from src.play.model.Board import Board, EMPTY, BLACK, WHITE
 
 
@@ -70,14 +69,13 @@ def import_data():
 
             flat_move = -1
             if len(sgf_move) is 2:  # otherwise its a pass
-                row = string.ascii_lowercase.index(sgf_move[1])
-                col = string.ascii_lowercase.index(sgf_move[0])
-                move = row, col
-                flat_move = row * 9 + col
-                board.place_stone_and_capture_if_applicable_default_values(move, player_val)
+                _row = string.ascii_lowercase.index(sgf_move[1])
+                _col = string.ascii_lowercase.index(sgf_move[0])
+                flat_move = _row * 9 + _col
+                board.place_stone_and_capture_if_applicable_default_values((_row, _col), player_val)
 
-            flat_matrix = [val for _row in board.tolist() for val in _row]
             values = [game_id, player_val, flat_move]
+            flat_matrix = [val for _row in board.tolist() for val in _row]
             values.extend(flat_matrix)
             cursor.execute(table_insert_command, values)
 
