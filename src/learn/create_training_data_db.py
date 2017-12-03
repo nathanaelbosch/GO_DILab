@@ -21,7 +21,7 @@ for row in range(0, 9):
 
 
 def setup():
-    cursor.execute('''CREATE TABLE meta(id INTEGER PRIMARY KEY, sgf_content TEXT)''')
+    cursor.execute('CREATE TABLE meta(id INTEGER PRIMARY KEY, all_moves_imported INTEGER, sgf_content TEXT)')
     db.commit()
     cursor.execute('CREATE TABLE games(id INTEGER, color INTEGER, move INTEGER'
                    + ''.join([', ' + _str + ' INTEGER' for _str in flat_matrix_table_column_names]) + ')')
@@ -51,17 +51,18 @@ def import_data():
         game_id = int(filename.split('_')[1][:-4])  # get x in game_x.sgf
         sgf_content = sgf_file.read().replace('\n', '')
         sgf_file.close()
-        cursor.execute('INSERT INTO meta(id, sgf_content) VALUES(?,?)', (game_id, sgf_content))
-        db.commit()
         collection = sgf.parse(sgf_content)
         game_tree = collection.children[0]
         moves = game_tree.nodes[1:]
         board = Board([[EMPTY] * 9] * 9)
 
+        all_moves_imported = True
+
         for j, move in enumerate(moves):
             keys = move.properties.keys()
             if 'B' not in keys and 'W' not in keys:  # don't know how to deal with special stuff (yet?)
-                break
+                all_moves_imported = False
+                break  # or just continue? would are the moves afterwards still definitely be useful? not sure
             # can't rely on the order in keys(), apparently must extract it like this
             player_color = 'B' if 'B' in move.properties.keys() else 'W'
             player_val = BLACK if player_color == 'B' else WHITE
@@ -79,6 +80,10 @@ def import_data():
             values = [game_id, player_val, flat_move]
             values.extend(flat_matrix)
             cursor.execute(table_insert_command, values)
+
+        cursor.execute('INSERT INTO meta(id, all_moves_imported, sgf_content) VALUES(?,?,?)',
+                       (game_id, all_moves_imported, sgf_content))
+        db.commit()
 
 
 setup()
