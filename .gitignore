@@ -2,6 +2,7 @@
 
 data/dgs/
 data/full_file.txt
+*.sqlite
 
 logs/*
 !logs/.gitkeep
