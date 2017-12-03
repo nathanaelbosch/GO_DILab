@@ -43,7 +43,9 @@ def get_unique_file_logger(cls, level=logging.INFO):
 # then we can't use scipy because pyinstaller can't handle it. TODO find a better solution for this problem
 def use_scipy():
     return str(sys.argv[0]).endswith('run.py') or \
-           str(sys.argv[0]).endswith('generate_training_data.py')
+           str(sys.argv[0]).endswith('generate_training_data.py') or \
+           str(sys.argv[0]).endswith('BaseLearn.py') or \
+           str(sys.argv[0]).endswith('Learn.py')
 
 
 # ported to Python 3 from stackoverflow.com/a/44446822

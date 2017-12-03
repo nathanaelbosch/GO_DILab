@@ -1,8 +1,8 @@
+import logging
 import os
 import sqlite3
 import numpy as np
 import time
-from time import strftime
 from os.path import dirname, abspath
 from abc import ABC, abstractmethod
 
@@ -23,8 +23,7 @@ class BaseLearn(ABC):
     def __init__(self):
         self.db = sqlite3.connect(db_path)
         cursor = self.db.cursor()
-        report_filename = 'learn_' + strftime('%d%m%Y-%H%M%S') + '.log'
-        self.report = open(os.path.join(log_dir, report_filename), 'w')
+        self.logger = Utils.get_unique_file_logger(self, logging.INFO)
         numb_all_games = cursor.execute('SELECT COUNT(*) FROM meta').fetchone()[0]
         self.invalid_game_ids = [_id[0] for _id in
                                  cursor.execute('SELECT id FROM meta WHERE all_moves_imported=0').fetchall()]
@@ -33,7 +32,7 @@ class BaseLearn(ABC):
         self.numb_games_to_learn_from = 5
 
     def log(self, msg):
-        self.report.write(msg + '\n')
+        self.logger.info(msg)
         print(msg)
 
     def get_sgf(self, game_id):
@@ -57,10 +56,8 @@ class BaseLearn(ABC):
 
     def run(self):
         start_time = time.time()
-        self.log(strftime('%d.%m.%Y %H:%M:%S'))
         self.log('starting the training with moves from ' + str(self.numb_games_to_learn_from)
                  + ' as input: ' + self.get_path_to_self())
-
         X = []
         Y = []
         cursor = self.db.cursor()
@@ -106,5 +103,3 @@ class BaseLearn(ABC):
         self.log('model trained on ' + str(len(X)) + ' moves from ' + str(self.numb_games_to_learn_from) + ' games')
         self.log('model architecture saved to: ' + architecture_path)
         self.log('model weights saved to: ' + weights_path)
-
-        self.report.close()
