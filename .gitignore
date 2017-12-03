@@ -2,7 +2,11 @@
 
 data/dgs/
 data/full_file.txt
+
+# training files that shouldn't be added to the repository
 *.sqlite
+*.json
+*.h5
 
 logs/*
 !logs/.gitkeep
