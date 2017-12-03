@@ -16,7 +16,7 @@ from src.play.controller.bots.RandomBot import RandomBot
 from src.play.controller.bots.RandomGroupingBot import RandomGroupingBot
 from src.learn.dev_nath.SimplestNNBot import SimplestNNBot
 from src.learn.dev_nath_win_prediction.WinPredictionBot import WinPredictionBot
-from src.learn.dev_ben.NNBot import NNBot
+from src.learn.dev_ben.NNBot_ben1 import NNBot_ben1
 from src.learn.dev_yu.MovePredictionBot import MovePredictionBot
 
 
@@ -70,7 +70,7 @@ def main():
         'random_grouping': RandomGroupingBot,
         'dev_nn_nath': SimplestNNBot,
         'win_prediction': WinPredictionBot,
-        'dev_nn_ben': NNBot,
+        'dev_nn_ben': NNBot_ben1,
         'dev_nn_yu': MovePredictionBot
     }
     player1type = player_types[args.player1].__name__

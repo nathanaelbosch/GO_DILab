@@ -10,7 +10,7 @@ BLACK_val = -1.35
 WHITE_val = 1.05
 
 
-class NNBot(BaseNNBot):
+class NNBot_ben1(BaseNNBot):
 
     def __init__(self):
         super().__init__()
