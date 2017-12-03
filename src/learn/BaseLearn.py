@@ -38,6 +38,18 @@ class BaseLearn(ABC):
     def get_sgf(self, game_id):
         return self.db.cursor().execute('SELECT sgf_content FROM meta WHERE id=?', (game_id,)).fetchone()[0]
 
+    @staticmethod
+    def append_to_numpy_array(base, new):
+        if base is None:
+            base = np.array([new])
+        else:
+            base = np.vstack((base, new))
+        return base
+
+    @staticmethod
+    def flatten_matrix(matrix):
+        return np.array([val for row in matrix.tolist() for val in row])  # better command?
+
     @abstractmethod
     def handle_row(self, X, Y, game_id, color, flat_move, board):
         pass
