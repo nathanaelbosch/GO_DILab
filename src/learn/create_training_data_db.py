@@ -1,6 +1,7 @@
 import os
 import sgf
 import glob
+import time
 import string
 import sqlite3
 from os.path import dirname, abspath
@@ -52,15 +53,23 @@ def import_data():
 
     print('importing ' + str(len(sgf_files)) + ' sgf-files into ' + db_name + '...')
 
+    start_time = time.time()
+
     for i, path in enumerate(sgf_files):
         if i > 5: break  # dev-restriction
 
         # not ignoring errors caused UnicodeDecodeError: 'ascii' codec can't decode byte 0xf6
         sgf_file = open(path, 'r', errors='ignore')  # via stackoverflow.com/a/12468274/2474159
         filename = os.path.basename(path)
+        elapsed_time = time.time() - start_time
+        time_remaining_str = ''
+        if i > 0:
+            time_remaining = (elapsed_time / i) * (len(sgf_files) - i)
+            time_remaining_str = '~' + '{0:.0f}'.format(time_remaining) + 's remaining'
 
         print(filename + '\t' + str(i) + '/' + str(len(sgf_files)) + '\t'
-              + '{0:.3f}'.format((i / len(sgf_files)) * 100) + '%')
+              + '{0:.2f}'.format((i / len(sgf_files)) * 100) + '%\t'
+              + '{0:.0f}'.format(elapsed_time) + 's elapsed\t' + time_remaining_str)
 
         game_id = int(filename.split('_')[1][:-4])  # get x in game_x.sgf
         sgf_content = sgf_file.read().replace('\n', '')
