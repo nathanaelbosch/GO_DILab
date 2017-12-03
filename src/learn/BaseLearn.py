@@ -10,9 +10,8 @@ from src import Utils
 Utils.set_keras_backend("tensorflow")
 
 project_root_dir = dirname(dirname(dirname(abspath(__file__))))
-data_dir = os.path.join(project_root_dir, 'data')
 log_dir = os.path.join(project_root_dir, 'logs')
-db_path = os.path.join(data_dir, 'db.sqlite')
+db_path = os.path.join(project_root_dir, 'data', 'db.sqlite')
 if not os.path.exists(db_path):
     print('no db found at: ' + db_path)
     exit(1)
