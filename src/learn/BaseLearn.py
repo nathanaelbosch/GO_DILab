@@ -23,12 +23,12 @@ class BaseLearn(ABC):
         self.db = sqlite3.connect(db_path)
         cursor = self.db.cursor()
         self.logger = Utils.get_unique_file_logger(self, logging.INFO)
-        numb_all_games = cursor.execute('SELECT COUNT(*) FROM meta').fetchone()[0]
+        self.numb_all_games = cursor.execute('SELECT COUNT(*) FROM meta').fetchone()[0]
         self.invalid_game_ids = [_id[0] for _id in
                                  cursor.execute('SELECT id FROM meta WHERE all_moves_imported=0').fetchall()]
-        self.log('database contains ' + str(numb_all_games) + ' games, ' + str(len(self.invalid_game_ids))
+        self.log('database contains ' + str(self.numb_all_games) + ' games, ' + str(len(self.invalid_game_ids))
                  + ' are invalid and won\'t be used for training')
-        self.numb_games_to_learn_from = 5  # overwrite this in your extending Learn class as desired
+        self.numb_games_to_learn_from = self.numb_all_games  # overwrite this in your extending Learn class as desired
 
     def log(self, msg):
         self.logger.info(msg)
@@ -72,8 +72,9 @@ class BaseLearn(ABC):
 
     def run(self):
         start_time = time.time()
-        self.log('starting the training with moves from ' + str(self.numb_games_to_learn_from)
-                 + ' as input: ' + self.get_path_to_self())
+        self.log('starting the training with moves from '
+                 + (' all' if self.numb_games_to_learn_from == self.numb_all_games else '')
+                 + str(self.numb_games_to_learn_from) + ' games as input ' + self.get_path_to_self())
         X = None
         Y = None
         cursor = self.db.cursor()
@@ -85,7 +86,7 @@ class BaseLearn(ABC):
             if game_id in self.invalid_game_ids:
                 continue
             if last_game_id != game_id:
-                if len(game_ids_learned_from) == self.numb_games_to_learn_from:
+                if len(game_ids_learned_from) >= self.numb_games_to_learn_from:
                     break
                 game_ids_learned_from.append(game_id)
                 last_game_id = game_id
