@@ -34,6 +34,10 @@ class BaseNNBot(ABC):
     def flatten_matrix(matrix):
         return np.array([val for row in matrix.tolist() for val in row])
 
+    # can be overwritten by extending classes
+    def customize_color_values(self, flat_board):
+        return flat_board
+
     @abstractmethod
     def _genmove(self, color, game, flat_board):
         pass
@@ -45,5 +49,5 @@ class BaseNNBot(ABC):
         return row, col
 
     def genmove(self, color, game) -> Move:
-        flat_board = self.flatten_matrix(game.board)
+        flat_board = self.customize_color_values(self.flatten_matrix(game.board))
         return self._genmove(color, game, flat_board)
