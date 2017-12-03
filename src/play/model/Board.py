@@ -83,7 +83,13 @@ class Board(np.matrix):
         #     return True
         # return False
 
-    # currently only used in Ben's NN-dev
+    # TODO
+    # call this just place_stone_and_capture_if_applicable() and rename the one below .._custom_values
+    # that would be better style. didn't want to do that now because it would break usages of this method
+    def place_stone_and_capture_if_applicable_default_values(self, loc, player_val):
+        opponent_val = WHITE if player_val == BLACK else BLACK
+        self.place_stone_and_capture_if_applicable(loc, player_val, opponent_val, EMPTY)
+
     def place_stone_and_capture_if_applicable(self, loc, player_val, opponent_val, empty_val):
         self[loc] = player_val
         # remove stones if this move captured them
