@@ -23,12 +23,16 @@ class BaseLearn(ABC):
         self.db = sqlite3.connect(db_path)
         cursor = self.db.cursor()
         self.logger = Utils.get_unique_file_logger(self, logging.INFO)
-        self.numb_all_games = cursor.execute('SELECT COUNT(*) FROM meta').fetchone()[0]
-        self.invalid_game_ids = [_id[0] for _id in
-                                 cursor.execute('SELECT id FROM meta WHERE all_moves_imported=0').fetchall()]
-        self.log('database contains ' + str(self.numb_all_games) + ' games, ' + str(len(self.invalid_game_ids))
-                 + ' are invalid and won\'t be used for training')
-        self.numb_games_to_learn_from = self.numb_all_games  # overwrite this in your extending Learn class as desired
+        self.numb_all_games = cursor.execute(
+            'SELECT COUNT(*) FROM meta').fetchone()[0]
+        self.games_table_length = cursor.execute(
+            'SELECT COUNT(*) FROM games').fetchone()[0]
+        self.invalid_game_ids = cursor.execute(
+            'SELECT id FROM meta WHERE all_moves_imported=0').fetchall()
+        self.log('''database contains {} games,
+            {} are invalid and won\'t be used for training'''.format(
+            self.numb_all_games, len(self.invalid_game_ids)))
+        self.training_size = self.games_table_length
 
     def log(self, msg):
         self.logger.info(msg)
@@ -72,16 +76,21 @@ class BaseLearn(ABC):
 
     def run(self):
         start_time = time.time()
-        self.log('starting the training with moves from '
-                 + ('all ' if self.numb_games_to_learn_from == self.numb_all_games else '')
-                 + str(self.numb_games_to_learn_from) + ' games as input ' + self.get_path_to_self())
+        # self.log('starting the training with moves from '
+        #          + ('all ' if self.numb_games_to_learn_from == self.numb_all_games else '')
+        #          + str(self.numb_games_to_learn_from) + ' games as input ' + self.get_path_to_self())
 
         # Get data from Database
         cursor = self.db.cursor()
-        cursor.execute('SELECT * FROM games LIMIT ?',
-                       [self.numb_games_to_learn_from])
+        cursor.execute('''SELECT games.*
+                          FROM games, meta
+                          WHERE games.id == meta.id
+                          AND meta.all_moves_imported!=0
+                          LIMIT ?''',
+                       [self.training_size])
         result = cursor.fetchall()
 
+        self.log('working with {} rows'.format(len(result)))
         X, y = self.handle_data(result)
 
         # SET UP AND STORE NETWORK TOPOLOGY
@@ -104,6 +113,6 @@ class BaseLearn(ABC):
         elapsed_time = time.time() - start_time
         self.log('training ended after {:.0f}s'.format(elapsed_time))
         self.log('model trained on {} moves from {} games'.format(
-                 len(X), self.numb_games_to_learn_from))
+                 len(X), self.numb_all_games))
         self.log('model architecture saved to: ' + architecture_path)
         self.log('model weights saved to: ' + weights_path)

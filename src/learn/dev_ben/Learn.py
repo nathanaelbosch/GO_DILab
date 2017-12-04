@@ -27,7 +27,7 @@ class Learn(BaseLearn):
 
     def __init__(self):
         super().__init__()
-        self.numb_games_to_learn_from = 10
+        self.training_size = 500000
 
     @staticmethod
     def apply_transf_and_flatten(flat_move, transf_matrix):
