@@ -61,23 +61,27 @@ class Learn(BaseLearn):
     def customize_color_values(self, flat_board):
         return np.array([self.replace_value(entry) for entry in flat_board])
 
-    def handle_row(self, X, Y, game_id, color, flat_move, flat_board):
-        board = flat_board.reshape(9, 9)
-        hflip_board = np.fliplr(board)
-        X, Y = self.append_symmetry(X, Y, board, flat_move, identity_transf)
-        X, Y = self.append_symmetry(X, Y, np.rot90(board, 1), flat_move, rot90_transf)
-        X, Y = self.append_symmetry(X, Y, np.rot90(board, 2), flat_move, rot180_transf)
-        X, Y = self.append_symmetry(X, Y, np.rot90(board, 3), flat_move, rot270_transf)
-        X, Y = self.append_symmetry(X, Y, hflip_board, flat_move, identity_transf)
-        X, Y = self.append_symmetry(X, Y, np.rot90(hflip_board, 1), flat_move, hflip_rot90_transf)
-        X, Y = self.append_symmetry(X, Y, np.rot90(hflip_board, 2), flat_move, hflip_rot180_transf)
-        X, Y = self.append_symmetry(X, Y, np.rot90(hflip_board, 3), flat_move, hflip_rot270_transf)
+    def handle_data(self, result):
+        result = np.array(result)
 
-        # TODO
-        # what to do about flipping colors? would double the 8 symmetries to 16
-        # would require komi-math... but how
+        ids = result[:, 0]
+        colors = result[:, 1]
+        moves = result[:, 2]
+        moves += 1
+        boards = result[:, 3:]
 
-        return X, Y
+        # Generate y
+        y = np.zeros((moves.shape[0], 82))
+        y[np.arange(len(y)), moves] = 1
+        assert (y.sum(axis=1)==1).all()
+
+        # Generate X
+        X = boards
+
+        print('X.shape:', X.shape)
+        print('y.shape:', y.shape)
+
+        return X, y
 
     def setup_and_compile_model(self):
         model = Sequential()

@@ -7,7 +7,7 @@ from os.path import dirname, abspath
 from abc import ABC, abstractmethod
 
 from src import Utils
-Utils.set_keras_backend("tensorflow")
+# Utils.set_keras_backend("tensorflow")
 
 project_root_dir = dirname(dirname(dirname(abspath(__file__))))
 log_dir = os.path.join(project_root_dir, 'logs')
@@ -51,7 +51,7 @@ class BaseLearn(ABC):
         return np.array([val for row in matrix.tolist() for val in row])  # better command?
 
     @abstractmethod
-    def handle_row(self, X, Y, game_id, color, flat_move, board):
+    def handle_data(self, result):
         pass
 
     @abstractmethod
@@ -75,28 +75,14 @@ class BaseLearn(ABC):
         self.log('starting the training with moves from '
                  + ('all ' if self.numb_games_to_learn_from == self.numb_all_games else '')
                  + str(self.numb_games_to_learn_from) + ' games as input ' + self.get_path_to_self())
-        X = None
-        Y = None
+
+        # Get data from Database
         cursor = self.db.cursor()
-        cursor.execute('SELECT * FROM games')
-        game_ids_learned_from = []
-        last_game_id = None
-        for i, row in enumerate(cursor):
-            game_id = row[0]
-            if i % 100 == 0:
-                print(str(i) + ' moves imported from ' + str(len(game_ids_learned_from)) + ' games\t'
-                      + '{0:.1f}'.format((len(game_ids_learned_from) / self.numb_games_to_learn_from) * 100) + '%')
-            if game_id in self.invalid_game_ids:
-                continue
-            if last_game_id != game_id:
-                if len(game_ids_learned_from) >= self.numb_games_to_learn_from:
-                    break
-                game_ids_learned_from.append(game_id)
-                last_game_id = game_id
-            color = row[1]
-            flat_move = row[2]
-            flat_board = self.customize_color_values(np.array(row[3:]))
-            X, Y = self.handle_row(X, Y, game_id, color, flat_move, flat_board)
+        cursor.execute('SELECT * FROM games LIMIT ?',
+                       [self.numb_games_to_learn_from])
+        result = cursor.fetchall()
+
+        X, y = self.handle_data(result)
 
         # SET UP AND STORE NETWORK TOPOLOGY
         model = self.setup_and_compile_model()
@@ -106,17 +92,18 @@ class BaseLearn(ABC):
         json_file.close()
 
         # TRAIN AND STORE WEIGHTS
-        self.train(model, X, Y)
+        self.train(model, X, y)
         weights_path = os.path.join(dirname(self.get_path_to_self()), 'model_weights.h5')
         model.save_weights(weights_path)
 
         # EVALUATE
-        scores = model.evaluate(X, Y)
+        scores = model.evaluate(X, y)
         print("\n%s: %.2f%%" % (model.metrics_names[1], scores[1] * 100))
 
         # DONE
         elapsed_time = time.time() - start_time
-        self.log('training ended after ' + '{0:.0f}'.format(elapsed_time) + 's')
-        self.log('model trained on ' + str(len(X)) + ' moves from ' + str(self.numb_games_to_learn_from) + ' games')
+        self.log('training ended after {:.0f}s'.format(elapsed_time))
+        self.log('model trained on {} moves from {} games'.format(
+                 len(X), self.numb_games_to_learn_from))
         self.log('model architecture saved to: ' + architecture_path)
         self.log('model weights saved to: ' + weights_path)
