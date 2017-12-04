@@ -67,7 +67,8 @@ class WinPredictionBot:
         inp = self.board_to_input(color, game.board)
         current_pred = self.model.predict(inp)
         # print('Current outcome prediction:', current_pred)
-        assert (self.softmax(current_pred) == current_pred).all()
+        # assert (self.softmax(current_pred) == current_pred).all()
+        current_pred = self.softmax(current_pred)
         my_pred = current_pred[0, my_index]
 
         my_value = BLACK if color == 'b' else WHITE

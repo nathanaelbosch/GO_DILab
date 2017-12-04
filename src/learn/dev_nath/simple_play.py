@@ -11,42 +11,57 @@ from pprint import pprint
 sys.path.append('.')
 
 
-def main():
-    player1 = RandomBot()
-    player2 = WinPredictionBot()
+def play(args):
+    player1, player2, verbose = args
+    current, other = player1, player2
+    current_col, other_col = 'b', 'w'
+    last_move = None
+    game = Game({'SZ': 9})
 
-    num_games = 50
-    results = []
-    for i in range(num_games):
-        current, other = player1, player2
-        current_col, other_col = 'b', 'w'
-        last_move = None
-        game = Game({'SZ': 9})
-
-        while True:
+    while True:
+        if verbose:
             print(game)
 
-            move = current.genmove(current_col, game)
-            # print(move.to_gtp(9))
-            result = game.play(move, player=current_col)
-            if (last_move is not None and
-                    last_move.is_pass and
-                    move.is_pass):
+        move = current.genmove(current_col, game)
+        # print(move.to_gtp(9))
+        result = game.play(move, player=current_col)
+        if (last_move is not None and
+                last_move.is_pass and
+                move.is_pass):
+            if verbose:
                 print(current_col, current)
                 print(other_col, other)
-                results.append(result)
-                break
+            return result
 
-            current, other = other, current
-            current_col, other_col = other_col, current_col
-            last_move = move
+        current, other = other, current
+        current_col, other_col = other_col, current_col
+        last_move = move
 
-    pprint(results)
-    print('Playerd {} games'.format(num_games))
-    print('Black ({}) won {} times'.format(
-        player1, len([r for r in results if r.startswith('B')])))
-    print('White ({}) won {} times'.format(
-        player2, len([r for r in results if r.startswith('W')])))
+
+def main():
+
+    PLAYER2 = RandomBot()
+    PLAYER1 = WinPredictionBot()
+    VERBOSE = False
+    NUM_GAMES = 100
+
+    # import multiprocessing
+    # pool = multiprocessing.Pool()
+    results = list(map(play,
+        [(PLAYER1, PLAYER2, VERBOSE)]*int(NUM_GAMES/2) +
+        [(PLAYER2, PLAYER1, VERBOSE)]*int(NUM_GAMES/2)))
+
+    results1 = results[:int(NUM_GAMES/2)]
+    results2 = results[int(NUM_GAMES/2):]
+    print('Playerd {} games'.format(int(NUM_GAMES/2)*2))
+    print('Black ({}) : White ({})\t\t\t{}:{}'.format(
+        PLAYER1, PLAYER2,
+        len([r for r in results1 if r.startswith('B')]),
+        len([r for r in results1 if r.startswith('W')])))
+    print('Black ({}) : White ({})\t\t\t{}:{}'.format(
+        PLAYER2, PLAYER1,
+        len([r for r in results2 if r.startswith('B')]),
+        len([r for r in results2 if r.startswith('W')])))
 
 
 if __name__ == '__main__':
