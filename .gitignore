@@ -1,20 +1,15 @@
 # Don't git data
-
-data/dgs/
-data/full_file.txt
+data/
+!data/some_game.sgf
 
 # training files that shouldn't be added to the repository
 *.sqlite
-*.json
-*.h5
-
-logs/*
-!logs/.gitkeep
-
 *.csv
 *.npy
 
 # ignore log files
+logs/*
+!logs/.gitkeep
 *.log
 
 # ignore executables
