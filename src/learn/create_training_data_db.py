@@ -1,14 +1,17 @@
 import os
 import sgf
+import sys
 import glob
 import time
 import string
 import sqlite3
 from os.path import dirname, abspath
+
+project_root_dir = dirname(dirname(dirname(abspath(__file__))))  # GO_DILab
+sys.path.append(project_root_dir)
 from src.play.model.Board import Board, EMPTY, BLACK, WHITE
 
 
-project_root_dir = dirname(dirname(dirname(abspath(__file__))))  # GO_DILab
 data_dir = os.path.join(project_root_dir, 'data')
 
 db_name = 'db.sqlite'
