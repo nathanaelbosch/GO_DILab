@@ -27,7 +27,7 @@ class Learn(BaseLearn):
 
     def __init__(self):
         super().__init__()
-        self.training_size = 500000
+        self.training_size = 50
 
     @staticmethod
     def apply_transf_and_flatten(flat_move, transf_matrix):
@@ -49,19 +49,17 @@ class Learn(BaseLearn):
             y[flat_move_transf + 1] = 1
         return self.append_to_numpy_array(X, flat_board), self.append_to_numpy_array(Y, y)
 
-    def handle_data(self, result):
-        result = np.array(result)
-
-        ids = result[:, 0]
-        colors = result[:, 1]
-        moves = result[:, 2]
+    def handle_data(self, training_data):
+        ids = training_data[:, 0]
+        colors = training_data[:, 1]
+        moves = training_data[:, 2]
         moves += 1
-        boards = result[:, 3:]
+        boards = training_data[:, 3:]
 
         # Generate y
         y = np.zeros((moves.shape[0], 82))
         y[np.arange(len(y)), moves] = 1
-        assert (y.sum(axis=1)==1).all()
+        assert (y.sum(axis=1) == 1).all()
 
         # Generate X
         X = boards

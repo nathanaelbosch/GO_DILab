@@ -32,7 +32,7 @@ class BaseLearn(ABC):
         self.log('''database contains {} games,
             {} are invalid and won\'t be used for training'''.format(
             self.numb_all_games, len(self.invalid_game_ids)))
-        self.training_size = self.games_table_length
+        self.training_size = self.games_table_length  # override this in your Learn class as desired
 
     def log(self, msg):
         self.logger.info(msg)
@@ -51,7 +51,7 @@ class BaseLearn(ABC):
         return base
 
     @abstractmethod
-    def handle_data(self, result):
+    def handle_data(self, training_data):
         pass
 
     @abstractmethod
@@ -80,10 +80,10 @@ class BaseLearn(ABC):
                           AND meta.all_moves_imported!=0
                           LIMIT ?''',
                        [self.training_size])
-        result = cursor.fetchall()
+        training_data = np.array(cursor.fetchall())  # this is a gigantic array, has millions of rows
 
-        self.log('working with {} rows'.format(len(result)))
-        X, y = self.handle_data(result)
+        self.log('working with {} rows'.format(len(training_data)))
+        X, y = self.handle_data(training_data)
 
         # SET UP AND STORE NETWORK TOPOLOGY
         model = self.setup_and_compile_model()
