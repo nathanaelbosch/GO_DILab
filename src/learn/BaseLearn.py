@@ -46,10 +46,6 @@ class BaseLearn(ABC):
             base = np.vstack((base, new))
         return base
 
-    @staticmethod
-    def flatten_matrix(array):
-        return array.flatten()
-
     @abstractmethod
     def handle_row(self, X, Y, game_id, color, flat_move, board):
         pass
