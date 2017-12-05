@@ -66,10 +66,6 @@ class BaseLearn(ABC):
     def get_path_to_self(self):
         pass
 
-    # can be overwritten by extending classes, doesn't have to though
-    def customize_color_values(self, flat_board):
-        return flat_board
-
     def run(self):
         start_time = time.time()
         # self.log('starting the training with moves from '

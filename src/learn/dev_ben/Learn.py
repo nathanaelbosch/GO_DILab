@@ -49,18 +49,6 @@ class Learn(BaseLearn):
             y[flat_move_transf + 1] = 1
         return self.append_to_numpy_array(X, flat_board), self.append_to_numpy_array(Y, y)
 
-    @staticmethod
-    def replace_value(value):
-        if value == EMPTY:
-            return EMPTY_val
-        if value == BLACK:
-            return BLACK_val
-        if value == WHITE:
-            return WHITE_val
-
-    def customize_color_values(self, flat_board):
-        return np.array([self.replace_value(entry) for entry in flat_board])
-
     def handle_data(self, result):
         result = np.array(result)
 
@@ -77,6 +65,11 @@ class Learn(BaseLearn):
 
         # Generate X
         X = boards
+
+        # Replace values as you like to do
+        X[X==BLACK] = BLACK_val
+        X[X==EMPTY] = EMPTY_val
+        X[X==WHITE] = WHITE_val
 
         print('X.shape:', X.shape)
         print('y.shape:', y.shape)
