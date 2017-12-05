@@ -47,8 +47,8 @@ class BaseLearn(ABC):
         return base
 
     @staticmethod
-    def flatten_matrix(matrix):
-        return np.array([val for row in matrix.tolist() for val in row])  # better command?
+    def flatten_matrix(array):
+        return array.flatten()
 
     @abstractmethod
     def handle_row(self, X, Y, game_id, color, flat_move, board):
