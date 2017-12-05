@@ -28,15 +28,65 @@ cursor = db.cursor()
 flat_matrix_table_column_names = []
 for row in range(0, 9):
     for col in range(0, 9):
-        flat_matrix_table_column_names.append('loc_' + str(row) + '_' + str(col) + '_' + str(row * 9 + col))
+        flat_matrix_table_column_names.append('loc_{}_{}_{}'.format(row, col, row*9 + col))
 
 
 def setup():
     print('creating tables meta and games')
-    cursor.execute('CREATE TABLE meta(id INTEGER PRIMARY KEY, all_moves_imported INTEGER, sgf_content TEXT)')
+    cursor.execute(
+        '''CREATE TABLE meta(id INTEGER PRIMARY KEY,
+                             all_moves_imported INTEGER,
+                             sgf_content TEXT)''')
     db.commit()
     cursor.execute('CREATE TABLE games(id INTEGER, color INTEGER, move INTEGER'
                    + ''.join([', ' + _str + ' INTEGER' for _str in flat_matrix_table_column_names]) + ')')
+    db.commit()
+
+
+def game_to_database(sgf_content, game_id):
+    """Replay game and save to database
+
+    No real changes here, just in a function for convenience, as we want
+    to apply it both to the single sgf files given by Bernhard and the
+    one big file from Nath
+    """
+    table_insert_command = '''INSERT INTO games
+                              VALUES({})'''.format(','.join(['?']*84))
+
+    collection = sgf.parse(sgf_content)
+    game_tree = collection.children[0]
+    moves = game_tree.nodes[1:]
+    board = Board([[EMPTY] * 9] * 9)
+
+    all_moves_imported = True
+
+    for j, move in enumerate(moves):
+        keys = move.properties.keys()
+        if 'B' not in keys and 'W' not in keys:  # don't know how to deal with special stuff (yet?)
+            all_moves_imported = False
+            break  # or just continue? would are the moves afterwards still definitely be useful? not sure
+        # can't rely on the order in keys(), apparently must extract it like this
+        player_color = 'B' if 'B' in move.properties.keys() else 'W'
+        player_val = BLACK if player_color == 'B' else WHITE
+        sgf_move = move.properties[player_color][0]
+
+        flat_move = -1
+        if len(sgf_move) is 2:  # otherwise its a pass
+            _row = string.ascii_lowercase.index(sgf_move[1])
+            _col = string.ascii_lowercase.index(sgf_move[0])
+            flat_move = _row * 9 + _col
+            board.place_stone_and_capture_if_applicable_default_values((_row, _col), player_val)
+
+        values = [game_id, player_val, flat_move]
+        flat_matrix = [val for _row in board.tolist() for val in _row]
+        values.extend(flat_matrix)
+        cursor.execute(table_insert_command, values)
+
+    cursor.execute('''INSERT INTO meta(id,
+                                       all_moves_imported,
+                                       sgf_content)
+                      VALUES (?, ?, ?)''',
+                   (game_id, all_moves_imported, sgf_content))
     db.commit()
 
 
@@ -46,67 +96,52 @@ def import_data():
         print(sgf_dir + ' does not exist')
         exit(1)
     sgf_files = glob.glob(os.path.join(sgf_dir, '*'))
+
+    if os.path.isfile('data/full_file.txt'):
+        with open('data/full_file.txt') as f:
+            lines = f.readlines()
+    else:
+        lines = []
+
+    total_lengths = len(lines) + len(sgf_files)
+
     if len(sgf_files) is 0:
         print('no sgf files in ' + sgf_dir)
         exit(1)
 
-    table_insert_command = 'INSERT INTO games(id, color, move' \
-                           + ''.join([', ' + _str for _str in flat_matrix_table_column_names]) + ') ' \
-                           + 'VALUES(' + ''.join(['?,' for i in range(0, 84)])[:-1] + ')'
-
-    print('importing ' + str(len(sgf_files)) + ' sgf-files into ' + db_name + '...')
+    print('importing {} sgf-files into {}...'.format(
+        len(sgf_files)+len(lines), db_name))
 
     start_time = time.time()
 
-    for i, path in enumerate(sgf_files):
-        # not ignoring errors caused UnicodeDecodeError: 'ascii' codec can't decode byte 0xf6
-        sgf_file = open(path, 'r', errors='ignore')  # via stackoverflow.com/a/12468274/2474159
-        filename = os.path.basename(path)
+    def print_time_info(i, filename):
+        """Print info on elapsed and remaining time
+
+        Thought it would be cleaner as a function, and I can use
+        it in both loops"""
         elapsed_time = time.time() - start_time
-        time_remaining_str = ''
-        if i > 0:
-            time_remaining = (elapsed_time / i) * (len(sgf_files) - i)
-            time_remaining_str = '~' + '{0:.0f}'.format(time_remaining) + 's remaining'
+        time_remaining = ((elapsed_time / i) *
+                          (len(sgf_files)+len(lines) - i))
 
-        print(filename + '\t' + str(i) + '/' + str(len(sgf_files)) + '\t'
-              + '{0:.2f}'.format((i / len(sgf_files)) * 100) + '%\t'
-              + '{0:.0f}'.format(elapsed_time) + 's elapsed\t' + time_remaining_str)
+        print('{}\t{}/{}\t{:.2f}%\t{:.0f}s elapsed\t~{:.0f}s remaining'.format(
+            filename, i, len(sgf_files)+len(lines),
+            (i / (len(sgf_files)+len(lines))) * 100,
+            elapsed_time, time_remaining))
 
+    for i, line in enumerate(lines):
+        game_id = 1000000+i
+        print_time_info(i+1, game_id)
+        game_to_database(lines[i], game_id)
+
+    for j, path in enumerate(sgf_files):
+        # not ignoring errors caused UnicodeDecodeError: 'ascii' codec can't decode byte 0xf6
+        with open(path, 'r', errors='ignore') as f:
+            sgf_content = f.read()
+        filename = os.path.basename(path)
         game_id = int(filename.split('_')[1][:-4])  # get x in game_x.sgf
-        sgf_content = sgf_file.read().replace('\n', '')
-        sgf_file.close()
-        collection = sgf.parse(sgf_content)
-        game_tree = collection.children[0]
-        moves = game_tree.nodes[1:]
-        board = Board([[EMPTY] * 9] * 9)
 
-        all_moves_imported = True
-
-        for j, move in enumerate(moves):
-            keys = move.properties.keys()
-            if 'B' not in keys and 'W' not in keys:  # don't know how to deal with special stuff (yet?)
-                all_moves_imported = False
-                break  # or just continue? would are the moves afterwards still definitely be useful? not sure
-            # can't rely on the order in keys(), apparently must extract it like this
-            player_color = 'B' if 'B' in move.properties.keys() else 'W'
-            player_val = BLACK if player_color == 'B' else WHITE
-            sgf_move = move.properties[player_color][0]
-
-            flat_move = -1
-            if len(sgf_move) is 2:  # otherwise its a pass
-                _row = string.ascii_lowercase.index(sgf_move[1])
-                _col = string.ascii_lowercase.index(sgf_move[0])
-                flat_move = _row * 9 + _col
-                board.place_stone_and_capture_if_applicable_default_values((_row, _col), player_val)
-
-            values = [game_id, player_val, flat_move]
-            flat_matrix = [val for _row in board.tolist() for val in _row]
-            values.extend(flat_matrix)
-            cursor.execute(table_insert_command, values)
-
-        cursor.execute('INSERT INTO meta(id, all_moves_imported, sgf_content) VALUES(?,?,?)',
-                       (game_id, all_moves_imported, sgf_content))
-        db.commit()
+        print_time_info(j+i, start_time, total_lengths, filename)
+        game_to_database(sgf_content, game_id)
 
 
 setup()
