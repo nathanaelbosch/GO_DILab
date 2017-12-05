@@ -4,6 +4,7 @@ Supports alternative constructors using `from_*`, so that it can be
 constructed from the sgf format, gtp, and matrix locations.
 Same goes for output, using the `to_*` functions
 """
+import math
 
 
 class Move:
@@ -34,7 +35,7 @@ class Move:
             return cls(col, row)
 
     @classmethod
-    def from_gtp(cls, string, size):
+    def from_gtp(cls, string, size=9):
         """Create instance from string using the SGF standard
 
         Examples
@@ -85,7 +86,7 @@ class Move:
             row = chr(self.row + ord('a'))
             return col+row
 
-    def to_gtp(self, size):
+    def to_gtp(self, size=9):
         """Output move following the GTP standard
 
         Examples
@@ -117,16 +118,33 @@ class Move:
     # TODO
     # it would be better style if this would throw an InvalidMove_Error, that creates
     # circular import-errors though, the error class would have to be moved out of Game
-    def is_on_board(self, size):
+    def is_on_board(self, size=9):
         return self.is_pass is True or 0 <= self.col < size and 0 <= self.row < size
 
-    # used by NNBot to get the index in a matrix that got serialized
-    # into a single array in the following way:
-    # AA
-    # BB
-    # -> AABB
-    def to_flat_idx(self, size):
+    def to_flat_idx(self, size=9):
+        """
+
+        Used by NNBot to get the index in a matrix that got serialized into
+        a single array in the following way:
+        AB
+        CD
+        -> ABCD
+        """
         return self.row * size + self.col
+
+    @classmethod
+    def from_flat_idx(cls, flat_move, size=9):
+        """
+
+        Used by NNBot to get the index in a matrix that got serialized into
+        a single array in the following way:
+        AB
+        CD
+        -> ABCD
+        """
+        row = int(math.floor(flat_move / 9))
+        col = int(flat_move % 9)
+        return cls(col=col, row=row)
 
 
 if __name__ == '__main__':
