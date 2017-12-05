@@ -97,11 +97,11 @@ def import_data():
         exit(1)
     sgf_files = glob.glob(os.path.join(sgf_dir, '*'))
 
-    if os.path.isfile('data/full_file.txt'):
-        with open('data/full_file.txt') as f:
+    lines = []
+    full_file_path = os.path.join(data_dir, 'full_file.txt')
+    if os.path.isfile(full_file_path):
+        with open(full_file_path) as f:
             lines = f.readlines()
-    else:
-        lines = []
 
     total_lengths = len(lines) + len(sgf_files)
 
@@ -110,37 +110,40 @@ def import_data():
         exit(1)
 
     print('importing {} sgf-files into {}...'.format(
-        len(sgf_files)+len(lines), db_name))
+        total_lengths, db_name))
 
     start_time = time.time()
 
-    def print_time_info(i, filename):
+    def print_time_info(k, game_id):
         """Print info on elapsed and remaining time
 
         Thought it would be cleaner as a function, and I can use
         it in both loops"""
+        if k == 0:  # would cause a ZeroDivisionError
+            return
         elapsed_time = time.time() - start_time
-        time_remaining = ((elapsed_time / i) *
-                          (len(sgf_files)+len(lines) - i))
+        time_remaining = ((elapsed_time / k) *
+                          (total_lengths - k))
 
         print('{}\t{}/{}\t{:.2f}%\t{:.0f}s elapsed\t~{:.0f}s remaining'.format(
-            filename, i, len(sgf_files)+len(lines),
-            (i / (len(sgf_files)+len(lines))) * 100,
+            game_id, k, total_lengths,
+            (k / total_lengths) * 100,
             elapsed_time, time_remaining))
 
+    # import full_file.txt, 344374 games merged into one file by Nath
     for i, line in enumerate(lines):
-        game_id = 1000000+i
-        print_time_info(i+1, game_id)
+        game_id = 1000000 + i
+        print_time_info(i, game_id)
         game_to_database(lines[i], game_id)
 
+    # import 76440 .sgf games from the dgs-folder, from Bernhard
     for j, path in enumerate(sgf_files):
         # not ignoring errors caused UnicodeDecodeError: 'ascii' codec can't decode byte 0xf6
         with open(path, 'r', errors='ignore') as f:
             sgf_content = f.read()
         filename = os.path.basename(path)
         game_id = int(filename.split('_')[1][:-4])  # get x in game_x.sgf
-
-        print_time_info(j+i, start_time, total_lengths, filename)
+        print_time_info(j + len(lines), game_id)
         game_to_database(sgf_content, game_id)
 
 
