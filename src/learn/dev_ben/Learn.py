@@ -40,7 +40,7 @@ class Learn(BaseLearn):
         return flat_move_transf
 
     def append_symmetry(self, X, Y, board, flat_move, transf_matrix):
-        flat_board = self.flatten_matrix(board)
+        flat_board = board.flatten()
         y = np.array([0 for _i in range(82)])
         if flat_move == -1:  # PASS
             y[0] = 1

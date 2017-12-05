@@ -50,10 +50,6 @@ class BaseLearn(ABC):
             base = np.vstack((base, new))
         return base
 
-    @staticmethod
-    def flatten_matrix(matrix):
-        return np.array([val for row in matrix.tolist() for val in row])  # better command?
-
     @abstractmethod
     def handle_data(self, result):
         pass
