@@ -61,14 +61,12 @@ class Learn(BaseLearn):
     def customize_color_values(self, flat_board):
         return np.array([self.replace_value(entry) for entry in flat_board])
 
-    def handle_data(self, result):
-        result = np.array(result)
-
-        ids = result[:, 0]
-        colors = result[:, 1]
-        moves = result[:, 2]
+    def handle_data(self, training_data):
+        ids = training_data[:, 0]
+        colors = training_data[:, 1]
+        moves = training_data[:, 2]
         moves += 1
-        boards = result[:, 3:]
+        boards = training_data[:, 3:]
 
         # Generate y
         y = np.zeros((moves.shape[0], 82))

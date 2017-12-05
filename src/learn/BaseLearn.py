@@ -55,7 +55,7 @@ class BaseLearn(ABC):
         return np.array([val for row in matrix.tolist() for val in row])  # better command?
 
     @abstractmethod
-    def handle_data(self, result):
+    def handle_data(self, training_data):
         pass
 
     @abstractmethod
@@ -88,10 +88,10 @@ class BaseLearn(ABC):
                           AND meta.all_moves_imported!=0
                           LIMIT ?''',
                        [self.training_size])
-        result = cursor.fetchall()
+        training_data = np.array(cursor.fetchall())
 
-        self.log('working with {} rows'.format(len(result)))
-        X, y = self.handle_data(result)
+        self.log('working with {} rows'.format(len(training_data)))
+        X, y = self.handle_data(training_data)
 
         # SET UP AND STORE NETWORK TOPOLOGY
         model = self.setup_and_compile_model()
