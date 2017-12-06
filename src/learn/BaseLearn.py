@@ -104,7 +104,7 @@ class BaseLearn(ABC):
         # DONE
         elapsed_time = time.time() - start_time
         self.log('training ended after {:.0f}s'.format(elapsed_time))
-        self.log('model trained on {} moves from {} games'.format(
-                 len(X), self.numb_all_games))
+        self.log('model trained on {} moves, 8 symmetries included that\'s a training size of {}'
+                 .format(self.training_size, len(X)))
         self.log('model architecture saved to: ' + architecture_path)
         self.log('model weights saved to: ' + weights_path)
