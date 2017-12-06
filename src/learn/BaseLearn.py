@@ -83,22 +83,22 @@ class BaseLearn(ABC):
         training_data = np.array(cursor.fetchall())  # this is a gigantic array, has millions of rows
 
         self.log('working with {} rows'.format(len(training_data)))
-        X, y = self.handle_data(training_data)
+        X, Y = self.handle_data(training_data)
 
-        # SET UP AND STORE NETWORK TOPOLOGY
+        # SET UP and STORE NETWORK TOPOLOGY as json
         model = self.setup_and_compile_model()
         architecture_path = os.path.join(dirname(self.get_path_to_self()), 'model_architecture.json')
         json_file = open(architecture_path, 'w')
         json_file.write(model.to_json())
         json_file.close()
 
-        # TRAIN AND STORE WEIGHTS
-        self.train(model, X, y)
+        # TRAIN and then STORE WEIGHTS as hdf5
+        self.train(model, X, Y)
         weights_path = os.path.join(dirname(self.get_path_to_self()), 'model_weights.h5')
         model.save_weights(weights_path)
 
         # EVALUATE
-        scores = model.evaluate(X, y)
+        scores = model.evaluate(X, Y)
         print("\n%s: %.2f%%" % (model.metrics_names[1], scores[1] * 100))
 
         # DONE

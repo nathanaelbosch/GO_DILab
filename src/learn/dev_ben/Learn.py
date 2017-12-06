@@ -36,7 +36,6 @@ class Learn(BaseLearn):
         row = int(math.floor(flat_move / 9))
         col = int(flat_move % 9)
         coord = col, -row
-        # this matrix multiplication approach is from Yushan
         coord_transf = np.dot(transf_matrix, coord - CENTER) + CENTER
         flat_move_transf = coord_transf[1] * 9 + coord_transf[0]
         return flat_move_transf
