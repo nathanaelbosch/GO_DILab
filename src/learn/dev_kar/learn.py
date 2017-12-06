@@ -9,7 +9,7 @@ from keras.models import Sequential
 from keras.layers import Dense, Dropout
 
 DIR = 'data/training_data/simplest_move_prediction'
-DEV_PATH = 'src/learn/dev_nath'
+DEV_PATH = '/Users/karthikeyakaushik/Documents/GO_DILab/src/learn/dev_kar'
 np.random.seed(123)  # for reproducibility
 
 
@@ -38,7 +38,7 @@ def list_all_csv_files(dir):
 def main():
     # all_files = list_all_csv_files(DIR)
     # all_files = rn.sample(all_files, 1000)
-    all_files = ['src/learn/dev_nath/5000_games.csv']
+    all_files = ['/Users/karthikeyakaushik/Documents/GO_DILab/src/learn/dev_kar/100_games.csv']
     print(len(all_files))
     in_size = 2*9*9
     out_size = 9*9

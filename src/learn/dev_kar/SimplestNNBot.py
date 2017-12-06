@@ -5,6 +5,7 @@ from src.play.model.Move import Move
 from src.play.model.Board import WHITE, BLACK, EMPTY
 import sys
 import os
+from scipy import ndimage
 from os.path import abspath, dirname
 
 from src.play.model.Move import Move
@@ -18,9 +19,9 @@ class SimplestNNBot:
         Utils.set_keras_backend("theano")
         import keras
         model_path = os.path.join(
-            project_dir, 'src/learn/dev_nath/model.h5')
+            project_dir, 'src/learn/dev_kar/model.h5')
         self.model = keras.models.load_model(model_path)
-        mean_var_path = os.path.join(project_dir, 'src/learn/dev_nath/mean_var.txt')
+        mean_var_path = os.path.join(project_dir, 'src/learn/dev_kar/mean_var.txt')
         with open(mean_var_path, 'r') as f:
             lines = f.readlines()
         self.mean = float(lines[0])
@@ -31,23 +32,65 @@ class SimplestNNBot:
 
         #print(b.dtype)
         #print(type(self.mean))
-        b -= self.mean
-        b /= self.std
+        #b -= self.mean
+        #b /= self.std
         if color == 'b':
             me = BLACK
             other = WHITE
         else:
             me = WHITE
             other = BLACK
-        my_board = (b == me) * 2 - 1
-        other_board = (b == other) * 2 - 1
 
-        my_board_vect = my_board.reshape(
-            1, my_board.shape[0]*my_board.shape[1])
-        other_board_vect = other_board.reshape(
-            1, other_board.shape[0]*other_board.shape[1])
-        #print(my_board_vect.shape)
-        #print(other_board_vect.shape)
+        my_board = (b == me) * 1
+        other_board = (b == other) * 1
+        empty_board = (np.matrix([[1] * 9] * 9)) - my_board - other_board
+        my_board_vals = np.matrix([[0.0] * 9] * 9)
+        other_board_vals = np.matrix([[0.0] * 9] * 9)
+
+        label_mine, mine_labels = ndimage.label(my_board)
+        label_other, other_labels = ndimage.label(other_board)
+
+        for label in range(1, mine_labels + 1):
+            my_board_label = (label_mine == label) * 1
+            dilated = ndimage.binary_dilation(my_board_label)  # dilates a group
+            dilated = ((dilated - other_board - my_board_label) == 1)  # gets the net increase of each group
+            L = np.count_nonzero(dilated)  # L = Total number of liberties of group
+            stone_list = list(zip(np.where(my_board_label)[0], np.where(my_board_label)[1]))  # present group location
+            for location in stone_list:
+                stone_dilated = np.matrix([[0] * 9] * 9)
+                stone_dilated[location] = 1
+                stone_dilated = ndimage.binary_dilation(stone_dilated)
+                stone_liberty = (stone_dilated - other_board - my_board_label) == 1
+                sL = np.count_nonzero(stone_liberty)  # liberty per stone
+                if L == 0:
+                    break
+                my_board_vals[location] = sL / L
+
+        for label in range(1, other_labels + 1):
+            other_board_label = (label_other == label) * 1
+            dilated = ndimage.binary_dilation(other_board_label)
+            dilated = ((dilated - other_board - my_board_label) == 1)
+            L = np.count_nonzero(dilated)
+            stone_list = list(zip(np.where(other_board_label)[0], np.where(other_board_label)[1]))
+            for location in stone_list:
+                stone_dilated = np.matrix([[0] * 9] * 9)
+                stone_dilated[location] = 1
+                stone_dilated = ndimage.binary_dilation(stone_dilated)
+                stone_liberty = (stone_dilated - other_board - my_board_label) == 1
+                sL = np.count_nonzero(stone_liberty)
+                if L == 0:
+                    break
+                other_board_vals[location] = sL / L
+
+        # print (my_board_vals)
+        # print('helloooooo')
+        # print(other_board_vals)
+
+        my_board_vect = my_board_vals.reshape(
+            1, my_board_vals.shape[0] * my_board_vals.shape[1])
+        other_board_vect = other_board_vals.reshape(
+            1, other_board_vals.shape[0] * other_board_vals.shape[1])
+
         a = np.append([my_board_vect, other_board_vect], [])
         a = a.reshape(
             (1, my_board_vect.shape[1]+other_board_vect.shape[1]))
