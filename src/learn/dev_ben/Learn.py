@@ -27,55 +27,65 @@ class Learn(BaseLearn):
 
     def __init__(self):
         super().__init__()
-        self.numb_games_to_learn_from = 10
+        self.training_size = 50
 
     @staticmethod
-    def apply_transf_and_flatten(flat_move, transf_matrix):
+    def apply_transf(flat_move, transf_matrix):
+        if flat_move == 0:
+            return 0
         row = int(math.floor(flat_move / 9))
         col = int(flat_move % 9)
         coord = col, -row
-        # this matrix multiplication approach is from Yushan
         coord_transf = np.dot(transf_matrix, coord - CENTER) + CENTER
         flat_move_transf = coord_transf[1] * 9 + coord_transf[0]
         return flat_move_transf
 
-    def append_symmetry(self, X, Y, board, flat_move, transf_matrix):
-        flat_board = board.flatten()
-        y = np.array([0 for _i in range(82)])
-        if flat_move == -1:  # PASS
-            y[0] = 1
-        else:
-            flat_move_transf = self.apply_transf_and_flatten(flat_move, transf_matrix)
-            y[flat_move_transf + 1] = 1
-        return self.append_to_numpy_array(X, flat_board), self.append_to_numpy_array(Y, y)
+    def handle_data(self, training_data):
+        # ids = training_data[:, 0]
+        # colors = training_data[:, 1]
+        moves = training_data[:, 2]
+        moves += 1
+        boards = training_data[:, 3:]
 
-    @staticmethod
-    def replace_value(value):
-        if value == EMPTY:
-            return EMPTY_val
-        if value == BLACK:
-            return BLACK_val
-        if value == WHITE:
-            return WHITE_val
+        boards[boards == EMPTY] = EMPTY_val
+        boards[boards == BLACK] = BLACK_val
+        boards[boards == WHITE] = WHITE_val
 
-    def customize_color_values(self, flat_board):
-        return np.array([self.replace_value(entry) for entry in flat_board])
+        n = boards.shape[0] * 8
+        X = np.ndarray(shape=(n, 81))
+        Y = np.zeros(shape=(n, 82))
 
-    def handle_row(self, X, Y, game_id, color, flat_move, flat_board):
-        board = flat_board.reshape(9, 9)
-        hflip_board = np.fliplr(board)
-        X, Y = self.append_symmetry(X, Y, board, flat_move, identity_transf)
-        X, Y = self.append_symmetry(X, Y, np.rot90(board, 1), flat_move, rot90_transf)
-        X, Y = self.append_symmetry(X, Y, np.rot90(board, 2), flat_move, rot180_transf)
-        X, Y = self.append_symmetry(X, Y, np.rot90(board, 3), flat_move, rot270_transf)
-        X, Y = self.append_symmetry(X, Y, hflip_board, flat_move, identity_transf)
-        X, Y = self.append_symmetry(X, Y, np.rot90(hflip_board, 1), flat_move, hflip_rot90_transf)
-        X, Y = self.append_symmetry(X, Y, np.rot90(hflip_board, 2), flat_move, hflip_rot180_transf)
-        X, Y = self.append_symmetry(X, Y, np.rot90(hflip_board, 3), flat_move, hflip_rot270_transf)
+        i = 0
+        for k, board in enumerate(boards):
+            move = moves[k]
+            matrix = board.reshape(9, 9)
+            hflip_matrix = np.fliplr(matrix)
+            X[i] = board
+            Y[i][move] = 1
+            i += 1
+            X[i] = np.rot90(matrix, 1).reshape(81)
+            Y[i][self.apply_transf(move, rot90_transf)] = 1
+            i += 1
+            X[i] = np.rot90(matrix, 2).reshape(81)
+            Y[i][self.apply_transf(move, rot180_transf)] = 1
+            i += 1
+            X[i] = np.rot90(matrix, 3).reshape(81)
+            Y[i][self.apply_transf(move, rot270_transf)] = 1
+            i += 1
+            X[i] = hflip_matrix.reshape(81)
+            Y[i][self.apply_transf(move, hflip_transf)] = 1
+            i += 1
+            X[i] = np.rot90(hflip_matrix, 1).reshape(81)
+            Y[i][self.apply_transf(move, hflip_rot90_transf)] = 1
+            i += 1
+            X[i] = np.rot90(hflip_matrix, 2).reshape(81)
+            Y[i][self.apply_transf(move, hflip_rot180_transf)] = 1
+            i += 1
+            X[i] = np.rot90(hflip_matrix, 3).reshape(81)
+            Y[i][self.apply_transf(move, hflip_rot270_transf)] = 1
 
-        # TODO
-        # what to do about flipping colors? would double the 8 symmetries to 16
-        # would require komi-math... but how
+        print('X.shape:', X.shape)
+        print('Y.shape:', Y.shape)
 
         return X, Y
 

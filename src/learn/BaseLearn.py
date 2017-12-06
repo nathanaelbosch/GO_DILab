@@ -7,7 +7,7 @@ from os.path import dirname, abspath
 from abc import ABC, abstractmethod
 
 from src import Utils
-Utils.set_keras_backend("tensorflow")
+# Utils.set_keras_backend("tensorflow")
 
 project_root_dir = dirname(dirname(dirname(abspath(__file__))))
 log_dir = os.path.join(project_root_dir, 'logs')
@@ -23,12 +23,16 @@ class BaseLearn(ABC):
         self.db = sqlite3.connect(db_path)
         cursor = self.db.cursor()
         self.logger = Utils.get_unique_file_logger(self, logging.INFO)
-        self.numb_all_games = cursor.execute('SELECT COUNT(*) FROM meta').fetchone()[0]
-        self.invalid_game_ids = [_id[0] for _id in
-                                 cursor.execute('SELECT id FROM meta WHERE all_moves_imported=0').fetchall()]
-        self.log('database contains ' + str(self.numb_all_games) + ' games, ' + str(len(self.invalid_game_ids))
-                 + ' are invalid and won\'t be used for training')
-        self.numb_games_to_learn_from = self.numb_all_games  # overwrite this in your extending Learn class as desired
+        self.numb_all_games = cursor.execute(
+            'SELECT COUNT(*) FROM meta').fetchone()[0]
+        self.games_table_length = cursor.execute(
+            'SELECT COUNT(*) FROM games').fetchone()[0]
+        self.invalid_game_ids = cursor.execute(
+            'SELECT id FROM meta WHERE all_moves_imported=0').fetchall()
+        self.log('''database contains {} games,
+            {} are invalid and won\'t be used for training'''.format(
+            self.numb_all_games, len(self.invalid_game_ids)))
+        self.training_size = self.games_table_length  # override this in your Learn class as desired
 
     def log(self, msg):
         self.logger.info(msg)
@@ -47,7 +51,7 @@ class BaseLearn(ABC):
         return base
 
     @abstractmethod
-    def handle_row(self, X, Y, game_id, color, flat_move, board):
+    def handle_data(self, training_data):
         pass
 
     @abstractmethod
@@ -62,46 +66,33 @@ class BaseLearn(ABC):
     def get_path_to_self(self):
         pass
 
-    # can be overwritten by extending classes, doesn't have to though
-    def customize_color_values(self, flat_board):
-        return flat_board
-
     def run(self):
         start_time = time.time()
-        self.log('starting the training with moves from '
-                 + ('all ' if self.numb_games_to_learn_from == self.numb_all_games else '')
-                 + str(self.numb_games_to_learn_from) + ' games as input ' + self.get_path_to_self())
-        X = None
-        Y = None
-        cursor = self.db.cursor()
-        cursor.execute('SELECT * FROM games')
-        game_ids_learned_from = []
-        last_game_id = None
-        for i, row in enumerate(cursor):
-            game_id = row[0]
-            if i % 100 == 0:
-                print(str(i) + ' moves imported from ' + str(len(game_ids_learned_from)) + ' games\t'
-                      + '{0:.1f}'.format((len(game_ids_learned_from) / self.numb_games_to_learn_from) * 100) + '%')
-            if game_id in self.invalid_game_ids:
-                continue
-            if last_game_id != game_id:
-                if len(game_ids_learned_from) >= self.numb_games_to_learn_from:
-                    break
-                game_ids_learned_from.append(game_id)
-                last_game_id = game_id
-            color = row[1]
-            flat_move = row[2]
-            flat_board = self.customize_color_values(np.array(row[3:]))
-            X, Y = self.handle_row(X, Y, game_id, color, flat_move, flat_board)
+        # self.log('starting the training with moves from '
+        #          + ('all ' if self.numb_games_to_learn_from == self.numb_all_games else '')
+        #          + str(self.numb_games_to_learn_from) + ' games as input ' + self.get_path_to_self())
 
-        # SET UP AND STORE NETWORK TOPOLOGY
+        # Get data from Database
+        cursor = self.db.cursor()
+        cursor.execute('''SELECT games.*
+                          FROM games, meta
+                          WHERE games.id == meta.id
+                          AND meta.all_moves_imported!=0
+                          LIMIT ?''',
+                       [self.training_size])
+        training_data = np.array(cursor.fetchall())  # this is a gigantic array, has millions of rows
+
+        self.log('working with {} rows'.format(len(training_data)))
+        X, Y = self.handle_data(training_data)
+
+        # SET UP and STORE NETWORK TOPOLOGY as json
         model = self.setup_and_compile_model()
         architecture_path = os.path.join(dirname(self.get_path_to_self()), 'model_architecture.json')
         json_file = open(architecture_path, 'w')
         json_file.write(model.to_json())
         json_file.close()
 
-        # TRAIN AND STORE WEIGHTS
+        # TRAIN and then STORE WEIGHTS as hdf5
         self.train(model, X, Y)
         weights_path = os.path.join(dirname(self.get_path_to_self()), 'model_weights.h5')
         model.save_weights(weights_path)
@@ -112,7 +103,8 @@ class BaseLearn(ABC):
 
         # DONE
         elapsed_time = time.time() - start_time
-        self.log('training ended after ' + '{0:.0f}'.format(elapsed_time) + 's')
-        self.log('model trained on ' + str(len(X)) + ' moves from ' + str(self.numb_games_to_learn_from) + ' games')
+        self.log('training ended after {:.0f}s'.format(elapsed_time))
+        self.log('model trained on {} moves, 8 symmetries included that\'s a training size of {}'
+                 .format(self.training_size, len(X)))
         self.log('model architecture saved to: ' + architecture_path)
         self.log('model weights saved to: ' + weights_path)
