@@ -30,7 +30,9 @@ class Learn(BaseLearn):
         self.training_size = 50
 
     @staticmethod
-    def apply_transf_and_flatten(flat_move, transf_matrix):
+    def apply_transf(flat_move, transf_matrix):
+        if flat_move == 0:
+            return 0
         row = int(math.floor(flat_move / 9))
         col = int(flat_move % 9)
         coord = col, -row
@@ -39,40 +41,54 @@ class Learn(BaseLearn):
         flat_move_transf = coord_transf[1] * 9 + coord_transf[0]
         return flat_move_transf
 
-    def append_symmetry(self, X, Y, board, flat_move, transf_matrix):
-        flat_board = board.flatten()
-        y = np.array([0 for _i in range(82)])
-        if flat_move == -1:  # PASS
-            y[0] = 1
-        else:
-            flat_move_transf = self.apply_transf_and_flatten(flat_move, transf_matrix)
-            y[flat_move_transf + 1] = 1
-        return self.append_to_numpy_array(X, flat_board), self.append_to_numpy_array(Y, y)
-
     def handle_data(self, training_data):
-        ids = training_data[:, 0]
-        colors = training_data[:, 1]
+        # ids = training_data[:, 0]
+        # colors = training_data[:, 1]
         moves = training_data[:, 2]
         moves += 1
         boards = training_data[:, 3:]
 
-        # Generate y
-        y = np.zeros((moves.shape[0], 82))
-        y[np.arange(len(y)), moves] = 1
-        assert (y.sum(axis=1) == 1).all()
+        boards[boards == EMPTY] = EMPTY_val
+        boards[boards == BLACK] = BLACK_val
+        boards[boards == WHITE] = WHITE_val
 
-        # Generate X
-        X = boards
+        n = boards.shape[0] * 8
+        X = np.ndarray(shape=(n, 81))
+        Y = np.zeros(shape=(n, 82))
 
-        # Replace values as you like to do
-        X[X==BLACK] = BLACK_val
-        X[X==EMPTY] = EMPTY_val
-        X[X==WHITE] = WHITE_val
+        i = 0
+        for k, board in enumerate(boards):
+            move = moves[k]
+            matrix = board.reshape(9, 9)
+            hflip_matrix = np.fliplr(matrix)
+            X[i] = board
+            Y[i][move] = 1
+            i += 1
+            X[i] = np.rot90(matrix, 1).reshape(81)
+            Y[i][self.apply_transf(move, rot90_transf)] = 1
+            i += 1
+            X[i] = np.rot90(matrix, 2).reshape(81)
+            Y[i][self.apply_transf(move, rot180_transf)] = 1
+            i += 1
+            X[i] = np.rot90(matrix, 3).reshape(81)
+            Y[i][self.apply_transf(move, rot270_transf)] = 1
+            i += 1
+            X[i] = hflip_matrix.reshape(81)
+            Y[i][self.apply_transf(move, hflip_transf)] = 1
+            i += 1
+            X[i] = np.rot90(hflip_matrix, 1).reshape(81)
+            Y[i][self.apply_transf(move, hflip_rot90_transf)] = 1
+            i += 1
+            X[i] = np.rot90(hflip_matrix, 2).reshape(81)
+            Y[i][self.apply_transf(move, hflip_rot180_transf)] = 1
+            i += 1
+            X[i] = np.rot90(hflip_matrix, 3).reshape(81)
+            Y[i][self.apply_transf(move, hflip_rot270_transf)] = 1
 
         print('X.shape:', X.shape)
-        print('y.shape:', y.shape)
+        print('Y.shape:', Y.shape)
 
-        return X, y
+        return X, Y
 
     def setup_and_compile_model(self):
         model = Sequential()
