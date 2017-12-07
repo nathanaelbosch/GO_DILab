@@ -42,10 +42,9 @@ def get_unique_file_logger(cls, level=logging.INFO):
 # false if not, that's the case e.g. when running GTPengine directly and when building an executable of GTPengine.
 # then we can't use scipy because pyinstaller can't handle it. TODO find a better solution for this problem
 def use_scipy():
-    return str(sys.argv[0]).endswith('run.py') or \
-           str(sys.argv[0]).endswith('generate_training_data.py') or \
-           str(sys.argv[0]).endswith('BaseLearn.py') or \
-           str(sys.argv[0]).endswith('Learn.py')
+    return (str(sys.argv[0]).endswith('run.py') or
+            str(sys.argv[0]).endswith('generate_training_data.py') or
+            str(sys.argv[0]).lower().endswith('learn.py'))
 
 
 # ported to Python 3 from stackoverflow.com/a/44446822
