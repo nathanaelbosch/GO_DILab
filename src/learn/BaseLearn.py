@@ -33,6 +33,11 @@ class BaseLearn(ABC):
             {} are invalid and won\'t be used for training'''.format(
             self.numb_all_games, len(self.invalid_game_ids)))
         self.training_size = self.games_table_length  # override this in your Learn class as desired
+        self.data_retrieval_command = '''SELECT games.*
+                                          FROM games, meta
+                                          WHERE games.id == meta.id
+                                          AND meta.all_moves_imported!=0
+                                          LIMIT ?'''
 
     def log(self, msg):
         self.logger.info(msg)
@@ -133,11 +138,7 @@ class BaseLearn(ABC):
 
         # Get data from Database
         cursor = self.db.cursor()
-        cursor.execute('''SELECT games.*
-                          FROM games, meta
-                          WHERE games.id == meta.id
-                          AND meta.all_moves_imported!=0
-                          LIMIT ?''',
+        cursor.execute(self.data_retrieval_command,
                        [self.training_size])
         training_data = np.array(cursor.fetchall())  # this is a gigantic array, has millions of rows
 
