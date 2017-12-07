@@ -18,7 +18,7 @@ from src.learn.dev_nath.SimplestNNBot import SimplestNNBot
 from src.learn.dev_nath_win_prediction.WinPredictionBot import WinPredictionBot
 from src.learn.dev_ben.NNBot_ben1 import NNBot_ben1
 from src.learn.dev_yu.MovePredictionBot import MovePredictionBot
-
+from src.learn.dev_kar.LibertyNNBot import LibertyNNBot
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -29,12 +29,12 @@ def parse_args():
     parser.add_argument(
         '-p1', '--player1',
         help=('Player 1 - black - options: "human", "random", '+
-              '"random_grouping", "dev_nn_nath", "win_prediction", "dev_nn_ben" or "dev_nn_yu"'),
+              '"random_grouping", "dev_nn_nath", "win_prediction", "dev_nn_ben", "dev_nn_yu" or "dev_nn_kar"'),
         default='random')
     parser.add_argument(
         '-p2', '--player2',
         help=('Player 2 - white - options: "human", "random", '+
-              '"random_grouping", "dev_nn_nath", "win_prediction", "dev_nn_ben" or "dev_nn_yu"'),
+              '"random_grouping", "dev_nn_nath", "win_prediction", "dev_nn_ben", "dev_nn_yu" or "dev_nn_kar"'),
         default='random')
     parser.add_argument(
         '-s', '--sleep',
@@ -60,7 +60,8 @@ def main():
         'dev_nn_nath': SimplestNNBot,
         'win_prediction': WinPredictionBot,
         'dev_nn_ben': NNBot_ben1,
-        'dev_nn_yu': MovePredictionBot
+        'dev_nn_yu': MovePredictionBot,
+        'dev_nn_kar':LibertyNNBot
     }
     player1type = player_types[args.player1].__name__
     player2type = player_types[args.player2].__name__

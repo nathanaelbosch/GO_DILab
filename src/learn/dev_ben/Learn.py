@@ -4,6 +4,7 @@ import numpy as np
 
 from keras import Sequential
 from keras.layers import Dense
+from keras.utils.np_utils import to_categorical
 
 from src.learn.BaseLearn import BaseLearn
 from src.play.model.Board import EMPTY, BLACK, WHITE
@@ -27,57 +28,47 @@ class Learn(BaseLearn):
 
     def __init__(self):
         super().__init__()
-        self.numb_games_to_learn_from = 10
+        self.training_size = 500
 
     @staticmethod
-    def apply_transf_and_flatten(flat_move, transf_matrix):
+    def apply_transf(flat_move, transf_matrix):
+        if flat_move == 0:
+            return 0
         row = int(math.floor(flat_move / 9))
         col = int(flat_move % 9)
         coord = col, -row
-        # this matrix multiplication approach is from Yushan
         coord_transf = np.dot(transf_matrix, coord - CENTER) + CENTER
         flat_move_transf = coord_transf[1] * 9 + coord_transf[0]
         return flat_move_transf
 
-    def append_symmetry(self, X, Y, board, flat_move, transf_matrix):
-        flat_board = self.flatten_matrix(board)
-        y = np.array([0 for _i in range(82)])
-        if flat_move == -1:  # PASS
-            y[0] = 1
-        else:
-            flat_move_transf = self.apply_transf_and_flatten(flat_move, transf_matrix)
-            y[flat_move_transf + 1] = 1
-        return self.append_to_numpy_array(X, flat_board), self.append_to_numpy_array(Y, y)
+    def handle_data(self, training_data):
+        # ids = training_data[:, 0]
+        # colors = training_data[:, 1]
+        moves = training_data[:, 2]
+        boards = training_data[:, 3:]
 
-    @staticmethod
-    def replace_value(value):
-        if value == EMPTY:
-            return EMPTY_val
-        if value == BLACK:
-            return BLACK_val
-        if value == WHITE:
-            return WHITE_val
+        # Generate y
+        moves[moves==-1] = 81
+        y = to_categorical(moves)
+        assert y.shape[1] == 82
+        assert (y.sum(axis=1) == 1).all()
 
-    def customize_color_values(self, flat_board):
-        return np.array([self.replace_value(entry) for entry in flat_board])
+        # Generate X
+        X = boards.astype(np.float64)
 
-    def handle_row(self, X, Y, game_id, color, flat_move, flat_board):
-        board = flat_board.reshape(9, 9)
-        hflip_board = np.fliplr(board)
-        X, Y = self.append_symmetry(X, Y, board, flat_move, identity_transf)
-        X, Y = self.append_symmetry(X, Y, np.rot90(board, 1), flat_move, rot90_transf)
-        X, Y = self.append_symmetry(X, Y, np.rot90(board, 2), flat_move, rot180_transf)
-        X, Y = self.append_symmetry(X, Y, np.rot90(board, 3), flat_move, rot270_transf)
-        X, Y = self.append_symmetry(X, Y, hflip_board, flat_move, identity_transf)
-        X, Y = self.append_symmetry(X, Y, np.rot90(hflip_board, 1), flat_move, hflip_rot90_transf)
-        X, Y = self.append_symmetry(X, Y, np.rot90(hflip_board, 2), flat_move, hflip_rot180_transf)
-        X, Y = self.append_symmetry(X, Y, np.rot90(hflip_board, 3), flat_move, hflip_rot270_transf)
+        # Replace values as you like to do
+        X[X==BLACK] = BLACK_val
+        X[X==EMPTY] = EMPTY_val
+        X[X==WHITE] = WHITE_val
+        assert X[0, 0] in [BLACK_val, EMPTY_val, WHITE_val]
 
-        # TODO
-        # what to do about flipping colors? would double the 8 symmetries to 16
-        # would require komi-math... but how
+        # Generate symmetries:
+        X, y = self.get_symmetries(X, y)
 
-        return X, Y
+        print('X.shape:', X.shape)
+        print('Y.shape:', y.shape)
+
+        return X, y
 
     def setup_and_compile_model(self):
         model = Sequential()

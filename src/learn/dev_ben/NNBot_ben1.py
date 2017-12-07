@@ -5,9 +5,7 @@ from src.learn.BaseNNBot import BaseNNBot
 from src.play.model.Board import EMPTY, BLACK, WHITE
 from src.play.model.Move import Move
 
-EMPTY_val = 0.45
-BLACK_val = -1.35
-WHITE_val = 1.05
+from src.learn.dev_ben.Learn import EMPTY_val, BLACK_val, WHITE_val
 
 
 class NNBot_ben1(BaseNNBot):
@@ -18,29 +16,32 @@ class NNBot_ben1(BaseNNBot):
     def get_path_to_self(self):
         return abspath(__file__)
 
-    @staticmethod
-    def replace_value(value):
-        if value == EMPTY:
-            return EMPTY_val
-        if value == BLACK:
-            return BLACK_val
-        if value == WHITE:
-            return WHITE_val
-
     def customize_color_values(self, flat_board):
-        return np.array([self.replace_value(entry) for entry in flat_board])
+        flat_board[flat_board==BLACK] = BLACK_val
+        flat_board[flat_board==EMPTY] = EMPTY_val
+        flat_board[flat_board==WHITE] = WHITE_val
+        return flat_board
 
     def _genmove(self, color, game, flat_board):
-        predict = self.model.predict(np.array([flat_board]))
+        flat_board = flat_board.reshape(1, len(flat_board))
+        predict = self.model.predict(flat_board)[0]
         max_idx = np.argmax(predict)
-        if max_idx is 0:
+        if max_idx == 82:
             return Move(is_pass=True)
         else:
-            board = predict[0][1:]  # strip away the pass-slot at pos zero
+            print(predict.shape)
+            board = predict[:-1]  # strip away the pass-slot at pos 82
+            print(board.shape)
             # set all invalid locations to 0 to avoid them being chosen
             for move in game.get_invalid_locations(color):
                 flat_idx = move.to_flat_idx(game.size)
                 board[flat_idx] = 0
+            print(board)
             max_idx = np.argmax(board)
-            row, col = self.deflatten_move(max_idx)
-            return Move(col=col, row=row)
+            print(max_idx)
+
+            # If this move is invalid pass!
+            if board[max_idx] == 0:
+                return Move(is_pass=True)
+
+            return Move.from_flat_idx(max_idx)

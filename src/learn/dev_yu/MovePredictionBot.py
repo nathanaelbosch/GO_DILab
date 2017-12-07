@@ -50,7 +50,7 @@ class MovePredictionBot:
             # set all invalid locations to 0 to avoid them being chosen
             for move in game.get_invalid_locations(color):
                 flat_idx = move.to_flat_idx(game.size)
-                board[flat_idx] = 0
+                board[flat_idx] = -1
             max_idx = np.argmax(board)
             row = int(math.floor(max_idx / game.size))
             col = int(max_idx % game.size)

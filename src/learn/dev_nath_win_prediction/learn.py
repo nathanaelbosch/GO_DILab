@@ -1,90 +1,88 @@
-"""Learn from the training data"""
-import random as rn
-import pandas as pd
-import os
+from os.path import abspath
 import numpy as np
-from sklearn.model_selection import train_test_split
+import sqlite3
 
 from keras.models import Sequential
 from keras.layers import Dense, Dropout
+from keras.utils.np_utils import to_categorical
 
-DIR = 'data/training_data/simplest_move_prediction'
-DEV_PATH = 'src/learn/dev_nath_win_prediction'
-np.random.seed(123)  # for reproducibility
-
-
-# from tensorflow.python.client import device_lib
-# print(device_lib.list_local_devices())
+from src.learn.BaseLearn import BaseLearn
+from src.play.model.Board import EMPTY, BLACK, WHITE
 
 
-# 1. Get data
-def list_all_csv_files(dir):
-    """List all sgf-files in a dir
+class Learn(BaseLearn):
 
-    Recursively explores a path and returns the filepaths
-    for all files ending in .sgf
-    """
-    root_dir = os.path.abspath(dir)
-    sgf_files = []
-    for root, sub_dirs, files in os.walk(root_dir):
-        for file in files:
-            path = os.path.join(root, file)
-            name, extension = os.path.splitext(path)
-            if extension == '.csv':
-                sgf_files.append(path)
-    return sgf_files
+    def __init__(self):
+        super().__init__()
+        self.training_size = 100000
+        self.data_retrieval_command = '''SELECT games.*, meta.result_text
+                                         FROM games, meta
+                                         WHERE games.id == meta.id
+                                         AND meta.all_moves_imported!=0
+                                         ORDER BY RANDOM()
+                                         LIMIT ?'''
 
+    def handle_data(self, training_data):
+        results_array = training_data[:, -1]
+        # ids = training_data[:, 0]
+        # colors = training_data[:, 1]
+        moves = training_data[:, 2].astype(int)
+        boards = training_data[:, 3:-1].astype(np.float64)
 
-def main():
-    file = os.path.join(DEV_PATH, '5000_games.npy')
+        # Moves as categorical data
+        moves[moves==-1] = 81
+        moves_categorical = to_categorical(moves)
+        assert moves_categorical.shape[1] == 82
+        assert (moves_categorical.sum(axis=1) == 1).all()
 
-    in_size = 2*9*9
-    data = np.load(file)
-    print(data.shape)
-    X = data[:, :(in_size)]
-    y = data[:, in_size:]
+        # Generate symmetries:
+        boards, moves_categorical, results_array = self.get_symmetries(
+            boards, moves_categorical, other_data=results_array)
 
-    # with open(os.path.join(DEV_PATH, 'mean_var.txt'), 'w') as f:
-    #     f.write(str(np.mean(X)))
-    #     f.write('\n')
-    #     X -= np.mean(X)
-    #     # print(np.std(X))
-    #     f.write(str(np.std(X)))
-    #     f.write('\n')
-    #     X /= np.std(X)
+        # Input: Board
+        X = np.concatenate(
+            ((boards==WHITE)*3 - 1,
+             (boards==BLACK)*3 - 1,
+             (boards==EMPTY)*3 - 1),
+            axis=1)
+        X = X / np.sqrt(2)
+        print('X.mean():', X.mean())
+        print('X.var():', X.var())
 
-    # Split into 67% for train and 33% for test
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.1)
-    print(X_train[0].shape)
-    print(y_train[0].shape)
+        # Output: Result
+        results = np.chararray(results_array.shape)
+        results[:] = results_array[:]
+        black_wins = results.lower().startswith(b'b')[:, None]
+        white_wins = results.lower().startswith(b'w')[:, None]
+        # draws = results.lower().startswith('D')
+        y = np.concatenate((black_wins, white_wins), axis=1)
 
-    # Create model
-    in_dim = X_train.shape[1]
-    out_dim = y_train.shape[1]
-    model = Sequential()
-    model.add(Dense(100, input_dim=in_dim, activation='relu'))
-    model.add(Dropout(0.75))
-    model.add(Dense(100, activation='relu'))
-    model.add(Dropout(0.75))
-    model.add(Dense(out_dim, activation='softmax'))
+        print('X.shape:', X.shape)
+        print('Y.shape:', y.shape)
 
-    # Compile model
-    model.compile(
-        loss='binary_crossentropy',
-        # loss='mean_squared_error',
-        optimizer='adam',
-        metrics=['accuracy'])
+        return X, y
 
-    # Fit model
-    model.fit(X_train, y_train, epochs=10, batch_size=1000)
+    def setup_and_compile_model(self):
+        model = Sequential()
+        model.add(Dense(200, input_dim=self.input_dim, activation='relu'))
+        model.add(Dropout(0.5))
+        model.add(Dense(400, input_dim=self.input_dim, activation='relu'))
+        model.add(Dropout(0.5))
+        model.add(Dense(200, input_dim=self.input_dim, activation='relu'))
+        model.add(Dropout(0.5))
+        model.add(Dense(self.output_dim, activation='softmax'))
+        model.compile(
+            loss='binary_crossentropy',
+            optimizer='adam',
+            metrics=['accuracy'])
+        return model
 
-    # Evaluate model
-    scores = model.evaluate(X_test, y_test)
-    print('\n{:s}: {:.2f}'.format(model.metrics_names[1], scores[1]*100))
+    def train(self, model, X, Y):
+        model.fit(X, Y, epochs=8, batch_size=10000)
 
-    model.save(os.path.join(DEV_PATH, 'model.h5'))
+    def get_path_to_self(self):
+        return abspath(__file__)
 
 
 if __name__ == '__main__':
-    main()
+    Learn().run()
