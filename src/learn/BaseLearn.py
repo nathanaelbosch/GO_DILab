@@ -7,11 +7,11 @@ from os.path import dirname, abspath
 from abc import ABC, abstractmethod
 
 from src import Utils
-# Utils.set_keras_backend("tensorflow")
+Utils.set_keras_backend("tensorflow")
 
 project_root_dir = dirname(dirname(dirname(abspath(__file__))))
 log_dir = os.path.join(project_root_dir, 'logs')
-db_path = os.path.join(project_root_dir, 'data', 'db.sqlite')
+db_path = os.path.join(project_root_dir, 'data', 'half_db.sqlite')
 if not os.path.exists(db_path):
     print('no db found at: ' + db_path)
     exit(1)
@@ -117,11 +117,10 @@ class BaseLearn(ABC):
         moves = moves.reshape((moves.shape[0], 81))
         passes = np.concatenate(
             (passes, passes, passes, passes, passes, passes, passes, passes))
-        print(passes[:, None].shape)
         moves = np.concatenate((moves, passes[:, None]), axis=1)
 
-        print('boards.shape:', boards.shape)
-        print('moves.shape:', moves.shape)
+        # print('boards.shape:', boards.shape)
+        # print('moves.shape:', moves.shape)
         if other_data is not None:
             other_data = np.concatenate(
                 (other_data, other_data, other_data, other_data,
@@ -145,6 +144,11 @@ class BaseLearn(ABC):
         self.log('working with {} rows'.format(len(training_data)))
         X, y = self.handle_data(training_data)
 
+        # Save input and output dimensions for easier, more modular use
+        # Implicit assumtion is that X, y are two-dimensional
+        self.input_dim = X.shape[1]
+        self.output_dim = y.shape[1]
+
         # SET UP AND STORE NETWORK TOPOLOGY
         model = self.setup_and_compile_model()
         architecture_path = os.path.join(dirname(self.get_path_to_self()), 'model_architecture.json')
@@ -158,8 +162,8 @@ class BaseLearn(ABC):
         model.save_weights(weights_path)
 
         # EVALUATE
-        scores = model.evaluate(X, y)
-        print("\n%s: %.2f%%" % (model.metrics_names[1], scores[1] * 100))
+        # scores = model.evaluate(X, y)
+        # print("\n%s: %.2f%%" % (model.metrics_names[1], scores[1] * 100))
 
         # DONE
         elapsed_time = time.time() - start_time
