@@ -25,6 +25,9 @@ class WinPredictionBot(BaseNNBot):
         X = X / np.sqrt(2)
         return X
 
+    def __str__(self):
+        return 'WinPredictionBot'
+
     def _genmove(self, color, game, flat_board):
         flat_board = flat_board.reshape(1, len(flat_board))
 

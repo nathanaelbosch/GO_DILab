@@ -1,9 +1,9 @@
 from os.path import abspath
-import math
 import numpy as np
+import sqlite3
 
-from keras import Sequential
-from keras.layers import Dense
+from keras.models import Sequential
+from keras.layers import Dense, Dropout
 from keras.utils.np_utils import to_categorical
 
 from src.learn.BaseLearn import BaseLearn
@@ -14,12 +14,13 @@ class Learn(BaseLearn):
 
     def __init__(self):
         super().__init__()
-        self.training_size = 50000000
+        self.training_size = 100000
         self.data_retrieval_command = '''SELECT games.*, meta.result_text
-                                          FROM games, meta
-                                          WHERE games.id == meta.id
-                                          AND meta.all_moves_imported!=0
-                                          LIMIT ?'''
+                                         FROM games, meta
+                                         WHERE games.id == meta.id
+                                         AND meta.all_moves_imported!=0
+                                         ORDER BY RANDOM()
+                                         LIMIT ?'''
 
     def handle_data(self, training_data):
         results_array = training_data[:, -1]
@@ -51,10 +52,9 @@ class Learn(BaseLearn):
         # Output: Result
         results = np.chararray(results_array.shape)
         results[:] = results_array[:]
-        black_wins = results.lower().startswith(b'B')[:, None]
-        white_wins = results.lower().startswith(b'W')[:, None]
+        black_wins = results.lower().startswith(b'b')[:, None]
+        white_wins = results.lower().startswith(b'w')[:, None]
         # draws = results.lower().startswith('D')
-        print(black_wins.shape)
         y = np.concatenate((black_wins, white_wins), axis=1)
 
         print('X.shape:', X.shape)
@@ -65,6 +65,11 @@ class Learn(BaseLearn):
     def setup_and_compile_model(self):
         model = Sequential()
         model.add(Dense(200, input_dim=self.input_dim, activation='relu'))
+        model.add(Dropout(0.5))
+        model.add(Dense(400, input_dim=self.input_dim, activation='relu'))
+        model.add(Dropout(0.5))
+        model.add(Dense(200, input_dim=self.input_dim, activation='relu'))
+        model.add(Dropout(0.5))
         model.add(Dense(self.output_dim, activation='softmax'))
         model.compile(
             loss='binary_crossentropy',
@@ -73,7 +78,7 @@ class Learn(BaseLearn):
         return model
 
     def train(self, model, X, Y):
-        model.fit(X, Y, epochs=1)
+        model.fit(X, Y, epochs=8, batch_size=10000)
 
     def get_path_to_self(self):
         return abspath(__file__)
