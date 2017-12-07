@@ -28,27 +28,18 @@ class Learn(BaseLearn):
 
     def __init__(self):
         super().__init__()
-        self.training_size = 50000
+        self.training_size = 500
 
     @staticmethod
-    def apply_transf_and_flatten(flat_move, transf_matrix):
+    def apply_transf(flat_move, transf_matrix):
+        if flat_move == 0:
+            return 0
         row = int(math.floor(flat_move / 9))
         col = int(flat_move % 9)
         coord = col, -row
-        # this matrix multiplication approach is from Yushan
         coord_transf = np.dot(transf_matrix, coord - CENTER) + CENTER
         flat_move_transf = coord_transf[1] * 9 + coord_transf[0]
         return flat_move_transf
-
-    def append_symmetry(self, X, Y, board, flat_move, transf_matrix):
-        flat_board = board.flatten()
-        y = np.array([0 for _i in range(82)])
-        if flat_move == -1:  # PASS
-            y[0] = 1
-        else:
-            flat_move_transf = self.apply_transf_and_flatten(flat_move, transf_matrix)
-            y[flat_move_transf + 1] = 1
-        return self.append_to_numpy_array(X, flat_board), self.append_to_numpy_array(Y, y)
 
     def get_symmetries(self, boards, moves):
         """Given arramovess containing boards and moves recreate all smovesmmetries
@@ -108,15 +99,15 @@ class Learn(BaseLearn):
 
 
     def handle_data(self, training_data):
-        ids = training_data[:, 0]
-        colors = training_data[:, 1]
+        # ids = training_data[:, 0]
+        # colors = training_data[:, 1]
         moves = training_data[:, 2]
         boards = training_data[:, 3:]
 
         # Generate y
         moves[moves==-1] = 81
-        y = np.zeros((moves.shape[0], 82))
         y = to_categorical(moves)
+        assert y.shape[1] == 82
         assert (y.sum(axis=1) == 1).all()
 
         # Generate X
@@ -132,7 +123,7 @@ class Learn(BaseLearn):
         X, y = self.get_symmetries(X, y)
 
         print('X.shape:', X.shape)
-        print('y.shape:', y.shape)
+        print('Y.shape:', y.shape)
 
         return X, y
 
