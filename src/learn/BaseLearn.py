@@ -42,14 +42,6 @@ class BaseLearn(ABC):
     def get_sgf(self, game_id):
         return self.db.cursor().execute('SELECT sgf_content FROM meta WHERE id=?', (game_id,)).fetchone()[0]
 
-    @staticmethod
-    def append_to_numpy_array(base, new):
-        if base is None:
-            base = np.array([new])
-        else:
-            base = np.vstack((base, new))
-        return base
-
     @abstractmethod
     def handle_data(self, training_data):
         pass
@@ -83,28 +75,28 @@ class BaseLearn(ABC):
         training_data = np.array(cursor.fetchall())  # this is a gigantic array, has millions of rows
 
         self.log('working with {} rows'.format(len(training_data)))
-        X, Y = self.handle_data(training_data)
+        X, y = self.handle_data(training_data)
 
-        # SET UP and STORE NETWORK TOPOLOGY as json
+        # SET UP AND STORE NETWORK TOPOLOGY
         model = self.setup_and_compile_model()
         architecture_path = os.path.join(dirname(self.get_path_to_self()), 'model_architecture.json')
         json_file = open(architecture_path, 'w')
         json_file.write(model.to_json())
         json_file.close()
 
-        # TRAIN and then STORE WEIGHTS as hdf5
-        self.train(model, X, Y)
+        # TRAIN AND STORE WEIGHTS
+        self.train(model, X, y)
         weights_path = os.path.join(dirname(self.get_path_to_self()), 'model_weights.h5')
         model.save_weights(weights_path)
 
         # EVALUATE
-        scores = model.evaluate(X, Y)
+        scores = model.evaluate(X, y)
         print("\n%s: %.2f%%" % (model.metrics_names[1], scores[1] * 100))
 
         # DONE
         elapsed_time = time.time() - start_time
         self.log('training ended after {:.0f}s'.format(elapsed_time))
-        self.log('model trained on {} moves, 8 symmetries included that\'s a training size of {}'
-                 .format(self.training_size, len(X)))
+        self.log('model trained on {} moves from {} games'.format(
+                 len(X), self.numb_all_games))
         self.log('model architecture saved to: ' + architecture_path)
         self.log('model weights saved to: ' + weights_path)

@@ -4,6 +4,7 @@ import numpy as np
 
 from keras import Sequential
 from keras.layers import Dense
+from keras.utils.np_utils import to_categorical
 
 from src.learn.BaseLearn import BaseLearn
 from src.play.model.Board import EMPTY, BLACK, WHITE
@@ -27,7 +28,7 @@ class Learn(BaseLearn):
 
     def __init__(self):
         super().__init__()
-        self.training_size = 50
+        self.training_size = 500
 
     @staticmethod
     def apply_transf(flat_move, transf_matrix):
@@ -40,54 +41,91 @@ class Learn(BaseLearn):
         flat_move_transf = coord_transf[1] * 9 + coord_transf[0]
         return flat_move_transf
 
+    def get_symmetries(self, boards, moves):
+        """Given arramovess containing boards and moves recreate all smovesmmetries
+
+        Also checks if moves are given using one-hot encoding alreadmoves
+        """
+        # print(boards.shape)
+        boards = boards.reshape((boards.shape[0], 9, 9))
+
+        passes, moves = moves[:, 81], moves[:, :81]
+        moves = moves.reshape((moves.shape[0], 9, 9))
+
+        boards_90 = np.rot90(boards, axes=(1, 2))
+        moves_90 = np.rot90(moves, axes=(1, 2))
+        boards_180 = np.rot90(boards, k=2, axes=(1, 2))
+        moves_180 = np.rot90(moves, k=2, axes=(1, 2))
+        boards_270 = np.rot90(boards, k=3, axes=(1, 2))
+        moves_270 = np.rot90(moves, k=3, axes=(1, 2))
+        boards_flipped = np.fliplr(boards)
+        moves_flipped = np.fliplr(moves)
+        boards_flipped_90 = np.rot90(np.fliplr(boards), axes=(1, 2))
+        moves_flipped_90 = np.rot90(np.fliplr(moves), axes=(1, 2))
+        boards_flipped_180 = np.rot90(np.fliplr(boards), k=2, axes=(1, 2))
+        moves_flipped_180 = np.rot90(np.fliplr(moves), k=2, axes=(1, 2))
+        boards_flipped_270 = np.rot90(np.fliplr(boards), k=3, axes=(1, 2))
+        moves_flipped_270 = np.rot90(np.fliplr(moves), k=3, axes=(1, 2))
+
+        boards = np.concatenate((
+            boards,
+            boards_90,
+            boards_180,
+            boards_270,
+            boards_flipped,
+            boards_flipped_90,
+            boards_flipped_180,
+            boards_flipped_270))
+        boards = boards.reshape((boards.shape[0], 81))
+
+        moves = np.concatenate((
+            moves,
+            moves_90,
+            moves_180,
+            moves_270,
+            moves_flipped,
+            moves_flipped_90,
+            moves_flipped_180,
+            moves_flipped_270))
+        moves = moves.reshape((moves.shape[0], 81))
+        passes = np.concatenate(
+            (passes, passes, passes, passes, passes, passes, passes, passes))
+        print(passes[:, None].shape)
+        moves = np.concatenate((moves, passes[:, None]), axis=1)
+
+        print('boards.shape:', boards.shape)
+        print('moves.shape:', moves.shape)
+        return boards, moves
+
+
     def handle_data(self, training_data):
         # ids = training_data[:, 0]
         # colors = training_data[:, 1]
         moves = training_data[:, 2]
-        moves += 1
         boards = training_data[:, 3:]
 
-        boards[boards == EMPTY] = EMPTY_val
-        boards[boards == BLACK] = BLACK_val
-        boards[boards == WHITE] = WHITE_val
+        # Generate y
+        moves[moves==-1] = 81
+        y = to_categorical(moves)
+        assert y.shape[1] == 82
+        assert (y.sum(axis=1) == 1).all()
 
-        n = boards.shape[0] * 8
-        X = np.ndarray(shape=(n, 81))
-        Y = np.zeros(shape=(n, 82))
+        # Generate X
+        X = boards.astype(np.float64)
 
-        i = 0
-        for k, board in enumerate(boards):
-            move = moves[k]
-            matrix = board.reshape(9, 9)
-            hflip_matrix = np.fliplr(matrix)
-            X[i] = board
-            Y[i][move] = 1
-            i += 1
-            X[i] = np.rot90(matrix, 1).reshape(81)
-            Y[i][self.apply_transf(move, rot90_transf)] = 1
-            i += 1
-            X[i] = np.rot90(matrix, 2).reshape(81)
-            Y[i][self.apply_transf(move, rot180_transf)] = 1
-            i += 1
-            X[i] = np.rot90(matrix, 3).reshape(81)
-            Y[i][self.apply_transf(move, rot270_transf)] = 1
-            i += 1
-            X[i] = hflip_matrix.reshape(81)
-            Y[i][self.apply_transf(move, hflip_transf)] = 1
-            i += 1
-            X[i] = np.rot90(hflip_matrix, 1).reshape(81)
-            Y[i][self.apply_transf(move, hflip_rot90_transf)] = 1
-            i += 1
-            X[i] = np.rot90(hflip_matrix, 2).reshape(81)
-            Y[i][self.apply_transf(move, hflip_rot180_transf)] = 1
-            i += 1
-            X[i] = np.rot90(hflip_matrix, 3).reshape(81)
-            Y[i][self.apply_transf(move, hflip_rot270_transf)] = 1
+        # Replace values as you like to do
+        X[X==BLACK] = BLACK_val
+        X[X==EMPTY] = EMPTY_val
+        X[X==WHITE] = WHITE_val
+        assert X[0, 0] in [BLACK_val, EMPTY_val, WHITE_val]
+
+        # Generate symmetries:
+        X, y = self.get_symmetries(X, y)
 
         print('X.shape:', X.shape)
-        print('Y.shape:', Y.shape)
+        print('Y.shape:', y.shape)
 
-        return X, Y
+        return X, y
 
     def setup_and_compile_model(self):
         model = Sequential()
