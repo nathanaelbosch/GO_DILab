@@ -14,6 +14,7 @@ from src.learn.dev_nath.SimplestNNBot import SimplestNNBot
 from src.learn.dev_nath_win_prediction.WinPredictionBot import WinPredictionBot
 from src.learn.dev_ben.NNBot_ben1 import NNBot_ben1
 from src.learn.dev_yu.MovePredictionBot import MovePredictionBot
+from src.learn.dev_kar.LibertyNNBot import LibertyNNBot
 
 
 class GTPengine:
@@ -58,7 +59,8 @@ class GTPengine:
             SimplestNNBot,
             WinPredictionBot,
             NNBot_ben1,
-            MovePredictionBot
+            MovePredictionBot,
+            LibertyNNBot
         ]
         for player_type in player_types_arr:
             self.player_types[player_type.__name__.lower()] = player_type
