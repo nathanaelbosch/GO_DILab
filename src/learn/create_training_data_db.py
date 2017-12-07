@@ -19,6 +19,7 @@ db_path = os.path.join(data_dir, db_name)
 
 if os.path.exists(db_path):
     print('connecting to existing db: ' + db_name)
+    os.remove(db_path)
 else:
     print('creating new db and connecting to it: ' + db_name)
 
@@ -36,7 +37,15 @@ def setup():
     cursor.execute(
         '''CREATE TABLE meta(id INTEGER PRIMARY KEY,
                              all_moves_imported INTEGER,
-                             sgf_content TEXT)''')
+                             sgf_content TEXT,
+                             komi REAL,
+                             size INT,
+                             rules TEXT,
+                             result_text TEXT,
+                             result_B_minus_W REAL,
+                             rank_black INT,
+                             rank_white INT,
+                             turns INT)''')
     db.commit()
     cursor.execute('CREATE TABLE games(id INTEGER, color INTEGER, move INTEGER'
                    + ''.join([', ' + _str + ' INTEGER' for _str in flat_matrix_table_column_names]) + ')')
@@ -55,6 +64,7 @@ def game_to_database(sgf_content, game_id):
 
     collection = sgf.parse(sgf_content)
     game_tree = collection.children[0]
+    game_properties = game_tree.nodes[0].properties
     moves = game_tree.nodes[1:]
     board = Board([[EMPTY] * 9] * 9)
 
@@ -75,18 +85,36 @@ def game_to_database(sgf_content, game_id):
             _row = string.ascii_lowercase.index(sgf_move[1])
             _col = string.ascii_lowercase.index(sgf_move[0])
             flat_move = _row * 9 + _col
-            board.place_stone_and_capture_if_applicable_default_values((_row, _col), player_val)
 
         values = [game_id, player_val, flat_move]
         flat_matrix = [val for _row in board.tolist() for val in _row]
         values.extend(flat_matrix)
         cursor.execute(table_insert_command, values)
 
+        # Apply move only at the end
+        if flat_move != -1:
+            board.place_stone_and_capture_if_applicable_default_values((_row, _col), player_val)
+
+    # Insert some data about this game into the `meta` table
     cursor.execute('''INSERT INTO meta(id,
                                        all_moves_imported,
-                                       sgf_content)
-                      VALUES (?, ?, ?)''',
-                   (game_id, all_moves_imported, sgf_content))
+                                       sgf_content,
+                                       turns,
+                                       komi,
+                                       size,
+                                       result_text,
+                                       rank_black, rank_white)
+                      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)''',
+                   (game_id,
+                    all_moves_imported,
+                    sgf_content,
+                    len(moves),
+                    game_properties['KM'][0],
+                    game_properties['SZ'][0],
+                    game_properties['RE'][0],
+                    game_properties['WR'][0],
+                    game_properties['BR'][0],
+                    ))
     db.commit()
 
 
