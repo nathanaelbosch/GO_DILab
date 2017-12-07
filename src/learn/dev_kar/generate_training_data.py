@@ -95,14 +95,14 @@ def to_numpy(game, move, player):
     for label in range(1,other_labels+1):
         other_board_label = (label_other == label) * 1
         dilated = ndimage.binary_dilation(other_board_label)
-        dilated = ((dilated - other_board - my_board_label)==1)
+        dilated = ((dilated - other_board_label - my_board)==1)
         L = np.count_nonzero(dilated)
         stone_list = list(zip(np.where(other_board_label)[0],np.where(other_board_label)[1]))
         for location in stone_list:
             stone_dilated = np.matrix([[0]*9]*9)
             stone_dilated[location] = 1
             stone_dilated = ndimage.binary_dilation(stone_dilated)
-            stone_liberty = (stone_dilated - other_board - my_board_label) == 1
+            stone_liberty = (stone_dilated - other_board_label - my_board) == 1
             sL = np.count_nonzero(stone_liberty)
             if L == 0:
                 break
