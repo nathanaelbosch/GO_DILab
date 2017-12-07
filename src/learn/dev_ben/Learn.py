@@ -41,63 +41,6 @@ class Learn(BaseLearn):
         flat_move_transf = coord_transf[1] * 9 + coord_transf[0]
         return flat_move_transf
 
-    def get_symmetries(self, boards, moves):
-        """Given arramovess containing boards and moves recreate all smovesmmetries
-
-        Also checks if moves are given using one-hot encoding alreadmoves
-        """
-        # print(boards.shape)
-        boards = boards.reshape((boards.shape[0], 9, 9))
-
-        passes, moves = moves[:, 81], moves[:, :81]
-        moves = moves.reshape((moves.shape[0], 9, 9))
-
-        boards_90 = np.rot90(boards, axes=(1, 2))
-        moves_90 = np.rot90(moves, axes=(1, 2))
-        boards_180 = np.rot90(boards, k=2, axes=(1, 2))
-        moves_180 = np.rot90(moves, k=2, axes=(1, 2))
-        boards_270 = np.rot90(boards, k=3, axes=(1, 2))
-        moves_270 = np.rot90(moves, k=3, axes=(1, 2))
-        boards_flipped = np.fliplr(boards)
-        moves_flipped = np.fliplr(moves)
-        boards_flipped_90 = np.rot90(np.fliplr(boards), axes=(1, 2))
-        moves_flipped_90 = np.rot90(np.fliplr(moves), axes=(1, 2))
-        boards_flipped_180 = np.rot90(np.fliplr(boards), k=2, axes=(1, 2))
-        moves_flipped_180 = np.rot90(np.fliplr(moves), k=2, axes=(1, 2))
-        boards_flipped_270 = np.rot90(np.fliplr(boards), k=3, axes=(1, 2))
-        moves_flipped_270 = np.rot90(np.fliplr(moves), k=3, axes=(1, 2))
-
-        boards = np.concatenate((
-            boards,
-            boards_90,
-            boards_180,
-            boards_270,
-            boards_flipped,
-            boards_flipped_90,
-            boards_flipped_180,
-            boards_flipped_270))
-        boards = boards.reshape((boards.shape[0], 81))
-
-        moves = np.concatenate((
-            moves,
-            moves_90,
-            moves_180,
-            moves_270,
-            moves_flipped,
-            moves_flipped_90,
-            moves_flipped_180,
-            moves_flipped_270))
-        moves = moves.reshape((moves.shape[0], 81))
-        passes = np.concatenate(
-            (passes, passes, passes, passes, passes, passes, passes, passes))
-        print(passes[:, None].shape)
-        moves = np.concatenate((moves, passes[:, None]), axis=1)
-
-        print('boards.shape:', boards.shape)
-        print('moves.shape:', moves.shape)
-        return boards, moves
-
-
     def handle_data(self, training_data):
         # ids = training_data[:, 0]
         # colors = training_data[:, 1]

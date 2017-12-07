@@ -58,6 +58,73 @@ class BaseLearn(ABC):
     def get_path_to_self(self):
         pass
 
+    @staticmethod
+    def get_symmetries(boards, moves, other_data=None):
+        """Given array containing boards and moves recreate all symmetries
+
+        Right now it assumes that moves are given as categorical data already.
+        Output arrays will be 8 times as long as the input data, to help
+        keeping this in line with the other data you want to use for your
+        training you can pass an additional array to `other_data` which will
+        be returned with the adjusted length. Lines will still match.
+        """
+        # print(boards.shape)
+        boards = boards.reshape((boards.shape[0], 9, 9))
+
+        passes, moves = moves[:, 81], moves[:, :81]
+        moves = moves.reshape((moves.shape[0], 9, 9))
+
+        boards_90 = np.rot90(boards, axes=(1, 2))
+        moves_90 = np.rot90(moves, axes=(1, 2))
+        boards_180 = np.rot90(boards, k=2, axes=(1, 2))
+        moves_180 = np.rot90(moves, k=2, axes=(1, 2))
+        boards_270 = np.rot90(boards, k=3, axes=(1, 2))
+        moves_270 = np.rot90(moves, k=3, axes=(1, 2))
+        boards_flipped = np.fliplr(boards)
+        moves_flipped = np.fliplr(moves)
+        boards_flipped_90 = np.rot90(np.fliplr(boards), axes=(1, 2))
+        moves_flipped_90 = np.rot90(np.fliplr(moves), axes=(1, 2))
+        boards_flipped_180 = np.rot90(np.fliplr(boards), k=2, axes=(1, 2))
+        moves_flipped_180 = np.rot90(np.fliplr(moves), k=2, axes=(1, 2))
+        boards_flipped_270 = np.rot90(np.fliplr(boards), k=3, axes=(1, 2))
+        moves_flipped_270 = np.rot90(np.fliplr(moves), k=3, axes=(1, 2))
+
+        boards = np.concatenate((
+            boards,
+            boards_90,
+            boards_180,
+            boards_270,
+            boards_flipped,
+            boards_flipped_90,
+            boards_flipped_180,
+            boards_flipped_270))
+        boards = boards.reshape((boards.shape[0], 81))
+
+        moves = np.concatenate((
+            moves,
+            moves_90,
+            moves_180,
+            moves_270,
+            moves_flipped,
+            moves_flipped_90,
+            moves_flipped_180,
+            moves_flipped_270))
+        moves = moves.reshape((moves.shape[0], 81))
+        passes = np.concatenate(
+            (passes, passes, passes, passes, passes, passes, passes, passes))
+        print(passes[:, None].shape)
+        moves = np.concatenate((moves, passes[:, None]), axis=1)
+
+        print('boards.shape:', boards.shape)
+        print('moves.shape:', moves.shape)
+        if other_data is not None:
+            other_data = np.concatenate(
+                (other_data, other_data, other_data, other_data,
+                 other_data, other_data, other_data, other_data))
+            return boards, moves, other_data
+        else:
+            return boards, moves
+
     def run(self):
         start_time = time.time()
         # self.log('starting the training with moves from '
