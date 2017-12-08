@@ -19,12 +19,13 @@ from src.learn.dev_ben.NNBot_ben1 import NNBot_ben1
 from src.learn.dev_yu.MovePredictionBot import MovePredictionBot
 from src.learn.dev_kar.LibertyNNBot import LibertyNNBot
 
+
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        '--no-gui',
+        '-g', '--gui',
         action='store_true',
-        help='No GUI')
+        help='Use GUI')
     parser.add_argument(
         '-p1', '--player1',
         help=('Player 1 - black - options: "human", "random", '+
@@ -45,7 +46,7 @@ def parse_args():
 def main():
     args = parse_args()
 
-    if args.no_gui:
+    if not args.gui:
         if args.player1 == 'human':
             args.player1 = 'human_console'
         if args.player2 == 'human':
@@ -60,7 +61,7 @@ def main():
         'win_prediction': WinPredictionBot,
         'dev_nn_ben': NNBot_ben1,
         'dev_nn_yu': MovePredictionBot,
-        'dev_nn_kar':LibertyNNBot
+        'dev_nn_kar': LibertyNNBot
     }
     player1type = player_types[args.player1].__name__
     player2type = player_types[args.player2].__name__
@@ -70,7 +71,7 @@ def main():
     controller = GTPcontroller(
         player1type, player2type, logging.INFO, float(args.sleep))
     controller.start()
-    if not args.no_gui:
+    if args.gui:
         PygameView(controller).open()
 
 
