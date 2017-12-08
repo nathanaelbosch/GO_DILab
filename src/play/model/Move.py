@@ -60,7 +60,7 @@ class Move:
                 # raise possible parsing errors here TODO
                 return cls(col, row)
         except Exception as e:
-            raise InvalidMove_Error()
+            raise BadInput_Error()
 
     @classmethod
     def from_matrix_location(cls, loc):

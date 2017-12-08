@@ -4,3 +4,7 @@ class GO_Error(Exception):
 
 class InvalidMove_Error(GO_Error):
     pass
+
+
+class BadInput_Error(GO_Error):
+    pass
