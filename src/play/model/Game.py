@@ -22,7 +22,7 @@ logging.basicConfig(
     format='%(levelname)s:%(name)s:%(message)s',
     datefmt='%Y-%m-%d %H:%M:%S')
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.ERROR)
 
 
 class GO_Error(Exception):
@@ -95,7 +95,7 @@ class Game:
         test_board = copy.deepcopy(self.board)
         # test_board = self.board.copy()
         # 1. Check if the player is passing and if this ends the game
-        if move.is_pass:
+        if move.is_pass and not testing:
             self.play_history.append(player + ':' + str(move))
             # Append the move to the move_history
             if (len(self.play_history) > 2 and
