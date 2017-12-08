@@ -5,7 +5,9 @@ from src.learn.BaseNNBot import BaseNNBot
 from src.play.model.Board import EMPTY, BLACK, WHITE
 from src.play.model.Move import Move
 
-from src.learn.dev_ben.Learn import EMPTY_val, BLACK_val, WHITE_val
+EMPTY_val = 0.45
+BLACK_val = -1.35
+WHITE_val = 1.05
 
 
 class NNBot_ben1(BaseNNBot):
