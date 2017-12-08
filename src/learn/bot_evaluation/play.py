@@ -19,27 +19,28 @@ from src.learn.dev_yu.MovePredictionBot import MovePredictionBot
 
 
 def parse_args():
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(
+        description='''Compare two bots over a specified number of games.
+        The bots will switch colors when they played half of all games.''',
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument(
         '-n', '--number',
-        help='Number of games to play',
+        help='Total number of games to play',
         type=int,
         default=100)
     parser.add_argument(
         '-p1', '--player1',
-        help=('Player 1 - black - options: "human", "random", ' +
-              '"random_grouping", "dev_nn_nath", "win_prediction", ' +
-              '"dev_nn_ben" or "dev_nn_yu"'),
+        help='''Player 1 - black - options: "random", "random_grouping",
+        "win_prediction", "dev_nn_ben" or "dev_nn_yu"''',
         default='random')
     parser.add_argument(
         '-p2', '--player2',
-        help=('Player 2 - white - options: "human", "random", ' +
-              '"random_grouping", "dev_nn_nath", "win_prediction", ' +
-              '"dev_nn_ben" or "dev_nn_yu"'),
-        default='random')
+        help='''Player 2 - white - options: "random", "random_grouping",
+        "win_prediction", "dev_nn_ben" or "dev_nn_yu"''',
+        default='win_prediction')
     parser.add_argument(
         '-v', '--verbose',
-        help='Print more',
+        help='Print each move and the corresponding game',
         action='store_true')
     return parser.parse_args()
 
