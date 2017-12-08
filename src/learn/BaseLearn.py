@@ -12,14 +12,15 @@ Utils.set_keras_backend("tensorflow")
 project_root_dir = dirname(dirname(dirname(abspath(__file__))))
 log_dir = os.path.join(project_root_dir, 'logs')
 db_path = os.path.join(project_root_dir, 'data', 'half_db.sqlite')
-if not os.path.exists(db_path):
-    print('no db found at: ' + db_path)
-    exit(1)
 
 
 class BaseLearn(ABC):
 
     def __init__(self):
+        if not os.path.exists(db_path):
+            print('no db found at: ' + db_path)
+            exit(1)
+
         self.db = sqlite3.connect(db_path)
         cursor = self.db.cursor()
         self.logger = Utils.get_unique_file_logger(self, logging.INFO)
