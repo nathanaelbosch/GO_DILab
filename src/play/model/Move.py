@@ -5,6 +5,7 @@ constructed from the sgf format, gtp, and matrix locations.
 Same goes for output, using the `to_*` functions
 """
 import math
+from src.play.model.errors import *
 
 
 class Move:
@@ -45,18 +46,21 @@ class Move:
         >>> print(Move.from_gtp('pass'))
         pass
         """
-        string = string.lower()
-        if string == 'pass':
-            return cls(is_pass=True)
-        else:
-            _ord = ord(string[0])
-            # i is excluded from board coordinates in GTP
-            if _ord >= ord('j'):
-                _ord -= 1
-            col = _ord - ord('a')
-            row = size - int(string[1])
-            # raise possible parsing errors here TODO
-            return cls(col, row)
+        try:
+            string = string.lower()
+            if string == 'pass':
+                return cls(is_pass=True)
+            else:
+                _ord = ord(string[0])
+                # i is excluded from board coordinates in GTP
+                if _ord >= ord('j'):
+                    _ord -= 1
+                col = _ord - ord('a')
+                row = size - int(string[1])
+                # raise possible parsing errors here TODO
+                return cls(col, row)
+        except Exception as e:
+            raise InvalidMove_Error()
 
     @classmethod
     def from_matrix_location(cls, loc):

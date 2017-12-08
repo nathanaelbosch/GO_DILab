@@ -14,6 +14,8 @@ import logging
 from src.play.model.Board import *
 
 from src.play.model.Move import *
+from src.play.model.errors import *
+
 
 logging.basicConfig(
     # filename='logs/Game.log',
@@ -23,14 +25,6 @@ logging.basicConfig(
     datefmt='%Y-%m-%d %H:%M:%S')
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.ERROR)
-
-
-class GO_Error(Exception):
-    pass
-
-
-class InvalidMove_Error(GO_Error):
-    pass
 
 
 class Game:
