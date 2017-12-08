@@ -1,5 +1,4 @@
 import os
-import math
 import numpy as np
 from os.path import dirname
 from abc import ABC, abstractmethod

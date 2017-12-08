@@ -1,6 +1,5 @@
 import logging
 import sys
-import os.path
 from os.path import dirname, abspath
 import argparse
 
