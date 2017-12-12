@@ -69,7 +69,8 @@ def to_numpy(game, move, player):
         other = BLACK
     my_board = (b == me)*1
     other_board = (b == other)*1
-    empty_board = (np.matrix([[1]*9]*9)) - my_board - other_board
+    empty_board = (np.matrix([[1.0]*9]*9)) - my_board - other_board
+    empty_board = empty_board/np.count_nonzero(empty_board)
     my_board_vals = np.matrix([[0.0]*9]*9)
     other_board_vals = np.matrix([[0.0]*9]*9)
 
@@ -92,6 +93,8 @@ def to_numpy(game, move, player):
                 break
             my_board_vals[location] = sL/L
 
+
+
     for label in range(1,other_labels+1):
         other_board_label = (label_other == label) * 1
         dilated = ndimage.binary_dilation(other_board_label)
@@ -108,6 +111,8 @@ def to_numpy(game, move, player):
                 break
             other_board_vals[location] = sL / L
 
+
+
     #print (my_board_vals)
     #print('helloooooo')
     #print(other_board_vals)
@@ -116,13 +121,15 @@ def to_numpy(game, move, player):
         1, my_board_vals.shape[0]*my_board_vals.shape[1])
     other_board_vect = other_board_vals.reshape(
         1, other_board_vals.shape[0]*other_board_vals.shape[1])
+    empty_board = empty_board.reshape(
+        1, empty_board.shape[0]*empty_board.shape[1])
 
     move_board = np.matrix([[0]*9]*9)
     move_board[move.to_matrix_location()] = 1
     move_vect = move_board.reshape(move_board.shape[0]*move_board.shape[1])
 
 
-    vect = np.append([my_board_vect, other_board_vect], move_vect)
+    vect = np.append([my_board_vect,other_board_vect,empty_board],move_vect)
 
     return vect
 
@@ -138,11 +145,11 @@ def main():
     file = '../../../data/full_file.txt'
     with open(file, 'r') as f:
         lines = f.readlines()
-    numgames = 100
+    numgames = 5000
     lines = rn.sample(lines, numgames)
     # print(lines)
 
-    max_batchsize = 100
+    max_batchsize = 500
     first = True; i=1
     still_todo = numgames
     filepath = '/Users/karthikeyakaushik/Documents/GO_DILab/src/learn/dev_kar/{}_games.csv'.format(numgames)
@@ -156,9 +163,7 @@ def main():
         still_todo = still_todo - max_batchsize
         if still_todo > 0:
             lines = lines[max_batchsize:]
-
         data = pool.map(foo, batch_lines)
-        # data = map(lambda x: replay_game(x, to_numpy), lines)
         data = [d for d in data if d is not None]
         data = np.concatenate(data)
         print(data.shape)

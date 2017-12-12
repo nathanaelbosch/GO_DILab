@@ -7,7 +7,7 @@ import sys
 import os
 from scipy import ndimage
 from os.path import abspath, dirname
-
+import time
 from src.play.model.Move import Move
 
 
@@ -43,7 +43,8 @@ class LibertyNNBot:
 
         my_board = (b == me) * 1
         other_board = (b == other) * 1
-        empty_board = (np.matrix([[1] * 9] * 9)) - my_board - other_board
+        empty_board = (np.matrix([[1.0] * 9] * 9)) - my_board - other_board
+        empty_board = empty_board / np.count_nonzero(empty_board)
         my_board_vals = np.matrix([[0.0] * 9] * 9)
         other_board_vals = np.matrix([[0.0] * 9] * 9)
 
@@ -65,6 +66,7 @@ class LibertyNNBot:
                 if L == 0:
                     break
                 my_board_vals[location] = sL / L
+
 
         for label in range(1, other_labels + 1):
             other_board_label = (label_other == label) * 1
@@ -90,12 +92,11 @@ class LibertyNNBot:
             1, my_board_vals.shape[0] * my_board_vals.shape[1])
         other_board_vect = other_board_vals.reshape(
             1, other_board_vals.shape[0] * other_board_vals.shape[1])
+        empty_board = empty_board.reshape(
+            1, empty_board.shape[0] * empty_board.shape[1])
 
-        a = np.append([my_board_vect, other_board_vect], [])
-        a = a.reshape(
-            (1, my_board_vect.shape[1]+other_board_vect.shape[1]))
-        #print(a.shape)
-        #print(type(a))
+        a = np.append([my_board_vect, other_board_vect, empty_board],[])
+        a = np.reshape(a,(1,a.shape[0]))
         return a
 
     def softmax(self, x):
@@ -109,9 +110,10 @@ class LibertyNNBot:
         # Format the board and make predictions
         inp = self.board_to_input(color, game.board)
         pred_moves = self.model.predict(inp)
-        # print(pred_moves)
 
         pred_moves = pred_moves.reshape(9, 9)
+
+
         # print(pred_moves)
         # print(playable_locations)
         dummy_value = -10
@@ -123,18 +125,19 @@ class LibertyNNBot:
             loc = move.to_matrix_location()
             potential_moves[loc[0]][loc[1]] = pred_moves[loc[0]][loc[1]]
 
-        # print([i for row in potential_moves for i in row])
 
         potential_moves = self.softmax(potential_moves)
-        #print(potential_moves)
 
         row, col = np.unravel_index(
             potential_moves.argmax(),
             potential_moves.shape)
 
         move = Move(col=col, row=row)
-        if (potential_moves[move.to_matrix_location()] == dummy_value or
-                potential_moves[move.to_matrix_location()] < (1/81+0.001)):
+        # if game.board[col,row] != 0:
+        #     move = Move(is_pass = True)
+        #     return move
+
+        if (potential_moves[move.to_matrix_location()] == dummy_value):
             move = Move(is_pass=True)
 
         return move
