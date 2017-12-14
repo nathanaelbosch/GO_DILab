@@ -171,7 +171,7 @@ class Board(np.matrix):
         matrix_repr = super(Board, b).__str__()
         matrix_repr = matrix_repr.replace('2', 'X')
         matrix_repr = matrix_repr.replace('3', 'O')
-        matrix_repr = matrix_repr.replace('0', '·')
+        matrix_repr = matrix_repr.replace('0', '.')
         matrix_repr = matrix_repr.replace('[[', ' [')
         matrix_repr = matrix_repr.replace(']]', ']')
 
