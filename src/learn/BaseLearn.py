@@ -11,7 +11,7 @@ Utils.set_keras_backend("tensorflow")
 
 project_root_dir = dirname(dirname(dirname(abspath(__file__))))
 log_dir = os.path.join(project_root_dir, 'logs')
-db_path = os.path.join(project_root_dir, 'data', 'half_db.sqlite')
+db_path = os.path.join(project_root_dir, 'data', 'db.sqlite')
 
 
 class BaseLearn(ABC):
