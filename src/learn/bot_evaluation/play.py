@@ -15,32 +15,32 @@ from src.play.controller.bots.RandomGroupingBot import RandomGroupingBot
 from src.learn.dev_nath.SimplestNNBot import SimplestNNBot
 from src.learn.dev_nath_win_prediction.WinPredictionBot import WinPredictionBot
 from src.learn.dev_ben.NNBot_ben1 import NNBot_ben1
+from src.learn.dev_kar.LibertyNNBot import LibertyNNBot
 from src.learn.dev_yu.MovePredictionBot import MovePredictionBot
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(
-        description='''Compare two bots over a specified number of games.
-        The bots will switch colors when they played half of all games.''',
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser = argparse.ArgumentParser()
     parser.add_argument(
         '-n', '--number',
-        help='Total number of games to play',
+        help='Number of games to play',
         type=int,
         default=100)
     parser.add_argument(
         '-p1', '--player1',
-        help='''Player 1 - black - options: "random", "random_grouping",
-        "win_prediction", "dev_nn_ben" or "dev_nn_yu"''',
+        help=('Player 1 - black - options: "human", "random", ' +
+              '"random_grouping", "dev_nn_nath", "win_prediction", ' +
+              '"dev_nn_ben" or "dev_nn_yu"'),
         default='random')
     parser.add_argument(
         '-p2', '--player2',
-        help='''Player 2 - white - options: "random", "random_grouping",
-        "win_prediction", "dev_nn_ben" or "dev_nn_yu"''',
-        default='win_prediction')
+        help=('Player 2 - white - options: "human", "random", ' +
+              '"random_grouping", "dev_nn_nath", "win_prediction", ' +
+              '"dev_nn_ben" or "dev_nn_yu"'),
+        default='random')
     parser.add_argument(
         '-v', '--verbose',
-        help='Print each move and the corresponding game',
+        help='Print more',
         action='store_true')
     return parser.parse_args()
 
@@ -51,6 +51,7 @@ PLAYERS = {
     'dev_nn_nath': SimplestNNBot,
     'win_prediction': WinPredictionBot,
     'dev_nn_ben': NNBot_ben1,
+    'dev_nn_kar': LibertyNNBot,
     'dev_nn_yu': MovePredictionBot
 }
 
