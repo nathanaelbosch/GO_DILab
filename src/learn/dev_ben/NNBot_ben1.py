@@ -19,9 +19,9 @@ class NNBot_ben1(BaseNNBot):
         return abspath(__file__)
 
     def customize_color_values(self, flat_board):
-        flat_board[flat_board==BLACK] = BLACK_val
-        flat_board[flat_board==EMPTY] = EMPTY_val
-        flat_board[flat_board==WHITE] = WHITE_val
+        flat_board[flat_board == BLACK] = BLACK_val
+        flat_board[flat_board == EMPTY] = EMPTY_val
+        flat_board[flat_board == WHITE] = WHITE_val
         return flat_board
 
     def _genmove(self, color, game, flat_board):
@@ -31,16 +31,12 @@ class NNBot_ben1(BaseNNBot):
         if max_idx == 82:
             return Move(is_pass=True)
         else:
-            print(predict.shape)
             board = predict[:-1]  # strip away the pass-slot at pos 82
-            print(board.shape)
             # set all invalid locations to 0 to avoid them being chosen
             for move in game.get_invalid_locations(color):
                 flat_idx = move.to_flat_idx(game.size)
                 board[flat_idx] = 0
-            print(board)
             max_idx = np.argmax(board)
-            print(max_idx)
 
             # If this move is invalid pass!
             if board[max_idx] == 0:
