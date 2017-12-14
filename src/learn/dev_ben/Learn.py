@@ -28,7 +28,7 @@ class Learn(BaseLearn):
 
     def __init__(self):
         super().__init__()
-        self.training_size = 500
+        self.training_size = 10000
 
     @staticmethod
     def apply_transf(flat_move, transf_matrix):
@@ -73,12 +73,13 @@ class Learn(BaseLearn):
     def setup_and_compile_model(self):
         model = Sequential()
         model.add(Dense(162, input_dim=81, activation='relu'))  # first parameter of Dense is number of neurons
+        model.add(Dense(162, activation='relu'))
         model.add(Dense(82, activation='softmax'))
         model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
         return model
 
     def train(self, model, X, Y):
-        model.fit(X, Y, epochs=1)
+        model.fit(X, Y, epochs=10)
 
     def get_path_to_self(self):
         return abspath(__file__)
