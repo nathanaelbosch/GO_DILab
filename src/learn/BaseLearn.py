@@ -163,8 +163,8 @@ class BaseLearn(ABC):
         model.save_weights(weights_path)
 
         # EVALUATE
-        # scores = model.evaluate(X, y)
-        # print("\n%s: %.2f%%" % (model.metrics_names[1], scores[1] * 100))
+        scores = model.evaluate(X, Y)
+        print("\n%s: %.2f%%" % (model.metrics_names[1], scores[1] * 100))
 
         # DONE
         elapsed_time = time.time() - start_time
