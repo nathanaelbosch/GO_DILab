@@ -35,17 +35,16 @@ for row in range(0, 9):
 def setup():
     print('creating tables meta and games')
     cursor.execute(
-        '''CREATE TABLE meta(id INTEGER PRIMARY KEY,
-                             all_moves_imported INTEGER,
-                             sgf_content TEXT,
-                             komi REAL,
+        '''CREATE TABLE meta(id INT PRIMARY KEY,
+                             all_moves_imported INT,
                              size INT,
                              rules TEXT,
-                             result_text TEXT,
-                             result_B_minus_W REAL,
-                             rank_black INT,
-                             rank_white INT,
-                             turns INT)''')
+                             turns INT,
+                             komi REAL,
+                             rank_black TEXT,
+                             rank_white TEXT,
+                             result TEXT,
+                             sgf_content TEXT)''')
     db.commit()
     cursor.execute('CREATE TABLE games(id INTEGER, color INTEGER, move INTEGER'
                    + ''.join([', ' + _str + ' INTEGER' for _str in flat_matrix_table_column_names]) + ')')
@@ -95,26 +94,35 @@ def game_to_database(sgf_content, game_id):
         if flat_move != -1:
             board.place_stone_and_capture_if_applicable_default_values((_row, _col), player_val)
 
+    size = int(game_properties['SZ'][0])
+    rules = game_properties['RU'][0]
+    komi = float(game_properties['KM'][0])
+    rank_black = game_properties['BR'][0]
+    rank_white = game_properties['WR'][0]
+    result = game_properties['RE'][0]
+
     # Insert some data about this game into the `meta` table
     cursor.execute('''INSERT INTO meta(id,
                                        all_moves_imported,
-                                       sgf_content,
+                                       size,
+                                       rules,
                                        turns,
                                        komi,
-                                       size,
-                                       result_text,
-                                       rank_black, rank_white)
-                      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)''',
+                                       rank_black, 
+                                       rank_white,
+                                       result,
+                                       sgf_content)
+                      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
                    (game_id,
                     all_moves_imported,
-                    sgf_content,
+                    size,
+                    rules,
                     len(moves),
-                    game_properties['KM'][0],
-                    game_properties['SZ'][0],
-                    game_properties['RE'][0],
-                    game_properties['WR'][0],
-                    game_properties['BR'][0],
-                    ))
+                    komi,
+                    rank_black,
+                    rank_white,
+                    result,
+                    sgf_content))
     db.commit()
 
 
