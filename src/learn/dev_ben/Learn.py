@@ -47,28 +47,28 @@ class Learn(BaseLearn):
         moves = training_data[:, 2]
         boards = training_data[:, 3:]
 
-        # Generate y
-        moves[moves==-1] = 81
-        y = to_categorical(moves)
-        assert y.shape[1] == 82
-        assert (y.sum(axis=1) == 1).all()
+        # Generate Y
+        moves[moves == -1] = 81
+        Y = to_categorical(moves)
+        assert Y.shape[1] == 82
+        assert (Y.sum(axis=1) == 1).all()
 
         # Generate X
         X = boards.astype(np.float64)
 
         # Replace values as you like to do
-        X[X==BLACK] = BLACK_val
-        X[X==EMPTY] = EMPTY_val
-        X[X==WHITE] = WHITE_val
+        X[X == BLACK] = BLACK_val
+        X[X == EMPTY] = EMPTY_val
+        X[X == WHITE] = WHITE_val
         assert X[0, 0] in [BLACK_val, EMPTY_val, WHITE_val]
 
         # Generate symmetries:
-        X, y = self.get_symmetries(X, y)
+        X, Y = self.get_symmetries(X, Y)
 
         print('X.shape:', X.shape)
-        print('Y.shape:', y.shape)
+        print('Y.shape:', Y.shape)
 
-        return X, y
+        return X, Y
 
     def setup_and_compile_model(self):
         model = Sequential()
