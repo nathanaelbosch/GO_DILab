@@ -7,11 +7,11 @@ from os.path import dirname, abspath
 from abc import ABC, abstractmethod
 
 from src import Utils
-Utils.set_keras_backend("tensorflow")
+# Utils.set_keras_backend("tensorflow")
 
 project_root_dir = dirname(dirname(dirname(abspath(__file__))))
 log_dir = os.path.join(project_root_dir, 'logs')
-db_path = os.path.join(project_root_dir, 'data', 'half_db.sqlite')
+db_path = os.path.join(project_root_dir, 'data', 'db.sqlite')
 
 
 class BaseLearn(ABC):
@@ -65,7 +65,7 @@ class BaseLearn(ABC):
         pass
 
     @staticmethod
-    def get_symmetries(boards, moves, other_data=None):
+    def get_symmetries(boards, moves=None, other_data=None):
         """Given array containing boards and moves recreate all symmetries
 
         Right now it assumes that moves are given as categorical data already.
@@ -76,24 +76,13 @@ class BaseLearn(ABC):
         """
         # print(boards.shape)
         boards = boards.reshape((boards.shape[0], 9, 9))
-
-        passes, moves = moves[:, 81], moves[:, :81]
-        moves = moves.reshape((moves.shape[0], 9, 9))
-
         boards_90 = np.rot90(boards, axes=(1, 2))
-        moves_90 = np.rot90(moves, axes=(1, 2))
         boards_180 = np.rot90(boards, k=2, axes=(1, 2))
-        moves_180 = np.rot90(moves, k=2, axes=(1, 2))
         boards_270 = np.rot90(boards, k=3, axes=(1, 2))
-        moves_270 = np.rot90(moves, k=3, axes=(1, 2))
         boards_flipped = np.fliplr(boards)
-        moves_flipped = np.fliplr(moves)
         boards_flipped_90 = np.rot90(np.fliplr(boards), axes=(1, 2))
-        moves_flipped_90 = np.rot90(np.fliplr(moves), axes=(1, 2))
         boards_flipped_180 = np.rot90(np.fliplr(boards), k=2, axes=(1, 2))
-        moves_flipped_180 = np.rot90(np.fliplr(moves), k=2, axes=(1, 2))
         boards_flipped_270 = np.rot90(np.fliplr(boards), k=3, axes=(1, 2))
-        moves_flipped_270 = np.rot90(np.fliplr(moves), k=3, axes=(1, 2))
 
         boards = np.concatenate((
             boards,
@@ -106,19 +95,31 @@ class BaseLearn(ABC):
             boards_flipped_270))
         boards = boards.reshape((boards.shape[0], 81))
 
-        moves = np.concatenate((
-            moves,
-            moves_90,
-            moves_180,
-            moves_270,
-            moves_flipped,
-            moves_flipped_90,
-            moves_flipped_180,
-            moves_flipped_270))
-        moves = moves.reshape((moves.shape[0], 81))
-        passes = np.concatenate(
-            (passes, passes, passes, passes, passes, passes, passes, passes))
-        moves = np.concatenate((moves, passes[:, None]), axis=1)
+        if moves is not None:
+            passes, moves = moves[:, 81], moves[:, :81]
+            moves = moves.reshape((moves.shape[0], 9, 9))
+
+            moves_90 = np.rot90(moves, axes=(1, 2))
+            moves_180 = np.rot90(moves, k=2, axes=(1, 2))
+            moves_270 = np.rot90(moves, k=3, axes=(1, 2))
+            moves_flipped = np.fliplr(moves)
+            moves_flipped_90 = np.rot90(np.fliplr(moves), axes=(1, 2))
+            moves_flipped_180 = np.rot90(np.fliplr(moves), k=2, axes=(1, 2))
+            moves_flipped_270 = np.rot90(np.fliplr(moves), k=3, axes=(1, 2))
+
+            moves = np.concatenate((
+                moves,
+                moves_90,
+                moves_180,
+                moves_270,
+                moves_flipped,
+                moves_flipped_90,
+                moves_flipped_180,
+                moves_flipped_270))
+            moves = moves.reshape((moves.shape[0], 81))
+            passes = np.concatenate(
+                (passes, passes, passes, passes, passes, passes, passes, passes))
+            moves = np.concatenate((moves, passes[:, None]), axis=1)
 
         # print('boards.shape:', boards.shape)
         # print('moves.shape:', moves.shape)
@@ -126,9 +127,15 @@ class BaseLearn(ABC):
             other_data = np.concatenate(
                 (other_data, other_data, other_data, other_data,
                  other_data, other_data, other_data, other_data))
+            
+        if moves is not None and other_data is not None:
             return boards, moves, other_data
-        else:
+        elif moves is not None and other_data is None:
             return boards, moves
+        elif moves is None and other_data is not None:
+            return boards, other_data
+        else:
+            return boards
 
     def run(self):
         start_time = time.time()
