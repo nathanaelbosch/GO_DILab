@@ -150,12 +150,12 @@ class BaseLearn(ABC):
         training_data = np.array(cursor.fetchall())  # this is a gigantic array, has millions of rows
 
         self.log('working with {} rows'.format(len(training_data)))
-        X, y = self.handle_data(training_data)
+        X, Y = self.handle_data(training_data)
 
         # Save input and output dimensions for easier, more modular use
         # Implicit assumtion is that X, y are two-dimensional
         self.input_dim = X.shape[1]
-        self.output_dim = y.shape[1]
+        self.output_dim = Y.shape[1]
 
         # SET UP AND STORE NETWORK TOPOLOGY
         model = self.setup_and_compile_model()
@@ -165,13 +165,13 @@ class BaseLearn(ABC):
         json_file.close()
 
         # TRAIN AND STORE WEIGHTS
-        self.train(model, X, y)
+        self.train(model, X, Y)
         weights_path = os.path.join(dirname(self.get_path_to_self()), 'model_weights.h5')
         model.save_weights(weights_path)
 
         # EVALUATE
-        # scores = model.evaluate(X, y)
-        # print("\n%s: %.2f%%" % (model.metrics_names[1], scores[1] * 100))
+        scores = model.evaluate(X, Y)
+        print("\n%s: %.2f%%" % (model.metrics_names[1], scores[1] * 100))
 
         # DONE
         elapsed_time = time.time() - start_time
