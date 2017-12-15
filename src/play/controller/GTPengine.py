@@ -15,6 +15,7 @@ from src.learn.dev_nath_win_prediction.WinPredictionBot import WinPredictionBot
 from src.learn.dev_ben.NNBot_ben1 import NNBot_ben1
 from src.learn.dev_yu.MovePredictionBot import MovePredictionBot
 from src.learn.dev_kar.LibertyNNBot import LibertyNNBot
+from src.learn.pytorch.PytorchBot import PytorchBot
 
 
 class GTPengine:
@@ -60,6 +61,7 @@ class GTPengine:
             WinPredictionBot,
             NNBot_ben1,
             MovePredictionBot,
+            PytorchBot,
             LibertyNNBot
         ]
         for player_type in player_types_arr:

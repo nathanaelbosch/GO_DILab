@@ -1,6 +1,7 @@
 from os.path import abspath
 import numpy as np
 import sqlite3
+import os
 
 import torch
 from torch.autograd import Variable
@@ -8,13 +9,14 @@ import torch.utils.data as Data
 
 from src.learn.BaseLearn import BaseLearn
 from src.play.model.Board import EMPTY, BLACK, WHITE
+from src.learn.pytorch.SimpleWinPredNN import SimpleWinPredNN
 
 
 class Learn(BaseLearn):
 
     def __init__(self):
         super().__init__()
-        self.training_size = 100000
+        self.training_size = 10000
         self.data_retrieval_command = '''SELECT games.*, meta.result_text
                                          FROM games, meta
                                          WHERE games.id == meta.id
@@ -89,24 +91,16 @@ class Learn(BaseLearn):
         data_loader = Data.DataLoader(dataset, batch_size=10, shuffle=True)
 
         D_in = X.size()[1]
-        H1, H2, H3 = 100, 200, 100
+        # H1, H2, H3 = 100, 200, 100
 
         # Pytorch stuff
-        model = torch.nn.Sequential(
-            torch.nn.Linear(D_in, H1),
-            torch.nn.ReLU(),
-            # torch.nn.Linear(H1, H2),
-            # torch.nn.ReLU(),
-            # torch.nn.Linear(H2, H3),
-            # torch.nn.ReLU(),
-            torch.nn.Linear(H1, num_classes),
-            torch.nn.Softmax(dim=1),
-        )
+        print(D_in, 2, 100)
+        model = SimpleWinPredNN(input_dim=D_in, output_dim=2, hidden_dim=100)
         criterion = torch.nn.CrossEntropyLoss()
         # learning_rate = 1e-4
         optimizer = torch.optim.Adam(model.parameters())
 
-        for epoch in range(5):
+        for epoch in range(1):
             running_loss = 0.0
             correct = 0
             total = 0
@@ -134,6 +128,12 @@ class Learn(BaseLearn):
                     correct = 0
                     total = 0
         print('Finished Training')
+
+        # Saving the model:
+        model_path = os.path.join(
+            os.path.dirname(os.path.abspath(__file__)), 'model.pt')
+        torch.save(model.state_dict(), model_path)
+        print('Saved model to {}'.format(model_path))
 
 
 if __name__ == '__main__':
