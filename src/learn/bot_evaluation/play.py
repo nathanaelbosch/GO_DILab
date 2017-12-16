@@ -5,9 +5,7 @@ here is on quickly playing games, preferrably in parallel, while only
 printing the result. In `src/play/run.py` we want to watch a game, or be
 able to play one ourselves.
 """
-import sys
 import argparse
-from pprint import pprint
 
 from src.play.model.Game import Game
 from src.play.controller.bots.RandomBot import RandomBot

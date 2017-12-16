@@ -1,13 +1,9 @@
 import numpy as np
-from os.path import abspath, dirname
 from src import Utils
-from src.play.model.Move import Move
 from src.play.model.Board import WHITE, BLACK, EMPTY
-import sys
 import os
 from scipy import ndimage
 from os.path import abspath, dirname
-import time
 from src.play.model.Move import Move
 
 
@@ -30,10 +26,10 @@ class LibertyNNBot:
     def board_to_input(self, color, board):
         b = board.astype(np.float64)
 
-        #print(b.dtype)
-        #print(type(self.mean))
-        #b -= self.mean
-        #b /= self.std
+        # print(b.dtype)
+        # print(type(self.mean))
+        # b -= self.mean
+        # b /= self.std
         if color == 'b':
             me = BLACK
             other = WHITE
@@ -66,7 +62,6 @@ class LibertyNNBot:
                 if L == 0:
                     break
                 my_board_vals[location] = sL / L
-
 
         for label in range(1, other_labels + 1):
             other_board_label = (label_other == label) * 1
@@ -110,9 +105,7 @@ class LibertyNNBot:
         # Format the board and make predictions
         inp = self.board_to_input(color, game.board)
         pred_moves = self.model.predict(inp)
-
         pred_moves = pred_moves.reshape(9, 9)
-
 
         # print(pred_moves)
         # print(playable_locations)
@@ -125,7 +118,6 @@ class LibertyNNBot:
             loc = move.to_matrix_location()
             potential_moves[loc[0]][loc[1]] = pred_moves[loc[0]][loc[1]]
 
-
         potential_moves = self.softmax(potential_moves)
 
         row, col = np.unravel_index(
@@ -137,7 +129,7 @@ class LibertyNNBot:
         #     move = Move(is_pass = True)
         #     return move
 
-        if (potential_moves[move.to_matrix_location()] == dummy_value):
+        if potential_moves[move.to_matrix_location()] == dummy_value:
             move = Move(is_pass=True)
 
         return move

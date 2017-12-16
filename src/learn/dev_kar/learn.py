@@ -1,9 +1,8 @@
 """Learn from the training data"""
-import random as rn
-import pandas as pd
+import pandas as pd  # TODO python has native support for importing CSV, no need to add this dependency ;)
 import os
 import numpy as np
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split  # TODO this can be done with keras or by hand I would think?
 
 from keras.models import Sequential
 from keras.layers import Dense, Dropout
