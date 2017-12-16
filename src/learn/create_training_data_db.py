@@ -41,9 +41,7 @@ def setup():
                              rules TEXT,
                              turns INT,
                              komi REAL,
-                             rank_black TEXT,
                              elo_black INT,
-                             rank_white TEXT,
                              elo_white INT,
                              result TEXT,
                              sgf_content TEXT)''')
@@ -99,7 +97,8 @@ def game_to_database(sgf_content, game_id):
     size = int(game_properties['SZ'][0])
     rules = game_properties['RU'][0]
     komi = float(game_properties['KM'][0])
-    rank_black = game_properties['BR'][0]
+    rank_black = game_properties['BR'][0].lower()
+    # conversion of rank to elo according to https://senseis.xmp.net/?EloRating
     if rank_black[-1] == '?':
         elo_black = rank_black[:-1]
     elif rank_black[-1] == 'k' or rank_black[-1] == 'd':
@@ -107,7 +106,7 @@ def game_to_database(sgf_content, game_id):
                     + string.ascii_lowercase.index(rank_black[-1])%2*(2*int(rank_black[:-1])-1)*100
     else:
         elo_black = rank_black
-    rank_white = game_properties['WR'][0]
+    rank_white = game_properties['WR'][0].lower()
     if rank_white[-1] == '?':
         elo_white = rank_white[:-1]
     elif rank_white[-1] == 'k' or rank_white[-1] == 'd':
@@ -124,22 +123,18 @@ def game_to_database(sgf_content, game_id):
                                        rules,
                                        turns,
                                        komi,
-                                       rank_black,
                                        elo_black, 
-                                       rank_white,
                                        elo_white,
                                        result,
                                        sgf_content)
-                      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
+                      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
                    (game_id,
                     all_moves_imported,
                     size,
                     rules,
                     len(moves),
                     komi,
-                    rank_black,
                     elo_black,
-                    rank_white,
                     elo_white,
                     result,
                     sgf_content))
