@@ -47,7 +47,8 @@ class MovePredictionBot:
             return Move(is_pass=True)
         else:
             board = pred[0][0:81]
-            # set all invalid locations to 0 to avoid them being chosen
+            # set all invalid locations to -1 to avoid them being chosen
+            # if all moves are invalid, play pass
             for move in game.get_invalid_locations(color):
                 flat_idx = move.to_flat_idx(game.size)
                 board[flat_idx] = -1
