@@ -192,7 +192,7 @@ def import_data():
         print_time_info(i, game_id)
         game_to_database(lines[i], game_id)
 
-    # import 76440 .sgf games from the dgs-folder, from Bernhard
+    # import 76439 .sgf games from the dgs-folder, from Bernhard
     for j, path in enumerate(sgf_files):
         # not ignoring errors caused UnicodeDecodeError: 'ascii' codec can't decode byte 0xf6
         with open(path, 'r', errors='ignore') as f:
