@@ -1,4 +1,5 @@
 import os
+import sys
 import numpy as np
 from os.path import dirname
 from abc import ABC, abstractmethod
@@ -15,11 +16,11 @@ class BaseNNBot(ABC):
         model_architecture_path = os.path.join(dirname(self.get_path_to_self()), 'model_architecture.json')
         if not os.path.isfile(model_architecture_path):
             print('model architecture not found: ' + model_architecture_path)
-            exit(1)
         model_weights_path = os.path.join(dirname(self.get_path_to_self()), 'model_weights.h5')
+            sys.exit(1)
         if not os.path.isfile(model_weights_path):
             print('model weights not found: ' + model_weights_path)
-            exit(1)
+            sys.exit(1)
         json_file = open(model_architecture_path, 'r')
         self.model = model_from_json(json_file.read())
         json_file.close()
