@@ -13,11 +13,12 @@ class BaseNNBot(ABC):
     def __init__(self):
         Utils.set_keras_backend('theano')
         from keras.models import model_from_json
-        model_architecture_path = os.path.join(dirname(self.get_path_to_self()), 'model_architecture.json')
+        model_files_dir = dirname(self.get_path_to_self())  # sys._MEIPASS, for use with pyinstaller
+        model_architecture_path = os.path.join(model_files_dir, 'model_architecture.json')
         if not os.path.isfile(model_architecture_path):
             print('model architecture not found: ' + model_architecture_path)
-        model_weights_path = os.path.join(dirname(self.get_path_to_self()), 'model_weights.h5')
             sys.exit(1)
+        model_weights_path = os.path.join(model_files_dir, 'model_weights.h5')
         if not os.path.isfile(model_weights_path):
             print('model weights not found: ' + model_weights_path)
             sys.exit(1)
