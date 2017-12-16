@@ -33,6 +33,8 @@ theano
 
 # COMMENTS
 
+# tensorflow on Windows seems to require the 64-bit version of Python
+
 # keras works with tensorflow or theano as backend
 # in ~.keras\keras.json the backend is defined, can also be changed at runtime though
 
