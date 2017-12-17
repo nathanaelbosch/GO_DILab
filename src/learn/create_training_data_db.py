@@ -192,14 +192,14 @@ def import_data():
             sgf_content = f.read()
         filename = os.path.basename(path)
         game_id = int(filename.split('_')[1][:-4])  # get x in game_x.sgf
-        print_time_info(j + len(lines), game_id)
+        print_time_info(j, game_id)
         game_to_database(bernhard_source_id, game_id, sgf_content)
 
     # import full_file.txt, 344374 games merged into one file by Nath
     nath_source_id = 1
     for i, line in enumerate(lines):
         game_id = 1000000 + i
-        print_time_info(i, game_id)
+        print_time_info(i + len(sgf_files), game_id)
         game_to_database(nath_source_id, game_id, lines[i])
 
 
