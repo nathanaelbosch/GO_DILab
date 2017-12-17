@@ -13,5 +13,5 @@ board_size = 9
 komi = 6
 
 matchups = [
-    Matchup('bot1', 'bot2', scorer='players', number_of_games=1),
+    Matchup('bot1', 'bot2', scorer='internal', number_of_games=1),
     ]
