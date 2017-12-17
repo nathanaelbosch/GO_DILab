@@ -1,51 +1,70 @@
-import os
-from os.path import dirname, abspath
+from os.path import abspath
 import numpy as np
-from numpy import genfromtxt
 
 from keras.models import Sequential
 from keras.layers import Dense
 from keras.utils.np_utils import to_categorical
 
-# fix random seed for reproducibility
-np.random.seed(100)
+from src.learn.BaseLearn import BaseLearn
+from src.play.model.Board import EMPTY, BLACK, WHITE
 
-project_dir = dirname(dirname(dirname(dirname(abspath(__file__)))))
-data_dir = os.path.join(project_dir, 'data')
-training_set_dir = os.path.join(data_dir, 'training_set')
-csv_file = os.path.join(training_set_dir, 'games_b_100.sgf.csv')
-
-
-# 1. Load data
-dataset = genfromtxt(csv_file, delimiter=';')
-
-# input X (board position and current player), output Y (next move)
-X = np.column_stack((dataset[:,0:81],dataset[:,82]))
-Y = to_categorical(dataset[:,81], num_classes=82)  # one-hot encoding, class 82 stands for pass
+EMPTY_val = 0.45
+BLACK_val = -1.35
+WHITE_val = 1.05
 
 
-# 2. Define model
-model = Sequential()
-model.add(Dense(200, kernel_initializer='normal', bias_initializer='normal', input_dim=82, activation='relu'))
-model.add(Dense(200, kernel_initializer='normal', bias_initializer='normal', activation='relu'))
-model.add(Dense(82, activation='softmax'))  # softmax guarantees a probability distribution over the 81 locations and pass
+class Learn(BaseLearn):
+
+    def __init__(self):
+        super().__init__()
+        self.training_size = 10000
+
+    def handle_data(self, training_data):
+        colors = training_data[:, 1]
+        moves = training_data[:, 2].astype(int)
+        boards = training_data[:, 3:].astype(np.float64)
+
+        # Output Y as next moves
+        # pass as class 82
+        moves[moves == -1] = 81
+        Y = to_categorical(moves, num_classes=82)
+        assert Y.shape[1] == 82
+        assert (Y.sum(axis=1) == 1).all()
+
+        # Generate board symmetries, 8 for each board
+        boards, Y = self.get_symmetries(boards, Y)
+        colors = [i for i in colors for r in range(8)]
+
+        # Input X as board and current player
+        X = np.column_stack((boards, colors))
+
+        # Replace values as you like to do
+        X[X == BLACK] = BLACK_val
+        X[X == EMPTY] = EMPTY_val
+        X[X == WHITE] = WHITE_val
+        assert X[0, 0] in [BLACK_val, EMPTY_val, WHITE_val]
+
+        print('X.shape:', X.shape)
+        print('Y.shape:', Y.shape)
+
+        return X, Y
+
+    def setup_and_compile_model(self):
+        model = Sequential()
+        model.add(Dense(200, kernel_initializer='normal', bias_initializer='normal', input_dim=82, activation='relu'))
+        model.add(Dense(200, kernel_initializer='normal', bias_initializer='normal', activation='relu'))
+        model.add(Dense(82, activation='softmax'))
+        # softmax guarantees a probability distribution over the 81 locations and pass
+        model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+        return model
+
+    def train(self, model, X, Y):
+        model.fit(X, Y, epochs=20)
 
 
-# 3. Compile model
-model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+    def get_path_to_self(self):
+        return abspath(__file__)
 
 
-# 4. Fit model
-model.fit(X, Y, epochs=30, batch_size=100)
-
-
-# 5. Evaluate model
-scores = model.evaluate(X, Y)
-print("\n%s: %.2f%%" % (model.metrics_names[1], scores[1]*100))
-
-
-#6. Make predictions
-# pred = model.predict(X[0].reshape(1,-1))
-
-
-model.save('model.h5')
+if __name__ == '__main__':
+    Learn().run()
