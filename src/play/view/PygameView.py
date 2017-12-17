@@ -18,6 +18,8 @@ board_top_left_coord = (50, 100)  # coordinate of the boards top left point
 board_size = 400
 stone_radius = 20
 
+# maybe PyQt5 could work as GUI that doesn't have to run in the main thread: youtu.be/o81Q3oyz6rg
+
 
 class PygameView:
 

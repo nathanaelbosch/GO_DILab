@@ -90,7 +90,7 @@ for path in sgf_files:
             if loc is not None:
                 loc_str = str(-coord[1] * 9 + coord[0])
             lines.append(flatten_matrix(board_cur) + ';' + loc_str + ';' + str(player_val) + ';' + str(winner) + ';0')  # original
-            lines.append(flatten_matrix(board_cur, True) + ';' + loc_str + ';' + str(opponent_val) + ';' +str(invert_entry(winner)) + ';-0')  # original inv
+            #lines.append(flatten_matrix(board_cur, True) + ';' + loc_str + ';' + str(opponent_val) + ';' +str(invert_entry(winner)) + ';-0')  # original inv
         # ----- 2
             if loc is not None:
                 r = np.array([[0,-1], [1,0]])
@@ -98,7 +98,7 @@ for path in sgf_files:
                 loc_str = str(-coord_new[1] * 9 + coord_new[0])
             board_cur = np.rot90(board_cur)
             lines.append(flatten_matrix(board_cur) + ';' + loc_str + ';' + str(player_val) + ';' + str(winner) + ';90')  # rot90
-            lines.append(flatten_matrix(board_cur, True) + ';' + loc_str + ';' + str(opponent_val) + ';' +str(invert_entry(winner)) + ';-90')  # rot90 inv
+            #lines.append(flatten_matrix(board_cur, True) + ';' + loc_str + ';' + str(opponent_val) + ';' +str(invert_entry(winner)) + ';-90')  # rot90 inv
         # ----- 3
             if loc is not None:
                 r = np.array([[-1,0], [0,-1]])
@@ -106,7 +106,7 @@ for path in sgf_files:
                 loc_str = str(-coord_new[1] * 9 + coord_new[0])
             board_cur = np.rot90(board_cur, 2)
             lines.append(flatten_matrix(board_cur) + ';' + loc_str + ';' + str(player_val) + ';' + str(winner) + ';180')  # rot180
-            lines.append(flatten_matrix(board_cur, True) + ';' + loc_str + ';' + str(opponent_val) + ';' +str(invert_entry(winner)) + ';-180')  # rot180 inv
+            #lines.append(flatten_matrix(board_cur, True) + ';' + loc_str + ';' + str(opponent_val) + ';' +str(invert_entry(winner)) + ';-180')  # rot180 inv
         # ----- 4
             if loc is not None:
                 r = np.array([[0,1], [-1,0]])
@@ -114,7 +114,7 @@ for path in sgf_files:
                 loc_str = str(-coord_new[1] * 9 + coord_new[0])
             board_cur = np.rot90(board_cur, 3)
             lines.append(flatten_matrix(board_cur) + ';' + loc_str + ';' + str(player_val) + ';' + str(winner) + ';270')  # rot270
-            lines.append(flatten_matrix(board_cur, True) + ';' + loc_str + ';' + str(opponent_val) + ';' +str(invert_entry(winner)) + ';-270')  # rot270 inv
+            #lines.append(flatten_matrix(board_cur, True) + ';' + loc_str + ';' + str(opponent_val) + ';' +str(invert_entry(winner)) + ';-270')  # rot270 inv
         # ----- 5
             if loc is not None:
                 r = np.array([[-1,0], [0,1]])
@@ -122,7 +122,7 @@ for path in sgf_files:
                 loc_str = str(-coord_new[1] * 9 + coord_new[0])
             board_cur = np.fliplr(board_cur)
             lines.append(flatten_matrix(board_cur) + ';' + loc_str + ';' + str(player_val) + ';' + str(winner) + ';0.5')  # hflip
-            lines.append(flatten_matrix(board_cur, True) + ';' + loc_str + ';' + str(opponent_val) + ';' +str(invert_entry(winner)) + ';-0.5')  # hflip inv
+            #lines.append(flatten_matrix(board_cur, True) + ';' + loc_str + ';' + str(opponent_val) + ';' +str(invert_entry(winner)) + ';-0.5')  # hflip inv
         # ----- 6
             if loc is not None:
                 r = np.array([[0,-1], [-1,0]])
@@ -130,7 +130,7 @@ for path in sgf_files:
                 loc_str = str(-coord_new[1] * 9 + coord_new[0])
             board_cur = np.rot90(np.fliplr(board_cur))
             lines.append(flatten_matrix(board_cur) + ';' + loc_str + ';' + str(player_val) + ';' + str(winner) + ';90.5')  # hflip rot90
-            lines.append(flatten_matrix(board_cur, True) + ';' + loc_str + ';' + str(opponent_val) + ';' +str(invert_entry(winner)) + ';-90.5')  # hflip rot90 inv
+            #lines.append(flatten_matrix(board_cur, True) + ';' + loc_str + ';' + str(opponent_val) + ';' +str(invert_entry(winner)) + ';-90.5')  # hflip rot90 inv
         # ----- 7
             if loc is not None:
                 r = np.array([[1,0], [0,-1]])
@@ -138,7 +138,7 @@ for path in sgf_files:
                 loc_str = str(-coord_new[1] * 9 + coord_new[0])
             board_cur = np.rot90(np.fliplr(board_cur), 2)
             lines.append(flatten_matrix(board_cur) + ';' + loc_str + ';' + str(player_val) + ';' + str(winner) + ';180.5')  # hflip rot180
-            lines.append(flatten_matrix(board_cur, True) + ';' + loc_str + ';' + str(opponent_val) + ';' +str(invert_entry(winner)) + ';-180.5')  # hflip rot180 inv
+            #lines.append(flatten_matrix(board_cur, True) + ';' + loc_str + ';' + str(opponent_val) + ';' +str(invert_entry(winner)) + ';-180.5')  # hflip rot180 inv
         # ----- 8
             if loc is not None:
                 r = np.array([[0,1], [1,0]])
@@ -146,7 +146,7 @@ for path in sgf_files:
                 loc_str = str(-coord_new[1] * 9 + coord_new[0])
             board_cur = np.rot90(np.fliplr(board_cur), 3)
             lines.append(flatten_matrix(board_cur) + ';' + loc_str + ';' + str(player_val) + ';' + str(winner) + ';270.5')  # hflip rot270
-            lines.append(flatten_matrix(board_cur, True) + ';' + loc_str + ';' + str(opponent_val) + ';' +str(invert_entry(winner)) + ';-270.5')  # hflip rot270 inv
+            #lines.append(flatten_matrix(board_cur, True) + ';' + loc_str + ';' + str(opponent_val) + ';' +str(invert_entry(winner)) + ';-270.5')  # hflip rot270 inv
 
 
         for line in lines:

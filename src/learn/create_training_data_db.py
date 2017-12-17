@@ -36,13 +36,14 @@ def setup():
     print('creating tables meta and games')
     cursor.execute(
         '''CREATE TABLE meta(id INT PRIMARY KEY,
+                             source_id INT,
                              all_moves_imported INT,
                              size INT,
                              rules TEXT,
                              turns INT,
                              komi REAL,
-                             rank_black TEXT,
-                             rank_white TEXT,
+                             elo_black INT,
+                             elo_white INT,
                              result TEXT,
                              sgf_content TEXT)''')
     db.commit()
@@ -51,7 +52,7 @@ def setup():
     db.commit()
 
 
-def game_to_database(sgf_content, game_id):
+def game_to_database(source_id, game_id, sgf_content):
     """Replay game and save to database
 
     No real changes here, just in a function for convenience, as we want
@@ -97,30 +98,47 @@ def game_to_database(sgf_content, game_id):
     size = int(game_properties['SZ'][0])
     rules = game_properties['RU'][0]
     komi = float(game_properties['KM'][0])
-    rank_black = game_properties['BR'][0]
-    rank_white = game_properties['WR'][0]
+    rank_black = game_properties['BR'][0].lower()
+    # conversion of rank to elo according to https://senseis.xmp.net/?EloRating
+    if rank_black[-1] == '?':
+        elo_black = rank_black[:-1]
+    elif rank_black[-1] == 'k' or rank_black[-1] == 'd':
+        elo_black = -900 + (30 - int(rank_black[:-1]))*100 \
+                    + string.ascii_lowercase.index(rank_black[-1])%2*(2*int(rank_black[:-1])-1)*100
+    else:
+        elo_black = rank_black
+    rank_white = game_properties['WR'][0].lower()
+    if rank_white[-1] == '?':
+        elo_white = rank_white[:-1]
+    elif rank_white[-1] == 'k' or rank_white[-1] == 'd':
+        elo_white = -900 + (30 - int(rank_white[:-1]))*100 \
+                    + string.ascii_lowercase.index(rank_white[-1])%2*(2*int(rank_white[:-1])-1)*100
+    else:
+        elo_white = rank_white
     result = game_properties['RE'][0]
 
     # Insert some data about this game into the `meta` table
     cursor.execute('''INSERT INTO meta(id,
+                                       source_id,
                                        all_moves_imported,
                                        size,
                                        rules,
                                        turns,
                                        komi,
-                                       rank_black, 
-                                       rank_white,
+                                       elo_black, 
+                                       elo_white,
                                        result,
                                        sgf_content)
-                      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
+                      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
                    (game_id,
+                    source_id,
                     all_moves_imported,
                     size,
                     rules,
                     len(moves),
                     komi,
-                    rank_black,
-                    rank_white,
+                    elo_black,
+                    elo_white,
                     result,
                     sgf_content))
     db.commit()
@@ -166,21 +184,23 @@ def import_data():
             (k / total_lengths) * 100,
             elapsed_time, time_remaining))
 
-    # import full_file.txt, 344374 games merged into one file by Nath
-    for i, line in enumerate(lines):
-        game_id = 1000000 + i
-        print_time_info(i, game_id)
-        game_to_database(lines[i], game_id)
-
-    # import 76440 .sgf games from the dgs-folder, from Bernhard
+    # import 76439 .sgf games from the dgs-folder, from Bernhard
+    bernhard_source_id = 0
     for j, path in enumerate(sgf_files):
         # not ignoring errors caused UnicodeDecodeError: 'ascii' codec can't decode byte 0xf6
         with open(path, 'r', errors='ignore') as f:
             sgf_content = f.read()
         filename = os.path.basename(path)
         game_id = int(filename.split('_')[1][:-4])  # get x in game_x.sgf
-        print_time_info(j + len(lines), game_id)
-        game_to_database(sgf_content, game_id)
+        print_time_info(j, game_id)
+        game_to_database(bernhard_source_id, game_id, sgf_content)
+
+    # import full_file.txt, 344374 games merged into one file by Nath
+    nath_source_id = 1
+    for i, line in enumerate(lines):
+        game_id = 1000000 + i
+        print_time_info(i + len(sgf_files), game_id)
+        game_to_database(nath_source_id, game_id, lines[i])
 
 
 setup()

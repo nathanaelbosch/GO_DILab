@@ -1,19 +1,68 @@
-# keras works with tensorflow or theano as backend
-# on Windows tensorflow seems to require the 64-bit version of Python 3
-# in your ~.keras\keras.json file, set the "backend" to "theano"
-theano==0.9.0
-tensorflow
-keras
+# BASIC GAME
 numpy
-sgf
-matplotlib
-seaborn
-pandas
-scikit-learn
-h5py
-pygame
+    # for morphological operations in Board, via Karthikeya
 scipy
 
-# pyinstaller: if you want to build an executable from GTPengine (confirmed to work in Windows, other OSs untested)
+
+# GUI
+pygame
+
+
+# CREATE TRAINING DATA
+sgf
+scikit-learn
+
+
+# TRAIN
+keras
+tensorflow
+    # save_weights from keras requires this
+h5py
+
+
+# PLAY
+    # for forward-prediction in the NN-Bot we currently use theano because tensorflow
+    # doesn't like not being in the main thread (pygame is in the main thread)
+theano
+
+
+# DEPRECATED
+# matplotlib
+    # is required by Karthikeyas learn-script, can probably be realized using a keras function or manually
+# scikit-learn
+
+
+# COMMENTS
+
+# tensorflow on Windows seems to require the 64-bit version of Python
+
+# keras works with tensorflow or theano as backend
+# in ~.keras\keras.json the backend is defined, can also be changed at runtime though
+
+# pyinstaller: to build an executable from GTPengine
 # if pyinstaller throws AttributeError: module 'enum' has no attribute 'IntFlag',
 # run 'pip uninstall enum34' (via stackoverflow.com/a/45716067)
+
+# ensure "tensorflow" is written in ~.keras\keras.json and remove theano traces from the bots imported
+# read the model.json and weights.h5 from: os.path.join(sys._MEIPASS, 'model.json'), sys._MEIPASS is the temporary
+# folder pyinstaller creates when packing the --onefile (via stackoverflow.com/a/13790741/2474159)
+#
+# pyinstaller --onefile .\src\play\controller\GTPengine.py --add-data ".\src\learn\dev_ben\model_architecture.json;." --add-data ".\src\learn\dev_ben\model_weights.h5;."
+#
+# the above command writes a GTPengine.spec file. If you want to be able to use scipy we must edit this file:
+# hiddenimports=['scipy._lib.messagestream']    (via stackoverflow.com/a/47071289/2474159)
+# and pip install the custom builds of numpy and scipy from here: www.lfd.uci.edu/~gohlke/pythonlibs
+# as described in this video: youtu.be/fLQg8dgB7cA
+# then use:
+#
+# pyinstaller GTPengine.spec
+#
+# if tensorflow throws errors regarding MSVCP140.DLL, try installing the Visual C++ 2015 redistributable:
+# www.tensorflow.org/versions/r0.12/get_started/os_setup#pip_installation_on_windows
+
+
+# Gomill / ringmaster
+# download the Gomill sources from here: https://mjw.woodcraft.me.uk/gomill
+# run 'python setup.py install' in gomill-0.8 with Python 2.6 or 2.7
+# this creates an executable called "ringmaster" in gomill-0.8/build/scripts-2.7, move this into src/evaluate of this repo
+# run the match defined in 'eval_run.ctl' with this command: 'ringmaster eval_run.ctl' (you must be in the virtual env)

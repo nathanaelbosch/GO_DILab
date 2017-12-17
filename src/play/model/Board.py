@@ -4,7 +4,7 @@ import numpy as np
 
 from src import Utils
 
-if Utils.use_scipy():
+if not Utils.in_pyinstaller_mode():
     from scipy import ndimage
 
 """Just to adjust the internal representation of color at a single location,
@@ -23,7 +23,7 @@ class Board(np.matrix):
     """
     def get_chain(self, loc: Tuple[int, int]) -> List[Tuple[int, int]]:
         # if run.py was started, we can use scipy and thereby improve performance
-        if Utils.use_scipy():
+        if not Utils.in_pyinstaller_mode():
             # This method uses morphological operations to find out the
             # connected components ie., chains. wikipedia link to
             # morphological operation - https://en.wikipedia.org/wiki/Mathematical_morphology

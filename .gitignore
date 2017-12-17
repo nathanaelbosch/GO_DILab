@@ -18,6 +18,14 @@ logs/*
 # the PyCharm IDE creates this folder
 .idea/
 
+# ringmaster files
+ringmaster
+*.hist
+*.report
+*.status
+*.games/
+
+
 ##################################################################
 # All the rest here is the preset python .gitignore from github ;)
 # Byte-compiled / optimized / DLL files

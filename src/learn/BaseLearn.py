@@ -28,11 +28,11 @@ class BaseLearn(ABC):
             'SELECT COUNT(*) FROM meta').fetchone()[0]
         self.games_table_length = cursor.execute(
             'SELECT COUNT(*) FROM games').fetchone()[0]
-        self.invalid_game_ids = cursor.execute(
-            'SELECT id FROM meta WHERE all_moves_imported=0').fetchall()
+        numb_invalid_games = cursor.execute(
+            'SELECT COUNT(*) FROM meta WHERE all_moves_imported=0').fetchone()[0]
         self.log('''database contains {} games,
             {} are invalid and won\'t be used for training'''.format(
-            self.numb_all_games, len(self.invalid_game_ids)))
+            self.numb_all_games, numb_invalid_games))
         self.training_size = self.games_table_length  # override this in your Learn class as desired
         self.data_retrieval_command = '''SELECT games.*
                                           FROM games, meta

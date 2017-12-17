@@ -1,3 +1,4 @@
+import argparse
 import sys
 from os.path import dirname, abspath
 
@@ -15,7 +16,6 @@ from src.learn.dev_nath_win_prediction.WinPredictionBot import WinPredictionBot
 from src.learn.dev_ben.NNBot_ben1 import NNBot_ben1
 from src.learn.dev_yu.MovePredictionBot import MovePredictionBot
 from src.learn.dev_kar.LibertyNNBot import LibertyNNBot
-from src.learn.pytorch.PytorchBot import PytorchBot
 from src.learn.bots._11.bot import Bot as Bot_11
 from src.learn.bots._21.bot import Bot as Bot_21
 from src.learn.bots._12.bot import Bot as Bot_12
@@ -23,9 +23,32 @@ from src.learn.bots._12.bot import Bot as Bot_12
 
 class GTPengine:
 
-    def __init__(self, logging_level):
+    def __init__(self, logging_level, player_type_str='RandomBot'):
         self.game = Game()
-        self.bot = RandomBot()
+
+        self.player_types = {}
+        player_types_arr = [
+            HumanConsole,
+            HumanGui,
+            RandomBot,
+            RandomGroupingBot,
+            SimplestNNBot,
+            WinPredictionBot,
+            NNBot_ben1,
+            MovePredictionBot,
+            LibertyNNBot,
+            Bot_11,
+            Bot_21,
+            Bot_12,
+        ]
+        for player_type in player_types_arr:
+            self.player_types[player_type.__name__.lower()] = player_type
+        player_type_str = player_type_str.lower()
+        if player_type_str not in self.player_types:
+            print('no player-type named: ' + player_type_str)
+            sys.exit(1)
+
+        self.bot = self.player_types[player_type_str]()
         self.controller = None
         self.stdin = None
         self.stdout = None
@@ -53,25 +76,6 @@ class GTPengine:
         # get the corresponding method
         for method in gtp_methods:
             self.gtp_commands[method.__name__] = method
-
-        self.player_types = {}
-        player_types_arr = [
-            HumanConsole,
-            HumanGui,
-            RandomBot,
-            RandomGroupingBot,
-            SimplestNNBot,
-            WinPredictionBot,
-            NNBot_ben1,
-            MovePredictionBot,
-            PytorchBot,
-            Bot_11,
-            Bot_21,
-            Bot_12,
-            LibertyNNBot
-        ]
-        for player_type in player_types_arr:
-            self.player_types[player_type.__name__.lower()] = player_type
 
     def set_player_type(self, args):
         if len(args) == 0:
@@ -231,7 +235,16 @@ class GTPengine:
 
 
 def main():
-    gtp_engine = GTPengine(logging_level=logging.INFO)
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        '-p', '--player',
+        help=('options: "HumanConsole", "HumanGui", "RandomBot", "RandomGroupingBot", ' +
+              '"SimplestNNBot", "WinPredictionBot", "NNBot_ben1", "MovePredictionBot", "LibertyNNBot"')
+    )
+    player_type_str = parser.parse_args().player
+    if player_type_str is None:
+        player_type_str = 'RandomBot'
+    gtp_engine = GTPengine(logging_level=logging.INFO, player_type_str=player_type_str)
     gtp_engine.stdin = sys.stdin
     gtp_engine.stdout = sys.stdout
     gtp_engine.run()
