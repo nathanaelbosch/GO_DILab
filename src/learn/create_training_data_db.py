@@ -36,6 +36,7 @@ def setup():
     print('creating tables meta and games')
     cursor.execute(
         '''CREATE TABLE meta(id INT PRIMARY KEY,
+                             source_id INT,
                              all_moves_imported INT,
                              size INT,
                              rules TEXT,
@@ -51,7 +52,7 @@ def setup():
     db.commit()
 
 
-def game_to_database(sgf_content, game_id):
+def game_to_database(source_id, game_id, sgf_content):
     """Replay game and save to database
 
     No real changes here, just in a function for convenience, as we want
@@ -118,6 +119,7 @@ def game_to_database(sgf_content, game_id):
 
     # Insert some data about this game into the `meta` table
     cursor.execute('''INSERT INTO meta(id,
+                                       source_id,
                                        all_moves_imported,
                                        size,
                                        rules,
@@ -127,8 +129,9 @@ def game_to_database(sgf_content, game_id):
                                        elo_white,
                                        result,
                                        sgf_content)
-                      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
+                      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
                    (game_id,
+                    source_id,
                     all_moves_imported,
                     size,
                     rules,
@@ -181,13 +184,8 @@ def import_data():
             (k / total_lengths) * 100,
             elapsed_time, time_remaining))
 
-    # import full_file.txt, 344374 games merged into one file by Nath
-    for i, line in enumerate(lines):
-        game_id = 1000000 + i
-        print_time_info(i, game_id)
-        game_to_database(lines[i], game_id)
-
     # import 76439 .sgf games from the dgs-folder, from Bernhard
+    bernhard_source_id = 0
     for j, path in enumerate(sgf_files):
         # not ignoring errors caused UnicodeDecodeError: 'ascii' codec can't decode byte 0xf6
         with open(path, 'r', errors='ignore') as f:
@@ -195,7 +193,14 @@ def import_data():
         filename = os.path.basename(path)
         game_id = int(filename.split('_')[1][:-4])  # get x in game_x.sgf
         print_time_info(j + len(lines), game_id)
-        game_to_database(sgf_content, game_id)
+        game_to_database(bernhard_source_id, game_id, sgf_content)
+
+    # import full_file.txt, 344374 games merged into one file by Nath
+    nath_source_id = 1
+    for i, line in enumerate(lines):
+        game_id = 1000000 + i
+        print_time_info(i, game_id)
+        game_to_database(nath_source_id, game_id, lines[i])
 
 
 setup()
