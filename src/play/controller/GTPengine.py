@@ -18,6 +18,7 @@ from src.learn.dev_kar.LibertyNNBot import LibertyNNBot
 from src.learn.pytorch.PytorchBot import PytorchBot
 from src.learn.bots._11.bot import Bot as Bot_11
 from src.learn.bots._21.bot import Bot as Bot_21
+from src.learn.bots._12.bot import Bot as Bot_12
 
 
 class GTPengine:
@@ -66,6 +67,7 @@ class GTPengine:
             PytorchBot,
             Bot_11,
             Bot_21,
+            Bot_12,
             LibertyNNBot
         ]
         for player_type in player_types_arr:

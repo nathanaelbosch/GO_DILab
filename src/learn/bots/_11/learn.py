@@ -1,4 +1,5 @@
 """Value network with naive board encoding"""
+import os
 from src.learn.bots.CommonLearn import CommonLearn
 import src.learn.bots.utils as utils
 
@@ -14,6 +15,9 @@ class Learn(CommonLearn):
         print('X.shape:', X.shape)
         print('Y.shape:', y.shape)
         return X, y
+
+    def get_path_to_self(self):
+        return os.path.abspath(__file__)
 
 
 if __name__ == '__main__':

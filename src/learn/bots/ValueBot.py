@@ -3,23 +3,14 @@
 The real input generation still depends on the actual bot, but the game logic
 on how to play, given the output of some value network, is the same
 """
-from os.path import abspath
-import numpy as np
 import copy
 
 from src.learn.BaseNNBot import BaseNNBot
-from src.play.model.Board import EMPTY, BLACK, WHITE
+from src.play.model.Board import BLACK, WHITE
 from src.play.model.Move import Move
 
 
 class ValueBot(BaseNNBot):
-
-    def __init__(self):
-        super().__init__()
-
-    def get_path_to_self(self):
-        return abspath(__file__)
-
     def _genmove(self, color, game, flat_board):
         """Generate a move - ValueBot logic
 

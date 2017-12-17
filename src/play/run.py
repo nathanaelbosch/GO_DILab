@@ -21,6 +21,7 @@ from src.learn.dev_kar.LibertyNNBot import LibertyNNBot
 from src.learn.pytorch.PytorchBot import PytorchBot
 from src.learn.bots._11.bot import Bot as Bot_11
 from src.learn.bots._21.bot import Bot as Bot_21
+from src.learn.bots._12.bot import Bot as Bot_12
 
 
 def parse_args():
@@ -67,6 +68,7 @@ def main():
         'pytorch': PytorchBot,
         '11': Bot_11,
         '21': Bot_21,
+        '12': Bot_12,
         'dev_nn_kar': LibertyNNBot
     }
     player1type = player_types[args.player1].__name__

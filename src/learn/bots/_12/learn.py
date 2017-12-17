@@ -1,8 +1,7 @@
-"""Basically what I did in WinPredictionBot
-
-Value-Network with 3*81-vector as input containing the encoded board
-"""
+"""Policy Network with naive board encoding"""
 import os
+import numpy as np
+
 from src.learn.bots.CommonLearn import CommonLearn
 import src.learn.bots.utils as utils
 
@@ -11,15 +10,15 @@ class Learn(CommonLearn):
     def handle_data(self, training_data):
         data = utils.separate_data(training_data)
 
-        y = utils.value_output(data['results'])
-        boards, y = self.get_symmetries(
-            data['boards'], other_data=y)
+        y = utils.policy_output(data['moves'])
+        X, y, colors = self.get_symmetries(
+            data['boards'], moves=y, other_data=data['colors'])
+        colors = colors[:, None]
 
-        X = utils.encode_board(boards)
+        X = np.concatenate((X, colors), axis=1)
 
         print('X.shape:', X.shape)
         print('Y.shape:', y.shape)
-
         return X, y
 
     def get_path_to_self(self):
