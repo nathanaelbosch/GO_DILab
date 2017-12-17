@@ -30,7 +30,7 @@ def get_unique_file_logger(cls, level=logging.INFO):
     for i in range(0, 5):
         rand_str += random.choice(string.ascii_lowercase)
     log_file = cls.__class__.__name__ + '_' + strftime('%d-%m-%Y_%H-%M-%S') + '_' + rand_str + '.log'
-    if use_scipy():  # else is GTPengine or executable, in that case we can't expect a folder
+    if not in_pyinstaller_mode():  # else is GTPengine or executable, in that case we can't expect a folder
         project_root_dir = dirname(dirname(abspath(__file__)))
         log_file = os.path.join(os.path.join(project_root_dir, 'logs'), log_file)
     logger = setup_logger(rand_str, log_file, level)
@@ -38,13 +38,10 @@ def get_unique_file_logger(cls, level=logging.INFO):
     return logger
 
 
-# true if the current run was started using run.py or generate_training_data.py
-# false if not, that's the case e.g. when running GTPengine directly and when building an executable of GTPengine.
-# then we can't use scipy because pyinstaller can't handle it. TODO find a better solution for this problem
-def use_scipy():
-    return (str(sys.argv[0]).endswith('run.py') or
-            str(sys.argv[0]).endswith('generate_training_data.py') or
-            str(sys.argv[0]).lower().endswith('learn.py'))
+# sys._MEIPASS is the path to a temporary folder pyinstaller (re)creates
+# therefore the existence of this attribute means we are running from pyinstaller
+def in_pyinstaller_mode():
+    return hasattr(sys, '_MEIPASS')
 
 
 # ported to Python 3 from stackoverflow.com/a/44446822
