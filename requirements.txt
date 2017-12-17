@@ -48,7 +48,13 @@ theano
 #
 # pyinstaller --onefile .\src\play\controller\GTPengine.py --add-data ".\src\learn\dev_ben\model_architecture.json;." --add-data ".\src\learn\dev_ben\model_weights.h5;."
 #
+# the above command writes a GTPengine.spec file. If you want to be able to use scipy we must edit this file:
+# hiddenimports=['scipy._lib.messagestream']    (via stackoverflow.com/a/47071289/2474159)
+# and pip install the custom builds of numpy and scipy from here: www.lfd.uci.edu/~gohlke/pythonlibs
+# as described in this video: youtu.be/fLQg8dgB7cA
+# then use:
+#
+# pyinstaller GTPengine.spec
+#
 # if tensorflow throws errors regarding MSVCP140.DLL, try installing the Visual C++ 2015 redistributable:
 # www.tensorflow.org/versions/r0.12/get_started/os_setup#pip_installation_on_windows
-#
-# "How to deploy PyQt, Keras, Tensorflow apps with PyInstaller": youtu.be/fLQg8dgB7cA
