@@ -16,6 +16,8 @@ from src.learn.dev_ben.NNBot_ben1 import NNBot_ben1
 from src.learn.dev_yu.MovePredictionBot import MovePredictionBot
 from src.learn.dev_kar.LibertyNNBot import LibertyNNBot
 from src.learn.pytorch.PytorchBot import PytorchBot
+from src.learn.bots._11.bot import Bot as Bot_11
+from src.learn.bots._21.bot import Bot as Bot_21
 
 
 class GTPengine:
@@ -62,6 +64,8 @@ class GTPengine:
             NNBot_ben1,
             MovePredictionBot,
             PytorchBot,
+            Bot_11,
+            Bot_21,
             LibertyNNBot
         ]
         for player_type in player_types_arr:

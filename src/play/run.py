@@ -19,6 +19,8 @@ from src.learn.dev_ben.NNBot_ben1 import NNBot_ben1
 from src.learn.dev_yu.MovePredictionBot import MovePredictionBot
 from src.learn.dev_kar.LibertyNNBot import LibertyNNBot
 from src.learn.pytorch.PytorchBot import PytorchBot
+from src.learn.bots._11.bot import Bot as Bot_11
+from src.learn.bots._21.bot import Bot as Bot_21
 
 
 def parse_args():
@@ -63,10 +65,13 @@ def main():
         'dev_nn_ben': NNBot_ben1,
         'dev_nn_yu': MovePredictionBot,
         'pytorch': PytorchBot,
+        '11': Bot_11,
+        '21': Bot_21,
         'dev_nn_kar': LibertyNNBot
     }
     player1type = player_types[args.player1].__name__
     player2type = player_types[args.player2].__name__
+    print(player1type)
 
     # if you don't want logfiles: change the logging-level to something
     # more critical than INFO (e.g. WARNING)
