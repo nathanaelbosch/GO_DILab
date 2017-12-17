@@ -17,7 +17,7 @@ class Learn(BaseLearn):
 
     def __init__(self):
         super().__init__()
-        self.training_size = 10000
+        self.training_size = 100000
 
     def handle_data(self, training_data):
         colors = training_data[:, 1]
@@ -59,7 +59,7 @@ class Learn(BaseLearn):
         return model
 
     def train(self, model, X, Y):
-        model.fit(X, Y, epochs=20)
+        model.fit(X, Y, epochs=10)
 
 
     def get_path_to_self(self):
