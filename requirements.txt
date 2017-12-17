@@ -7,6 +7,8 @@ keras
 numpy
 sgf
 matplotlib
+seaborn
+pandas
 scikit-learn
 h5py
 pygame
