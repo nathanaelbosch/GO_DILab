@@ -58,3 +58,10 @@ theano
 #
 # if tensorflow throws errors regarding MSVCP140.DLL, try installing the Visual C++ 2015 redistributable:
 # www.tensorflow.org/versions/r0.12/get_started/os_setup#pip_installation_on_windows
+
+
+# Gomill / ringmaster
+# download the Gomill sources from here: https://mjw.woodcraft.me.uk/gomill
+# run 'python setup.py install' in gomill-0.8 with Python 2.6 or 2.7
+# this creates an executable called "ringmaster" in gomill-0.8/build/scripts-2.7, move this into src/evaluate of this repo
+# run the match defined in 'eval_run.ctl' with this command: 'ringmaster eval_run.ctl'
