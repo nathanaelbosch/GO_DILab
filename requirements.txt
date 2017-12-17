@@ -64,4 +64,4 @@ theano
 # download the Gomill sources from here: https://mjw.woodcraft.me.uk/gomill
 # run 'python setup.py install' in gomill-0.8 with Python 2.6 or 2.7
 # this creates an executable called "ringmaster" in gomill-0.8/build/scripts-2.7, move this into src/evaluate of this repo
-# run the match defined in 'eval_run.ctl' with this command: 'ringmaster eval_run.ctl'
+# run the match defined in 'eval_run.ctl' with this command: 'ringmaster eval_run.ctl' (you must be in the virtual env)
