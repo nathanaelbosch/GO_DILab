@@ -127,7 +127,7 @@ class BaseLearn(ABC):
             other_data = np.concatenate(
                 (other_data, other_data, other_data, other_data,
                  other_data, other_data, other_data, other_data))
-            
+
         if moves is not None and other_data is not None:
             return boards, moves, other_data
         elif moves is not None and other_data is None:
@@ -152,6 +152,10 @@ class BaseLearn(ABC):
         self.log('working with {} rows'.format(len(training_data)))
         X, Y = self.handle_data(training_data)
 
+        training_size = int(X.shape[0]*0.9)
+        X, X_test = X[:training_size], X[training_size:]
+        Y, Y_test = Y[:training_size], Y[training_size:]
+
         # Save input and output dimensions for easier, more modular use
         # Implicit assumtion is that X, y are two-dimensional
         self.input_dim = X.shape[1]
@@ -170,8 +174,8 @@ class BaseLearn(ABC):
         model.save_weights(weights_path)
 
         # EVALUATE
-        scores = model.evaluate(X, Y)
-        print("\n%s: %.2f%%" % (model.metrics_names[1], scores[1] * 100))
+        scores = model.evaluate(X_test, Y_test)
+        print("\nTest accuracy: {:.2f}".format(scores[1] * 100))
 
         # DONE
         elapsed_time = time.time() - start_time
