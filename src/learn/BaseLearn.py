@@ -5,6 +5,7 @@ import numpy as np
 import time
 from os.path import dirname, abspath
 from abc import ABC, abstractmethod
+from sklearn.model_selection import train_test_split
 
 from src import Utils
 # Utils.set_keras_backend("tensorflow")
@@ -152,9 +153,8 @@ class BaseLearn(ABC):
         self.log('working with {} rows'.format(len(training_data)))
         X, Y = self.handle_data(training_data)
 
-        training_size = int(X.shape[0]*0.9)
-        X, X_test = X[:training_size], X[training_size:]
-        Y, Y_test = Y[:training_size], Y[training_size:]
+        X_train, X_test, Y_train, Y_test = train_test_split(
+            X, Y, test_size=0.1)
 
         # Save input and output dimensions for easier, more modular use
         # Implicit assumtion is that X, y are two-dimensional
@@ -169,7 +169,7 @@ class BaseLearn(ABC):
         json_file.close()
 
         # TRAIN AND STORE WEIGHTS
-        self.train(model, X, Y)
+        self.train(model, X_train, Y_train)
         weights_path = os.path.join(dirname(self.get_path_to_self()), 'model_weights.h5')
         model.save_weights(weights_path)
 
