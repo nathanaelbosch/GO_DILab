@@ -19,7 +19,7 @@ class CommonLearn(BaseLearn):
         super().__init__()
         np.random.seed(1234)
         self.training_size = 100
-        self.data_retrieval_command = '''SELECT games.*, meta.result_text
+        self.data_retrieval_command = '''SELECT games.*, meta.result
                                          FROM games, meta
                                          WHERE games.id == meta.id
                                          AND meta.all_moves_imported!=0
