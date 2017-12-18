@@ -174,8 +174,9 @@ class BaseLearn(ABC):
         model.save_weights(weights_path)
 
         # EVALUATE
+        print('\n\n')
         scores = model.evaluate(X_test, Y_test)
-        print("\nTest accuracy: {:.2f}".format(scores[1] * 100))
+        print("Test accuracy: {:.2f}%".format(scores[1] * 100))
 
         # DONE
         elapsed_time = time.time() - start_time
