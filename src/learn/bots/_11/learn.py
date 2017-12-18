@@ -1,4 +1,8 @@
-"""Value network with naive board encoding"""
+"""Value network with naive board encoding
+
+This approach is inherently flawed. It only serves as a comparison for the
+more refined approaches we have.
+"""
 import os
 from src.learn.bots.CommonLearn import CommonLearn
 import src.learn.bots.utils as utils

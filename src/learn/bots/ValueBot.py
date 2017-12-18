@@ -23,7 +23,7 @@ class ValueBot(BaseNNBot):
         my_index = 0 if color == 'b' else 1
         my_value = BLACK if color == 'b' else WHITE
 
-        inp = self.board_to_input(flat_board)
+        inp = self.generate_nn_input(flat_board, color)
         current_prob = self.model.predict(inp)
 
         # 1. Our win probability
@@ -41,7 +41,7 @@ class ValueBot(BaseNNBot):
             test_board = copy.deepcopy(game.board)
             test_board.place_stone_and_capture_if_applicable_default_values(
                 move.to_matrix_location(), my_value)
-            inp = self.board_to_input(test_board.flatten())
+            inp = self.generate_nn_input(test_board.flatten(), color)
             pred_result = self.model.predict(inp)[0, my_index]
 
             if pred_result > best_win_prob:

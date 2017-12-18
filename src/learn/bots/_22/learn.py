@@ -10,16 +10,17 @@ class Learn(CommonLearn):
     def handle_data(self, training_data):
         data = utils.separate_data(training_data)
 
-        y = utils.policy_output(data['moves'])
-        X, y, colors = self.get_symmetries(
-            data['boards'], moves=y, other_data=data['colors'])
-        colors = colors[:, None]
+        boards, training_data = self.get_symmetries(
+            data['boards'], other_data=training_data)
+        data = utils.separate_data(training_data)
 
-        X = utils.encode_board(X)
-        X = np.concatenate((X, colors), axis=1)
+        y = utils.policy_output(data['moves'])
+
+        X = utils.encode_board(boards, data['colors'])
 
         print('X.shape:', X.shape)
         print('Y.shape:', y.shape)
+
         return X, y
 
     def get_path_to_self(self):

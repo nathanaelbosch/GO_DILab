@@ -7,5 +7,5 @@ class Bot_11(ValueBot):
         return os.path.abspath(__file__)
 
     @staticmethod
-    def board_to_input(flat_board):
+    def generate_nn_input(flat_board, color):
         return flat_board

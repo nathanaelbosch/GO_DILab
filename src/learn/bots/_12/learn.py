@@ -1,4 +1,11 @@
-"""Policy Network with naive board encoding"""
+"""Policy Network with naive board encoding
+
+
+This approach is inherently flawed. It only serves as a comparison for the
+more refined approaches we have.
+
+Input here is the naive board encoding but also the current players color.
+"""
 import os
 import numpy as np
 

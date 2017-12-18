@@ -11,11 +11,13 @@ class Learn(CommonLearn):
     def handle_data(self, training_data):
         data = utils.separate_data(training_data)
 
-        y = utils.value_output(data['results'])
-        boards, y = self.get_symmetries(
-            data['boards'], other_data=y)
+        boards, training_data = self.get_symmetries(
+            data['boards'], other_data=training_data)
+        data = utils.separate_data(training_data)
 
-        X = utils.encode_board(boards)
+        y = utils.value_output(data['results'])
+
+        X = utils.encode_board(boards, data['colors'])
 
         print('X.shape:', X.shape)
         print('Y.shape:', y.shape)

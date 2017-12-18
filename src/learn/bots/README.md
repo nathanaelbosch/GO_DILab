@@ -37,9 +37,11 @@ First we need to settle on a good part of the dataset that will be used for this
 22: Policy bot with the advanced board encoding into a (3*81)-vector  
 
 ## ToDo
-- [ ] Research on some papers again to settle on a reasonable choice for the liberty encoding
+- [x] Research on some papers again to settle on a reasonable choice for the liberty encoding
+- [x] Change encodings from a "black-white" to a "player-opponent" point of view
 - [ ] Understand the `LibertyNNBot` to get the liberties
 - [ ] Add normalizing to the naive board encoding variants
 - [ ] Maybe add some variants for the models to compare - Might be better to do after comparing those 6 versions to then compare models
 - [x] Implement a reasonable SQL query to get a good choice of training data
 - [x] Implement the play-logic for both PolicyBot and ValueBot
+

@@ -8,13 +8,15 @@ multiple bots.
 import numpy as np
 from keras.utils import to_categorical
 
+from src.play.model.Game import BLACK, WHITE, EMPTY
+
 
 def separate_data(data):
     """Given the output of the SQL call separate that array into it's parts"""
     results = data[:, -1]
     ids = data[:, 0]
-    colors = data[:, 1]
-    moves = data[:, 2].astype(int)
+    colors = data[:, 1].astype(int)[:, None]
+    moves = data[:, 2].astype(int)[:, None]
     boards = data[:, 3:-1].astype(np.float64)
     out = {'results': results,
            'ids': ids,
@@ -52,19 +54,32 @@ def simple_board(boards):
     return boards
 
 
-def encode_board(boards):
+def encode_board(boards, colors):
     """Generate a categorical board encoding
 
     The board will be encoded into a 3*81-vector.
     Each of those 81-vectors basically stand for a True/False-encoding for
-    white, black and "empty".
+    player, opponent, and "empty".
     """
+    player_board = np.where(
+        colors==WHITE,
+        boards==WHITE,
+        boards==BLACK)
+    opponent_board = np.where(
+        colors==WHITE,
+        boards==BLACK,
+        boards==WHITE)
+    empty_board = (boards==EMPTY)
+
+    def normalize(board):
+        return (board * 3 - 1)/np.sqrt(2)
+
     out = np.concatenate(
-        ((boards==-1)*3 - 1,
-         (boards==1)*3 - 1,
-         (boards==0)*3 - 1),
+        (normalize(player_board),
+         normalize(opponent_board),
+         normalize(empty_board)),
         axis=1)
-    out = out / np.sqrt(2)
+
     return out
 
 
