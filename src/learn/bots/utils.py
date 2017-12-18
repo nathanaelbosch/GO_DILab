@@ -6,6 +6,7 @@ generation of those data formats here, as they will be shared accross
 multiple bots.
 """
 import numpy as np
+from scipy import ndimage
 from keras.utils import to_categorical
 
 from src.play.model.Game import BLACK, WHITE, EMPTY
@@ -83,3 +84,48 @@ def encode_board(boards, colors):
     return out
 
 
+def get_liberties(binary_board, empty_board):
+    """Generate Liberties
+
+    In goes a binary board with the stones of one of the player.
+    Out comes a board with the liberties encoded as scalar.
+    """
+    groups = ndimage.label(binary_board)
+    liberties = np.array([[0]*9]*9)
+    for label in range(1, groups[1]+1):
+        b = groups[0]==label
+        dilated = ndimage.binary_dilation(b)
+        libs = dilated & empty_board
+        n_libs = libs.sum()
+        liberties[b] = n_libs
+    return liberties
+
+
+def liberties_to_planes(liberties, n=4):
+    """Reformat liberties to a more categorical encoding
+
+    In goes the board with the liberties
+    Out come multiple boards with binary values
+    """
+    out = []
+    for i in range(n-1):
+        out.append(liberties==(i+1))
+    out.append(liberties>=n)
+    out = np.stack(out)
+    return out
+
+
+def get_liberties_vectorized(flat_boards, color):
+    """This uses multiple boards as input and outputs the liberties!"""
+    data = np.append(flat_boards, color, axis=1)
+
+    def foo(data):
+        flat_board, color = data[:-1], data[-1]
+        board = flat_board.reshape((9, 9))
+        liberties = get_liberties(board==color, board==EMPTY)
+        return liberties
+
+    liberties = np.apply_along_axis(foo, 1, data)
+    planes = np.apply_along_axis(liberties_to_planes, 1, liberties)
+    planes = planes.reshape((flat_boards.shape[0], 4*81))
+    return planes
