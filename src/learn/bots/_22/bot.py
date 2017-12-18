@@ -1,9 +1,11 @@
 import os
-from src.learn.bots.ValueBot import ValueBot
+import numpy as np
+from src.learn.bots.PolicyBot import PolicyBot
 import src.learn.bots.utils as utils
 
 
-class Bot_21(ValueBot):
+class Bot_22(PolicyBot):
+
     def get_path_to_self(self):
         return os.path.abspath(__file__)
 

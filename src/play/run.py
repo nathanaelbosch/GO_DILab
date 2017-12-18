@@ -19,9 +19,10 @@ from src.learn.dev_ben.NNBot_ben1 import NNBot_ben1
 from src.learn.dev_yu.MovePredictionBot import MovePredictionBot
 from src.learn.dev_kar.LibertyNNBot import LibertyNNBot
 from src.learn.pytorch.PytorchBot import PytorchBot
-from src.learn.bots._11.bot import Bot as Bot_11
-from src.learn.bots._21.bot import Bot as Bot_21
-from src.learn.bots._12.bot import Bot as Bot_12
+from src.learn.bots._11.bot import Bot_11
+from src.learn.bots._21.bot import Bot_21
+from src.learn.bots._12.bot import Bot_12
+from src.learn.bots._22.bot import Bot_22
 
 
 def parse_args():
@@ -69,6 +70,7 @@ def main():
         '11': Bot_11,
         '21': Bot_21,
         '12': Bot_12,
+        '22': Bot_22,
         'dev_nn_kar': LibertyNNBot
     }
     player1type = player_types[args.player1].__name__

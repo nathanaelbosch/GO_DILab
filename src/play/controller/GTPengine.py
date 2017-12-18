@@ -16,9 +16,10 @@ from src.learn.dev_nath_win_prediction.WinPredictionBot import WinPredictionBot
 from src.learn.dev_ben.NNBot_ben1 import NNBot_ben1
 from src.learn.dev_yu.MovePredictionBot import MovePredictionBot
 from src.learn.dev_kar.LibertyNNBot import LibertyNNBot
-from src.learn.bots._11.bot import Bot as Bot_11
-from src.learn.bots._21.bot import Bot as Bot_21
-from src.learn.bots._12.bot import Bot as Bot_12
+from src.learn.bots._11.bot import Bot_11
+from src.learn.bots._21.bot import Bot_21
+from src.learn.bots._12.bot import Bot_12
+from src.learn.bots._22.bot import Bot_22
 
 
 class GTPengine:
@@ -40,6 +41,7 @@ class GTPengine:
             Bot_11,
             Bot_21,
             Bot_12,
+            Bot_22,
         ]
         for player_type in player_types_arr:
             self.player_types[player_type.__name__.lower()] = player_type

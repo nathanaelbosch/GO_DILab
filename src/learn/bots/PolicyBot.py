@@ -3,6 +3,8 @@
 The real input generation still depends on the actual bot, but the game logic
 on how to play, given the output of some value network, is the same
 """
+import numpy as np
+
 from src.learn.BaseNNBot import BaseNNBot
 from src.play.model.Move import Move
 
@@ -19,6 +21,7 @@ class PolicyBot(BaseNNBot):
 
         # 1. Generate move probabilities
         inp = self.board_to_input(flat_board)
+        inp = np.append(inp, [[-1 if color == 'w' else 1]], axis=1)
         prediction = self.model.predict(inp)[0]
         print(prediction.shape)
 

@@ -2,7 +2,7 @@ import os
 from src.learn.bots.PolicyBot import PolicyBot
 
 
-class Bot(PolicyBot):
+class Bot_12(PolicyBot):
 
     def get_path_to_self(self):
         return os.path.abspath(__file__)
