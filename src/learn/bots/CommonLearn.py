@@ -18,12 +18,28 @@ class CommonLearn(BaseLearn):
     def __init__(self):
         super().__init__()
         np.random.seed(1234)
-        self.training_size = 100
-        self.data_retrieval_command = '''SELECT games.*, meta.result
-                                         FROM games, meta
-                                         WHERE games.id == meta.id
-                                         AND meta.all_moves_imported!=0
-                                         LIMIT ?'''
+        # Training size is here not the number of rows, but of games!
+        self.training_size = 10
+        # Results in 77016 rows, counting symmetries
+        self.data_retrieval_command = '''
+            WITH relevant_games as (
+                SELECT id,
+                    CASE WHEN elo_black <= elo_white THEN elo_black
+                    WHEN elo_white <= elo_black THEN elo_white
+                    END AS min_elo
+                FROM meta
+                WHERE elo_white != ""
+                AND elo_black != ""
+                AND turns > 30
+                ORDER BY min_elo DESC
+                LIMIT ?)
+            SELECT games.*, meta.result
+            FROM relevant_games, games, meta
+            WHERE relevant_games.id == games.id
+            AND games.id == meta.id
+            AND meta.result != 'Draw'
+            AND meta.result != 'Time'
+            AND meta.all_moves_imported!=0'''
 
     def setup_and_compile_model(self):
         model = Sequential()
