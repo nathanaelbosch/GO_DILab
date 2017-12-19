@@ -20,6 +20,8 @@ from src.learn.bots._11.bot import Bot_11
 from src.learn.bots._21.bot import Bot_21
 from src.learn.bots._12.bot import Bot_12
 from src.learn.bots._22.bot import Bot_22
+from src.learn.bots._31.bot import Bot_31
+from src.learn.bots._32.bot import Bot_32
 
 
 class GTPengine:
@@ -42,6 +44,8 @@ class GTPengine:
             Bot_21,
             Bot_12,
             Bot_22,
+            Bot_31,
+            Bot_32,
         ]
         for player_type in player_types_arr:
             self.player_types[player_type.__name__.lower()] = player_type
