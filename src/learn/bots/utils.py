@@ -84,7 +84,7 @@ def encode_board(boards, colors):
     return out
 
 
-def get_liberties(binary_board, empty_board):
+def _liberties(binary_board, empty_board):
     """Generate Liberties
 
     In goes a binary board with the stones of one of the player.
@@ -101,7 +101,7 @@ def get_liberties(binary_board, empty_board):
     return liberties
 
 
-def liberties_to_planes(liberties, n=4):
+def _liberties_to_planes(liberties, n=4):
     """Reformat liberties to a more categorical encoding
 
     In goes the board with the liberties
@@ -122,10 +122,19 @@ def get_liberties_vectorized(flat_boards, color):
     def foo(data):
         flat_board, color = data[:-1], data[-1]
         board = flat_board.reshape((9, 9))
-        liberties = get_liberties(board==color, board==EMPTY)
+        liberties = _liberties(board==color, board==EMPTY)
         return liberties
 
     liberties = np.apply_along_axis(foo, 1, data)
-    planes = np.apply_along_axis(liberties_to_planes, 1, liberties)
+    planes = np.apply_along_axis(_liberties_to_planes, 1, liberties)
     planes = planes.reshape((flat_boards.shape[0], 4*81))
+    return planes
+
+
+def get_liberties(flat_board, color):
+    """This uses multiple boards as input and outputs the liberties!"""
+    board = flat_board.reshape((9, 9))
+    liberties = _liberties(board==color, board==EMPTY)
+    planes = _liberties_to_planes(liberties)
+    planes = planes.reshape((1, 4*81))
     return planes
