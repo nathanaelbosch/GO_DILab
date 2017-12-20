@@ -19,8 +19,8 @@ class CommonLearn(BaseLearn):
         super().__init__()
         np.random.seed(1234)
         # Training size is here not the number of rows, but of games!
-        self.training_size = 10
-        # Results in 77016 rows, counting symmetries
+        # Max 150000
+        self.training_size = 1000
         self.data_retrieval_command = '''
             WITH relevant_games as (
                 SELECT id,
@@ -31,20 +31,24 @@ class CommonLearn(BaseLearn):
                 WHERE elo_white != ""
                 AND elo_black != ""
                 AND turns > 30
+                AND result != 'Draw'
+                AND result != 'Time'
+                AND all_moves_imported!=0
                 ORDER BY min_elo DESC
                 LIMIT ?)
             SELECT games.*, meta.result
             FROM relevant_games, games, meta
             WHERE relevant_games.id == games.id
-            AND games.id == meta.id
-            AND meta.result != 'Draw'
-            AND meta.result != 'Time'
-            AND meta.all_moves_imported!=0'''
+            AND games.id == meta.id'''
 
     def setup_and_compile_model(self):
         model = Sequential()
-        model.add(Dense(100, input_dim=self.input_dim, activation='relu'))
-        model.add(Dropout(0.5))
+        model.add(Dense(200, input_dim=self.input_dim, activation='relu'))
+        # model.add(Dropout(0.5))
+        model.add(Dense(400, input_dim=self.input_dim, activation='relu'))
+        # model.add(Dropout(0.5))
+        model.add(Dense(200, input_dim=self.input_dim, activation='relu'))
+        # model.add(Dropout(0.5))
         model.add(Dense(self.output_dim, activation='softmax'))
         model.compile(
             loss='categorical_crossentropy',

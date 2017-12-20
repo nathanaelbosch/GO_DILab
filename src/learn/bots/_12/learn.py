@@ -18,11 +18,12 @@ class Learn(CommonLearn):
         data = utils.separate_data(training_data)
 
         y = utils.policy_output(data['moves'])
-        X, y, colors = self.get_symmetries(
-            data['boards'], moves=y, other_data=data['colors'])
-        colors = colors[:, None]
+        X, y, training_data = self.get_symmetries(
+            data['boards'], moves=y, other_data=training_data)
+        data = utils.separate_data(training_data)
+        colors = data['colors']
 
-        X = np.concatenate((X, colors), axis=1)
+        X = np.append(X, colors, axis=1)
 
         print('X.shape:', X.shape)
         print('Y.shape:', y.shape)
