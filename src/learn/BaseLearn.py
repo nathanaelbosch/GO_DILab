@@ -154,7 +154,7 @@ class BaseLearn(ABC):
         X, Y = self.handle_data(training_data)
 
         X_train, X_test, Y_train, Y_test = train_test_split(
-            X, Y, test_size=0.1)
+            X, Y, test_size=0.1, random_state=2)
 
         # Save input and output dimensions for easier, more modular use
         # Implicit assumtion is that X, y are two-dimensional
