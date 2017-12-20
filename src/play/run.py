@@ -18,7 +18,6 @@ from src.learn.dev_nath_win_prediction.WinPredictionBot import WinPredictionBot
 from src.learn.dev_ben.NNBot_ben1 import NNBot_ben1
 from src.learn.dev_yu.MovePredictionBot import MovePredictionBot
 from src.learn.dev_kar.LibertyNNBot import LibertyNNBot
-from src.learn.pytorch.PytorchBot import PytorchBot
 from src.learn.bots._11.bot import Bot_11
 from src.learn.bots._21.bot import Bot_21
 from src.learn.bots._12.bot import Bot_12
@@ -66,7 +65,6 @@ def main():
         'win_prediction': WinPredictionBot,
         'dev_nn_ben': NNBot_ben1,
         'dev_nn_yu': MovePredictionBot,
-        'pytorch': PytorchBot,
         '11': Bot_11,
         '21': Bot_21,
         '12': Bot_12,
