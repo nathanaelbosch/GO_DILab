@@ -14,32 +14,48 @@ from src.play.model.Game import BLACK, WHITE, EMPTY
 
 def separate_data(data):
     """Given the output of the SQL call separate that array into it's parts"""
-    results = data[:, -1]
+    results = data[:, -2]
+    min_elo = data[:, -1]
+    print('Minimum Elo in Data:', min_elo[-1])
     ids = data[:, 0]
+    print('Unique games used in this data:', len(np.unique(ids)))
     colors = data[:, 1].astype(int)[:, None]
     moves = data[:, 2].astype(int)[:, None]
-    boards = data[:, 3:-1].astype(np.float64)
+    boards = data[:, 3:-2].astype(np.float64)
     out = {'results': results,
            'ids': ids,
            'colors': colors,
            'moves': moves,
-           'boards': boards}
+           'boards': boards,
+           'min_elo': min_elo}
     return out
 
 
-def value_output(results):
+def value_output(results, colors):
     r = np.chararray(results.shape)
     r[:] = results[:]
     black_wins = r.lower().startswith(b'b')[:, None]
     white_wins = r.lower().startswith(b'w')[:, None]
+    print('Black wins:', sum(black_wins))
+    print('White wins:', sum(white_wins))
+    player_wins = np.where(
+        colors==WHITE,
+        white_wins,
+        black_wins)
+    opponent_wins = np.where(
+        colors==BLACK,
+        white_wins,
+        black_wins)
+
     # draws = results.lower().startswith('D')
-    out = np.concatenate((black_wins, white_wins), axis=1)
+    out = np.concatenate((player_wins, opponent_wins), axis=1)
+    # out = np.concatenate((black_wins, white_wins), axis=1)
     return out
 
 
 def policy_output(moves):
     moves[moves==-1] = 81
-    out = to_categorical(moves)
+    out = to_categorical(moves, num_classes=82)
     assert out.shape[1] == 82
     assert (out.sum(axis=1) == 1).all()
 
@@ -80,6 +96,11 @@ def encode_board(boards, colors):
          normalize(opponent_board),
          normalize(empty_board)),
         axis=1)
+    # out = np.concatenate(
+    #     (normalize(boards==BLACK),
+    #      normalize(boards==WHITE),
+    #      normalize(boards==EMPTY)),
+    #     axis=1)
 
     return out
 

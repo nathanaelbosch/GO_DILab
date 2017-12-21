@@ -16,7 +16,7 @@ class Learn(CommonLearn):
             data['boards'], other_data=training_data)
         data = utils.separate_data(training_data)
 
-        y = utils.value_output(data['results'])
+        y = utils.value_output(data['results'], data['colors'])
 
         encoded_boards = utils.encode_board(boards, data['colors'])
         player_liberties = utils.get_liberties_vectorized(

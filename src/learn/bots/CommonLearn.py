@@ -20,35 +20,42 @@ class CommonLearn(BaseLearn):
         np.random.seed(1234)
         # Training size is here not the number of rows, but of games!
         # Max 150000
-        self.training_size = 1000
+        self.training_size = 1000000
+        # self.data_retrieval_command = '''
+        #     WITH relevant_games as (
+        #         SELECT id,
+        #             CASE WHEN elo_black <= elo_white THEN elo_black
+        #             WHEN elo_white <= elo_black THEN elo_white
+        #             END AS min_elo
+        #         FROM meta
+        #         WHERE elo_white != ""
+        #         AND elo_black != ""
+        #         AND turns > 30
+        #         AND result != 'Draw'
+        #         AND result != 'Time'
+        #         AND all_moves_imported!=0
+        #         ORDER BY min_elo DESC
+        #         LIMIT ?)
+        #     SELECT games.*, meta.result, relevant_games.min_elo
+        #     FROM relevant_games, games, meta
+        #     WHERE relevant_games.id == games.id
+        #     AND games.id == meta.id'''
         self.data_retrieval_command = '''
-            WITH relevant_games as (
-                SELECT id,
-                    CASE WHEN elo_black <= elo_white THEN elo_black
-                    WHEN elo_white <= elo_black THEN elo_white
-                    END AS min_elo
-                FROM meta
-                WHERE elo_white != ""
-                AND elo_black != ""
-                AND turns > 30
-                AND result != 'Draw'
-                AND result != 'Time'
-                AND all_moves_imported!=0
-                ORDER BY min_elo DESC
-                LIMIT ?)
-            SELECT games.*, meta.result
-            FROM relevant_games, games, meta
-            WHERE relevant_games.id == games.id
-            AND games.id == meta.id'''
+            SELECT *
+            FROM elo_ordered_games
+            LIMIT ?'''
 
     def setup_and_compile_model(self):
         model = Sequential()
-        model.add(Dense(200, input_dim=self.input_dim, activation='relu'))
-        # model.add(Dropout(0.5))
+        DROPOUT = 0
         model.add(Dense(400, input_dim=self.input_dim, activation='relu'))
-        # model.add(Dropout(0.5))
+        model.add(Dropout(DROPOUT))
         model.add(Dense(200, input_dim=self.input_dim, activation='relu'))
-        # model.add(Dropout(0.5))
+        model.add(Dropout(DROPOUT))
+        model.add(Dense(200, input_dim=self.input_dim, activation='relu'))
+        model.add(Dropout(DROPOUT))
+        model.add(Dense(100, input_dim=self.input_dim, activation='relu'))
+        model.add(Dropout(DROPOUT))
         model.add(Dense(self.output_dim, activation='softmax'))
         model.compile(
             loss='categorical_crossentropy',
@@ -57,7 +64,7 @@ class CommonLearn(BaseLearn):
         return model
 
     def train(self, model, X, Y):
-        model.fit(X, Y, epochs=8, batch_size=10000)
+        model.fit(X, Y, epochs=30, batch_size=10000)
 
 
 if __name__ == '__main__':
