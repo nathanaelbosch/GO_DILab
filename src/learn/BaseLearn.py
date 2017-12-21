@@ -23,18 +23,18 @@ class BaseLearn(ABC):
             exit(1)
 
         self.db = sqlite3.connect(db_path)
-        cursor = self.db.cursor()
+        # cursor = self.db.cursor()
         self.logger = Utils.get_unique_file_logger(self, logging.INFO)
-        self.numb_all_games = cursor.execute(
-            'SELECT COUNT(*) FROM meta').fetchone()[0]
-        self.games_table_length = cursor.execute(
-            'SELECT COUNT(*) FROM games').fetchone()[0]
-        numb_invalid_games = cursor.execute(
-            'SELECT COUNT(*) FROM meta WHERE all_moves_imported=0').fetchone()[0]
-        self.log('''database contains {} games,
-            {} are invalid and won\'t be used for training'''.format(
-            self.numb_all_games, numb_invalid_games))
-        self.training_size = self.games_table_length  # override this in your Learn class as desired
+        # self.numb_all_games = cursor.execute(
+        #     'SELECT COUNT(*) FROM meta').fetchone()[0]
+        # self.games_table_length = cursor.execute(
+        #     'SELECT COUNT(*) FROM games').fetchone()[0]
+        # numb_invalid_games = cursor.execute(
+        #     'SELECT COUNT(*) FROM meta WHERE all_moves_imported=0').fetchone()[0]
+        # self.log('''database contains {} games,
+        #     {} are invalid and won\'t be used for training'''.format(
+        #     self.numb_all_games, numb_invalid_games))
+        # self.training_size = self.games_table_length  # override this in your Learn class as desired
         self.data_retrieval_command = '''SELECT games.*
                                           FROM games, meta
                                           WHERE games.id == meta.id
@@ -125,9 +125,16 @@ class BaseLearn(ABC):
         # print('boards.shape:', boards.shape)
         # print('moves.shape:', moves.shape)
         if other_data is not None:
-            other_data = np.concatenate(
-                (other_data, other_data, other_data, other_data,
-                 other_data, other_data, other_data, other_data))
+            if not isinstance(other_data, list):
+                other_data = np.concatenate(
+                    (other_data, other_data, other_data, other_data,
+                     other_data, other_data, other_data, other_data))
+            else:
+                _other = other_data
+                other_data = []
+                for d in _other:
+                    other_data.append(np.concatenate(
+                        (d, d, d, d, d, d, d, d)))
 
         if moves is not None and other_data is not None:
             return boards, moves, other_data
@@ -149,17 +156,20 @@ class BaseLearn(ABC):
         cursor.execute(self.data_retrieval_command,
                        [self.training_size])
         training_data = np.array(cursor.fetchall())  # this is a gigantic array, has millions of rows
+        np.random.seed(1234)
+        np.random.shuffle(training_data)
+        _n = int(training_data.shape[0] * 0.9)
+        training_data, testing_data = training_data[:_n], training_data[_n:]
 
         self.log('working with {} rows'.format(len(training_data)))
-        X, Y = self.handle_data(training_data)
-
-        X_train, X_test, Y_train, Y_test = train_test_split(
-            X, Y, test_size=0.1, random_state=2)
+        X_train, Y_train = self.handle_data(training_data)
+        X_test, Y_test = self.handle_data(testing_data)
+        # del training_data; del testing_data
 
         # Save input and output dimensions for easier, more modular use
         # Implicit assumtion is that X, y are two-dimensional
-        self.input_dim = X.shape[1]
-        self.output_dim = Y.shape[1]
+        self.input_dim = X_train.shape[1]
+        self.output_dim = Y_train.shape[1]
 
         # SET UP AND STORE NETWORK TOPOLOGY
         model = self.setup_and_compile_model()
@@ -181,7 +191,7 @@ class BaseLearn(ABC):
         # DONE
         elapsed_time = time.time() - start_time
         self.log('training ended after {:.0f}s'.format(elapsed_time))
-        self.log('model trained on {} moves from {} games'.format(
-                 len(X), self.numb_all_games))
+        # self.log('model trained on {} moves from {} games'.format(
+        #          len(X), self.numb_all_games))
         self.log('model architecture saved to: ' + architecture_path)
         self.log('model weights saved to: ' + weights_path)
