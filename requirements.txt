@@ -2,6 +2,7 @@
 numpy
     # for morphological operations in Board, via Karthikeya
 scipy
+pandas
 
 
 # GUI
