@@ -9,20 +9,21 @@ import src.learn.bots.utils as utils
 
 
 class Learn(CommonLearn):
-    def handle_data(self, training_data):
-        data = utils.separate_data(training_data)
+    def handle_data(self, data):
+        boards = data[data.columns[3:-2]].as_matrix()
 
-        boards, training_data = self.get_symmetries(
-            data['boards'], other_data=training_data)
-        data = utils.separate_data(training_data)
+        y = utils.policy_output(data['move'])
 
-        y = utils.policy_output(data['moves'])
+        boards, _other = self.get_symmetries(
+            boards, other_data=[y, data['color']])
+        y, colors = _other
+        colors = colors.reshape(len(colors), 1)
 
-        encoded_boards = utils.encode_board(boards, data['colors'])
+        encoded_boards = utils.encode_board(boards, colors)
         player_liberties = utils.get_liberties_vectorized(
-            boards, data['colors'])
+            boards, colors)
         opponent_liberties = utils.get_liberties_vectorized(
-            boards, -data['colors'])
+            boards, -colors)
         X = np.concatenate(
             (encoded_boards, player_liberties, opponent_liberties), axis=1)
 

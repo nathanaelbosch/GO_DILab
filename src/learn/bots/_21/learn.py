@@ -8,16 +8,16 @@ import src.learn.bots.utils as utils
 
 
 class Learn(CommonLearn):
-    def handle_data(self, training_data):
-        data = utils.separate_data(training_data)
+    def handle_data(self, data):
+        boards = data[data.columns[3:-2]].as_matrix()
 
+        y = utils.value_output(data['result'], data['color'])
+
+        # Get symmetries and duplicate others accordingly
         X, _other = self.get_symmetries(
-            data['boards'], other_data=[data['results'], data['colors']])
-        results, colors = _other[0], _other[1]
-
+            boards, other_data=[y, data['color']])
+        y, colors = _other[0], _other[1]
         X = utils.encode_board(X, colors)
-
-        y = utils.value_output(results, colors)
 
         print('X.shape:', X.shape)
         print('Y.shape:', y.shape)
@@ -28,5 +28,9 @@ class Learn(CommonLearn):
         return os.path.abspath(__file__)
 
 
-if __name__ == '__main__':
+def main():
     Learn().run()
+
+
+if __name__ == '__main__':
+    main()

@@ -14,14 +14,17 @@ from src.play.model.Game import BLACK, WHITE, EMPTY
 
 def separate_data(data):
     """Given the output of the SQL call separate that array into it's parts"""
-    results = data[:, -2]
-    min_elo = data[:, -1]
+    # print(data.columns)
+    # print(data.dtypes)
+    # results = data[data.columns[-2]].as_matrix()
+    results = data.result
+    min_elo = data[data.columns[-1]].as_matrix()
     print('Minimum Elo in Data:', min_elo[-1])
-    ids = data[:, 0]
+    ids = data[data.columns[0]]
     print('Unique games used in this data:', len(np.unique(ids)))
-    colors = data[:, 1].astype(int)[:, None]
-    moves = data[:, 2].astype(int)[:, None]
-    boards = data[:, 3:-2].astype(np.float64)
+    colors = data[data.columns[1]].as_matrix()
+    moves = data[data.columns[2]].as_matrix()
+    boards = data[data.columns[3:-2]].as_matrix()
     out = {'results': results,
            'ids': ids,
            'colors': colors,
@@ -32,10 +35,10 @@ def separate_data(data):
 
 
 def value_output(results, colors):
-    r = np.chararray(results.shape)
-    r[:] = results[:]
-    black_wins = r.lower().startswith(b'b')[:, None]
-    white_wins = r.lower().startswith(b'w')[:, None]
+    # r = np.chararray(results.shape)
+    # r[:] = results[:]
+    black_wins = results.str.lower().str.startswith('b')
+    white_wins = results.str.lower().str.startswith('w')
     print('Black wins:', sum(black_wins))
     print('White wins:', sum(white_wins))
     player_wins = np.where(
@@ -46,10 +49,12 @@ def value_output(results, colors):
         colors==BLACK,
         white_wins,
         black_wins)
+    player_wins = player_wins.reshape(len(player_wins), 1)
+    opponent_wins = opponent_wins.reshape(len(opponent_wins), 1)
 
-    # draws = results.lower().startswith('D')
     out = np.concatenate((player_wins, opponent_wins), axis=1)
-    # out = np.concatenate((black_wins, white_wins), axis=1)
+    assert out.shape[1] == 2, 'Value Output does not have the right shape!'
+
     return out
 
 
@@ -78,6 +83,7 @@ def encode_board(boards, colors):
     Each of those 81-vectors basically stand for a True/False-encoding for
     player, opponent, and "empty".
     """
+    colors = colors.reshape((len(colors), 1))
     player_board = np.where(
         colors==WHITE,
         boards==WHITE,
@@ -91,16 +97,16 @@ def encode_board(boards, colors):
     def normalize(board):
         return (board * 3 - 1)/np.sqrt(2)
 
-    out = np.concatenate(
-        (normalize(player_board),
-         normalize(opponent_board),
-         normalize(empty_board)),
-        axis=1)
     # out = np.concatenate(
-    #     (normalize(boards==BLACK),
-    #      normalize(boards==WHITE),
-    #      normalize(boards==EMPTY)),
+    #     (normalize(player_board),
+    #      normalize(opponent_board),
+    #      normalize(empty_board)),
     #     axis=1)
+    out = np.concatenate(
+        (player_board,
+         opponent_board,
+         empty_board),
+        axis=1)
 
     return out
 

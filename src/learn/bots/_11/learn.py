@@ -10,14 +10,14 @@ import src.learn.bots.utils as utils
 
 
 class Learn(CommonLearn):
-    def handle_data(self, training_data):
-        data = utils.separate_data(training_data)
+    def handle_data(self, data):
+        boards = data[data.columns[3:-2]].as_matrix()
 
-        y = utils.value_output(data['results'], data['colors'])
+        y = utils.value_output(data['result'], data['color'])
         X, _other = self.get_symmetries(
-            data['boards'], other_data=[y, data['colors']])
+            boards, other_data=[y, data['color']])
         y, colors = _other
-        X = np.append(X, colors, axis=1)
+        X = np.append(X, colors.reshape((len(colors), 1)), axis=1)
 
         print('X.shape:', X.shape)
         print('Y.shape:', y.shape)

@@ -2,6 +2,7 @@ import logging
 import os
 import sqlite3
 import numpy as np
+import pandas as pd
 import time
 from os.path import dirname, abspath
 from abc import ABC, abstractmethod
@@ -147,24 +148,22 @@ class BaseLearn(ABC):
 
     def run(self):
         start_time = time.time()
-        # self.log('starting the training with moves from '
-        #          + ('all ' if self.numb_games_to_learn_from == self.numb_all_games else '')
-        #          + str(self.numb_games_to_learn_from) + ' games as input ' + self.get_path_to_self())
 
         # Get data from Database
         cursor = self.db.cursor()
         cursor.execute(self.data_retrieval_command,
                        [self.training_size])
-        training_data = np.array(cursor.fetchall())  # this is a gigantic array, has millions of rows
+        training_data = pd.read_sql_query(
+            self.data_retrieval_command,
+            self.db,
+            params=[self.training_size])
         np.random.seed(1234)
-        np.random.shuffle(training_data)
-        _n = int(training_data.shape[0] * 0.9)
-        training_data, testing_data = training_data[:_n], training_data[_n:]
+        msk = np.random.rand(len(training_data)) < 0.9
+        training_data, testing_data = training_data[msk], training_data[~msk]
 
         self.log('working with {} rows'.format(len(training_data)))
         X_train, Y_train = self.handle_data(training_data)
         X_test, Y_test = self.handle_data(testing_data)
-        # del training_data; del testing_data
 
         # Save input and output dimensions for easier, more modular use
         # Implicit assumtion is that X, y are two-dimensional

@@ -20,7 +20,7 @@ class CommonLearn(BaseLearn):
         np.random.seed(1234)
         # Training size is here not the number of rows, but of games!
         # Max 150000
-        self.training_size = 1000000
+        self.training_size = 100
         # self.data_retrieval_command = '''
         #     WITH relevant_games as (
         #         SELECT id,
@@ -64,7 +64,7 @@ class CommonLearn(BaseLearn):
         return model
 
     def train(self, model, X, Y):
-        model.fit(X, Y, epochs=30, batch_size=10000)
+        model.fit(X, Y, epochs=3, batch_size=1000)
 
 
 if __name__ == '__main__':

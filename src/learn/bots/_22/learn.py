@@ -1,22 +1,21 @@
 """Policy Network with naive board encoding"""
 import os
-import numpy as np
 
 from src.learn.bots.CommonLearn import CommonLearn
 import src.learn.bots.utils as utils
 
 
 class Learn(CommonLearn):
-    def handle_data(self, training_data):
-        data = utils.separate_data(training_data)
+    def handle_data(self, data):
+        boards = data[data.columns[3:-2]].as_matrix()
 
-        boards, training_data = self.get_symmetries(
-            data['boards'], other_data=training_data)
-        data = utils.separate_data(training_data)
+        y = utils.policy_output(data['move'])
 
-        y = utils.policy_output(data['moves'])
+        boards, _other = self.get_symmetries(
+            boards, other_data=[y, data['color']])
+        y, colors = _other
 
-        X = utils.encode_board(boards, data['colors'])
+        X = utils.encode_board(boards, colors)
 
         print('X.shape:', X.shape)
         print('Y.shape:', y.shape)
