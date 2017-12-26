@@ -157,6 +157,8 @@ class BaseLearn(ABC):
             self.data_retrieval_command,
             self.db,
             params=[self.training_size])
+        # training_data = np.array(training_data)
+        print(training_data)
         np.random.seed(1234)
         msk = np.random.rand(len(training_data)) < 0.9
         training_data, testing_data = training_data[msk], training_data[~msk]
