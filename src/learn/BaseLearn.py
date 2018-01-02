@@ -24,7 +24,6 @@ class BaseLearn(ABC):
             exit(1)
 
         self.db = sqlite3.connect(db_path)
-        # cursor = self.db.cursor()
         self.logger = Utils.get_unique_file_logger(self, logging.INFO)
         # self.numb_all_games = cursor.execute(
         #     'SELECT COUNT(*) FROM meta').fetchone()[0]
@@ -150,9 +149,6 @@ class BaseLearn(ABC):
         start_time = time.time()
 
         # Get data from Database
-        cursor = self.db.cursor()
-        cursor.execute(self.data_retrieval_command,
-                       [self.training_size])
         training_data = pd.read_sql_query(
             self.data_retrieval_command,
             self.db,
