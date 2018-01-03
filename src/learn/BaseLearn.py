@@ -24,7 +24,6 @@ class BaseLearn(ABC):
             exit(1)
 
         self.db = sqlite3.connect(db_path)
-        # cursor = self.db.cursor()
         self.logger = Utils.get_unique_file_logger(self, logging.INFO)
         # self.numb_all_games = cursor.execute(
         #     'SELECT COUNT(*) FROM meta').fetchone()[0]
@@ -150,14 +149,10 @@ class BaseLearn(ABC):
         start_time = time.time()
 
         # Get data from Database
-        cursor = self.db.cursor()
-        cursor.execute(self.data_retrieval_command,
-                       [self.training_size])
         training_data = pd.read_sql_query(
             self.data_retrieval_command,
             self.db,
-            params=[self.training_size])
-        # training_data = np.array(training_data)
+            params=[self.training_size]).values
         np.random.seed(1234)
         msk = np.random.rand(len(training_data)) < 0.9
         training_data, testing_data = training_data[msk], training_data[~msk]
