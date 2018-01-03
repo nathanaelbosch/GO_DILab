@@ -11,6 +11,5 @@ class Bot_22(PolicyBot):
 
     @staticmethod
     def generate_nn_input(flat_board, color):
-        color = WHITE if color == 'w' else BLACK
         X = utils.encode_board(flat_board, color)
         return X

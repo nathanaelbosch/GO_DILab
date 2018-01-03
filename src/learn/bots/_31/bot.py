@@ -11,7 +11,6 @@ class Bot_31(ValueBot):
 
     @staticmethod
     def generate_nn_input(flat_board, color):
-        color = WHITE if color == 'w' else BLACK
         encoded_boards = utils.encode_board(flat_board, color)
         player_liberties = utils.get_liberties(flat_board, color)
         opponent_liberties = utils.get_liberties(flat_board, -color)

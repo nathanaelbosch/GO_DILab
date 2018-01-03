@@ -18,19 +18,20 @@ def separate_data(data):
     # print(data.dtypes)
     # results = data[data.columns[-2]].as_matrix()
     results = data.result
-    min_elo = data[data.columns[-1]].as_matrix()
-    print('Minimum Elo in Data:', min_elo[-1])
+    # min_elo = data[data.columns[-1]].as_matrix()
+    # print('Minimum Elo in Data:', min_elo[-1])
     ids = data[data.columns[0]]
     print('Unique games used in this data:', len(np.unique(ids)))
     colors = data[data.columns[1]].as_matrix()
     moves = data[data.columns[2]].as_matrix()
-    boards = data[data.columns[3:-2]].as_matrix()
+    boards = data[data.columns[3:-1]].as_matrix()
     out = {'results': results,
            'ids': ids,
            'colors': colors,
            'moves': moves,
            'boards': boards,
-           'min_elo': min_elo}
+           # 'min_elo': min_elo,
+           }
     return out
 
 
@@ -83,7 +84,10 @@ def encode_board(boards, colors):
     Each of those 81-vectors basically stand for a True/False-encoding for
     player, opponent, and "empty".
     """
-    colors = colors.reshape((len(colors), 1))
+    try:
+        colors = colors.reshape((len(colors), 1))
+    except AttributeError:
+        pass
     player_board = np.where(
         colors==WHITE,
         boards==WHITE,
@@ -128,7 +132,7 @@ def _liberties(binary_board, empty_board):
     return liberties
 
 
-def _liberties_to_planes(liberties, n=4):
+def _liberties_to_planes(liberties, n=3):
     """Reformat liberties to a more categorical encoding
 
     In goes the board with the liberties
@@ -154,7 +158,7 @@ def get_liberties_vectorized(flat_boards, color):
 
     liberties = np.apply_along_axis(foo, 1, data)
     planes = np.apply_along_axis(_liberties_to_planes, 1, liberties)
-    planes = planes.reshape((flat_boards.shape[0], 4*81))
+    planes = planes.reshape((planes.shape[0], -1))
     return planes
 
 
@@ -163,5 +167,5 @@ def get_liberties(flat_board, color):
     board = flat_board.reshape((9, 9))
     liberties = _liberties(board==color, board==EMPTY)
     planes = _liberties_to_planes(liberties)
-    planes = planes.reshape((1, 4*81))
+    planes = planes.reshape((1, -1))
     return planes

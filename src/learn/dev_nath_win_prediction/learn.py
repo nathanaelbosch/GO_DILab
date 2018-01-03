@@ -15,7 +15,7 @@ class Learn(BaseLearn):
     def __init__(self):
         super().__init__()
         self.training_size = 100000
-        self.data_retrieval_command = '''SELECT games.*, meta.result_text
+        self.data_retrieval_command = '''SELECT games.*, meta.result
                                          FROM games, meta
                                          WHERE games.id == meta.id
                                          AND meta.all_moves_imported!=0
@@ -23,21 +23,23 @@ class Learn(BaseLearn):
                                          LIMIT ?'''
 
     def handle_data(self, training_data):
-        results_array = training_data[:, -1]
+        # results_array = training_data[:, -1]
+        results_array = training_data.result
         # ids = training_data[:, 0]
         # colors = training_data[:, 1]
-        moves = training_data[:, 2].astype(int)
-        boards = training_data[:, 3:-1].astype(np.float64)
+        # moves = training_data[:, 2].astype(int)
+        # moves = training_data.move
+        boards = training_data[training_data.columns[3:-1]].as_matrix()
 
         # Moves as categorical data
-        moves[moves==-1] = 81
-        moves_categorical = to_categorical(moves)
-        assert moves_categorical.shape[1] == 82
-        assert (moves_categorical.sum(axis=1) == 1).all()
+        # moves[moves==-1] = 81
+        # moves_categorical = to_categorical(moves, 82)
+        # assert moves_categorical.shape[1] == 82
+        # assert (moves_categorical.sum(axis=1) == 1).all()
 
         # Generate symmetries:
-        boards, moves_categorical, results_array = self.get_symmetries(
-            boards, moves_categorical, other_data=results_array)
+        boards, results_array = self.get_symmetries(
+            boards, other_data=results_array)
 
         # Input: Board
         X = np.concatenate(

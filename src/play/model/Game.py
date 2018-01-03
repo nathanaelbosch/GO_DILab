@@ -240,6 +240,8 @@ class Game:
         return result_string
 
     def get_playable_locations(self, color) -> []:
+        if color in [BLACK, WHITE]:
+            color = 'w' if color == WHITE else 'b'
         empty_locations = np.argwhere(self.board == 0)
         empty_locations = [(l[0], l[1]) for l in empty_locations]
         valid_moves = [Move(is_pass=True)]  # passing is always a valid move

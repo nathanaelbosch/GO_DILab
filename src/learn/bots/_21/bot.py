@@ -10,6 +10,8 @@ class Bot_21(ValueBot):
 
     @staticmethod
     def generate_nn_input(flat_board, color):
-        color = WHITE if color == 'w' else BLACK
         X = utils.encode_board(flat_board, color)
         return X
+
+    def __str__(self):
+        return 'ValueBot2'

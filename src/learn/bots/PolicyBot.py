@@ -5,6 +5,7 @@ on how to play, given the output of some value network, is the same
 """
 from src.learn.BaseNNBot import BaseNNBot
 from src.play.model.Move import Move
+from src.play.model.Game import BLACK, WHITE
 
 
 class PolicyBot(BaseNNBot):
@@ -15,12 +16,12 @@ class PolicyBot(BaseNNBot):
         1. Directly generate a move
         2. Take the valid move with the highest score
         """
+        color = WHITE if color == 'w' else BLACK
         flat_board = flat_board.reshape(1, len(flat_board))
 
         # 1. Generate move probabilities
         inp = self.generate_nn_input(flat_board, color)
         prediction = self.model.predict(inp)[0]
-        print(prediction.shape)
 
         # 2. Look at each valid move and take the best one
         # Yes, this is looped, bad perf, but it is intuitively understandable

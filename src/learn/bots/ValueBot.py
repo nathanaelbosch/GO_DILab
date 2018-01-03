@@ -20,15 +20,15 @@ class ValueBot(BaseNNBot):
         2. Evaluate the probabilities of winning for each move
         3. Make the best move if there is a valid move that raises the probs
         """
+        color = WHITE if color == 'w' else BLACK
         flat_board = flat_board.reshape(1, len(flat_board))
-        # my_index = 0 if color == 'b' else 1
-        my_value = BLACK if color == 'b' else WHITE
+        my_value = color
 
-        inp = self.generate_nn_input(flat_board, color)
         # 1. Get current Win Probability
+        inp = self.generate_nn_input(flat_board, color)
         current_prob = self.model.predict(inp)
         assert np.sum(current_prob) == 1, np.sum(current_prob)
-        print(current_prob)
+        # print(current_prob)
 
         # 2. Evaluate all possible moves
         best_win_prob = current_prob[0, 0]

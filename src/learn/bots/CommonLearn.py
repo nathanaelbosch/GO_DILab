@@ -7,6 +7,7 @@ multiple bots.
 """
 import numpy as np
 
+import keras
 from keras.models import Sequential
 from keras.layers import Dense, Dropout
 
@@ -20,7 +21,9 @@ class CommonLearn(BaseLearn):
         np.random.seed(1234)
         # Training size is here not the number of rows, but of games!
         # Max 150000
-        self.training_size = 100
+        self.training_size = 400000
+
+        # self.training_size = 1000
         # self.data_retrieval_command = '''
         #     WITH relevant_games as (
         #         SELECT id,
@@ -40,31 +43,46 @@ class CommonLearn(BaseLearn):
         #     FROM relevant_games, games, meta
         #     WHERE relevant_games.id == games.id
         #     AND games.id == meta.id'''
+
         self.data_retrieval_command = '''
             SELECT *
             FROM elo_ordered_games
+            ORDER BY RANDOM()
             LIMIT ?'''
+
+        # self.data_retrieval_command = '''SELECT games.*,
+        #                                     meta.result,
+        #                                     meta.elo_black
+        #                                  FROM games, meta
+        #                                  WHERE games.id == meta.id
+        #                                  AND meta.all_moves_imported!=0
+        #                                  -- AND meta.elo_black > 1000
+        #                                  -- AND meta.elo_white > 1000
+        #                                  ORDER BY RANDOM()
+        #                                  LIMIT ?'''
 
     def setup_and_compile_model(self):
         model = Sequential()
         DROPOUT = 0
+        model.add(Dense(200, input_dim=self.input_dim, activation='relu'))
+        model.add(Dropout(DROPOUT))
         model.add(Dense(400, input_dim=self.input_dim, activation='relu'))
         model.add(Dropout(DROPOUT))
         model.add(Dense(200, input_dim=self.input_dim, activation='relu'))
         model.add(Dropout(DROPOUT))
-        model.add(Dense(200, input_dim=self.input_dim, activation='relu'))
-        model.add(Dropout(DROPOUT))
-        model.add(Dense(100, input_dim=self.input_dim, activation='relu'))
-        model.add(Dropout(DROPOUT))
+        # model.add(Dense(100, input_dim=self.input_dim, activation='relu'))
+        # model.add(Dropout(DROPOUT))
         model.add(Dense(self.output_dim, activation='softmax'))
+        adam = keras.optimizers.Adam()
         model.compile(
             loss='categorical_crossentropy',
-            optimizer='adam',
+            optimizer=adam,
             metrics=['accuracy'])
         return model
 
     def train(self, model, X, Y):
-        model.fit(X, Y, epochs=3, batch_size=1000)
+        model.fit(X, Y, epochs=30, batch_size=100000)
+        # model.fit(X, Y, epochs=3, batch_size=1000)
 
 
 if __name__ == '__main__':
