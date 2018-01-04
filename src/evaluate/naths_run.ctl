@@ -12,7 +12,7 @@ players = {
     'Bot_12' : Player("python -m src.play.controller.GTPengine -p Bot_12"),
     'Bot_21' : Player("python -m src.play.controller.GTPengine -p Bot_21"),
     'Bot_22' : Player("python -m src.play.controller.GTPengine -p Bot_22"),
-    'Bot_31' : Player("python -m s1rc.play.controller.GTPengine -p Bot_31"),
+    'Bot_31' : Player("python -m src.play.controller.GTPengine -p Bot_31"),
     'Bot_32' : Player("python -m src.play.controller.GTPengine -p Bot_32"),
     }
 
