@@ -24,6 +24,7 @@ from src.learn.bots._12.bot import Bot_12
 from src.learn.bots._22.bot import Bot_22
 from src.learn.bots._31.bot import Bot_31
 from src.learn.bots._32.bot import Bot_32
+from src.learn.mcts.MCTSBot import MCTSBot
 
 
 def parse_args():
@@ -73,7 +74,8 @@ def main():
         '22': Bot_22,
         '31': Bot_31,
         '32': Bot_32,
-        'dev_nn_kar': LibertyNNBot
+        'dev_nn_kar': LibertyNNBot,
+        'mcts': MCTSBot,
     }
     player1type = player_types[args.player1].__name__
     player2type = player_types[args.player2].__name__

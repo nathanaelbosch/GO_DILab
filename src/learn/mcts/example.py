@@ -3,12 +3,19 @@ https://jeffbradberry.com/posts/2015/09/intro-to-monte-carlo-tree-search/
 """
 import datetime
 from random import choice
+import random
 from math import log, sqrt
 import copy
 
+import numpy as np
+import keras
 
+from src import Utils
 from src.play.model.Game import Game, BLACK, WHITE, EMPTY
 from src.play.model.Board import Board as _Board
+
+from src.learn.bots._21.bot import Bot_21
+from src.learn.bots._22.bot import Bot_22
 
 
 class Board(Game):
@@ -59,6 +66,8 @@ class Board(Game):
         # are legal plays for the current player.
         state = state_history[-1]
         color = 'b' if self.current_player(state) == 1 else 'w'
+        board = self.from_tuple(state[0])
+        self.board = board
         return self.get_playable_locations(color)
 
     def winner(self, state_history):
@@ -109,18 +118,87 @@ class MonteCarlo(object):
         self.board = board
         self.states = []
 
-        seconds = kwargs.get('time', 30)
+        seconds = kwargs.get('time', 10)
+        self.verbose = kwargs.get('verbose', True)
         self.calculation_time = datetime.timedelta(seconds=seconds)
-        self.max_moves = kwargs.get('max_moves', 100)
+        self.max_moves = kwargs.get('max_moves', 20)
 
         self.wins = {}
         self.plays = {}
 
         self.C = kwargs.get('C', 1.4)
 
+        Utils.set_keras_backend('theano')
+
+        # Value Network
+        _arch = 'src/learn/bots/_21/model_architecture.json'
+        _weights = 'src/learn/bots/_21/model_weights.h5'
+        with open(_arch, 'r') as f:
+            self.value_net = keras.models.model_from_json(f.read())
+        self.value_net.load_weights(_weights)
+
+        # Policy Network
+        _arch = 'src/learn/bots/_22/model_architecture.json'
+        _weights = 'src/learn/bots/_22/model_weights.h5'
+        with open(_arch, 'r') as f:
+            self.policy_net = keras.models.model_from_json(f.read())
+        self.policy_net.load_weights(_weights)
+
     def update(self, state):
         # Takes a game state, and appends it to the history.
         self.states.append(state)
+
+    def estimate_outcome(self, state):
+        # 1. state to board
+        board = state[0]
+        board = Board.from_tuple(board)
+        flat_board = np.array(board).flatten()
+        flat_board = flat_board.reshape(1, len(flat_board))
+        color = WHITE if state[1] == 2 else BLACK
+
+        # 2. board to input
+        inp = Bot_21.generate_nn_input(flat_board, color)
+        # print(inp)
+
+        # 3. input to predicted outcome
+        pred = self.value_net.predict(inp)[0]
+        if np.argmax(pred) == 0:
+            winner = 1 if color == BLACK else 2
+        else:
+            winner = 2 if color == BLACK else 1
+        return winner
+
+    @staticmethod
+    def _weighted_choice(choices):
+        total = sum(w for c, w in choices)
+        r = random.uniform(0, total)
+        upto = 0
+        for c, w in choices:
+            if upto + w >= r:
+                return c
+            upto += w
+        assert False, "Shouldn't get here"
+
+    def policy_weighted_choice(self, state, choices):
+        board, player = state
+        flat_board = np.array(board).flatten()
+        flat_board = flat_board.reshape(1, len(flat_board))
+        color = WHITE if player == 2 else BLACK
+        inp = Bot_22.generate_nn_input(flat_board, color)
+        pred = self.policy_net.predict(inp)[0]
+        # print(pred)
+        # print(pred.shape)
+        weights = []
+        for move, state in choices:
+            if move.is_pass:
+                # print(move, 'has probability', pred[81])
+                weights.append(pred[81])
+            else:
+                # print('Move to flat idx:', move.to_flat_idx())
+                # print(move, 'has probability', pred[move.to_flat_idx()])
+                weights.append(pred[move.to_flat_idx()])
+        choices_and_weights = list(zip(choices, weights))
+        return self._weighted_choice(choices_and_weights)
 
     def get_play(self):
         # Causes the AI to calculate the best move from the
@@ -146,8 +224,9 @@ class MonteCarlo(object):
 
         # Display the number of calls of `run_simulation` and the
         # time elapsed.
-        print('Simulations run:', games, '\tTime elapsed:',
-              datetime.datetime.utcnow() - begin)
+        if self.verbose:
+            print('Simulations run:', games, '\tTime elapsed:',
+                  datetime.datetime.utcnow() - begin)
 
         # Pick the move with the highest percentage of wins.
         percent_wins, move = max((
@@ -159,18 +238,19 @@ class MonteCarlo(object):
         )
 
         # Display the stats for each possible play.
-        for x in sorted(
-            ((100 * self.wins.get((player, S), 0) /
-              self.plays.get((player, S), 1),
-              self.wins.get((player, S), 0),
-              self.plays.get((player, S), 0), p)
-             for p, S in moves_states),
-            reverse=True,
-            key=lambda x: x[0]
-        ):
-            print("{3}: {0:.2f}% ({1} / {2})".format(*x))
+        if self.verbose:
+            for x in sorted(
+                ((100 * self.wins.get((player, S), 0) /
+                  self.plays.get((player, S), 1),
+                  self.wins.get((player, S), 0),
+                  self.plays.get((player, S), 0), p)
+                 for p, S in moves_states),
+                reverse=True,
+                key=lambda x: x[0]
+            ):
+                print("{3}: {0:.2f}% ({1} / {2})".format(*x))
 
-        print("Maximum depth searched:", self.max_depth)
+            print("Maximum depth searched:", self.max_depth)
 
         return move
 
@@ -188,19 +268,24 @@ class MonteCarlo(object):
         for t in range(1, self.max_moves + 1):
             legal = self.board.legal_plays(states_copy)
             moves_states = [(p, self.board.next_state(state, p)) for p in legal]
-            if all(plays.get((player, S)) for p, S in moves_states):
-                # If we have stats on all of the legal moves here, use them.
-                log_total = log(
-                    sum(plays[(player, S)] for p, S in moves_states))
-                value, move, state = max(
-                    (((wins[(player, S)] / plays[(player, S)]) +
-                      self.C * sqrt(log_total / plays[(player, S)]), p, S)
-                     for p, S in moves_states),
-                    key=lambda x: x[0]
-                )
-            else:
-                # Otherwise, just make an arbitrary decision.
-                move, state = choice(moves_states)
+            # if all(plays.get((player, S)) for p, S in moves_states):
+            #     # If we have stats on all of the legal moves here, use them.
+            #     log_total = log(
+            #         sum(plays[(player, S)] for p, S in moves_states))
+            #     value, move, state = max(
+            #         (((wins[(player, S)] / plays[(player, S)]) +
+            #           self.C * sqrt(log_total / plays[(player, S)]), p, S)
+            #          for p, S in moves_states),
+            #         key=lambda x: x[0]
+            #     )
+            # else:
+            #     # Otherwise, just make an arbitrary decision.
+            #     move, state = choice(moves_states)
+
+            # Instead of `move, state = choice(move_states)`
+            # Do a sampling according to the policy network
+            # print(self.policy_weighted_choice(state, moves_states))
+            move, state = self.policy_weighted_choice(state, moves_states)
 
             states_copy.append(state)
 
@@ -225,6 +310,9 @@ class MonteCarlo(object):
                 # print(states_copy)
                 break
 
+        if not winner:
+            winner = self.estimate_outcome(states_copy[-1])
+
         for player, state in visited_states:
             if (player, state) not in plays:
                 continue
@@ -235,8 +323,12 @@ class MonteCarlo(object):
 
 def main():
     board = Board()
-    board = Board({'SZ': [3]})
-    mc = MonteCarlo(board)
+    # board = Board({'SZ': [3]})
+    mc = MonteCarlo(
+        board,
+        max_moves=2,
+        time=30,
+    )
     mc.update(board.start())
     print(mc.get_play())
 

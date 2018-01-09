@@ -91,10 +91,10 @@ class Game:
         # 1. Check if the player is passing and if this ends the game
         if move.is_pass:
             if not testing:
-                self.play_history.append(player + ':' + str(move))
+                self.play_history.append((player, move))
                 # Append the move to the move_history
                 if (len(self.play_history) > 2 and
-                        self.play_history[-2].split(':')[1] == 'pass'):
+                        self.play_history[-2][1].is_pass):
                     logger.info('Game finished!')
                     self.is_running = False
                     return self.evaluate_points()  # Game ended!
@@ -167,7 +167,7 @@ class Game:
             self.white_player_captured += white_player_captured
             if checking:
                 self.board_history.add(test_board.to_number())
-                self.play_history.append(player + ':' + str(move))
+                self.play_history.append((player, move))
 
     def __str__(self):
         """Game representation = Board representation"""
