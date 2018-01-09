@@ -35,20 +35,15 @@ class MovePredictionBot(BaseNNBot):
             input_board.append(1)
         else:
             input_board.append(-1)
-        pred = self.model.predict(np.array([input_board]).reshape(1,-1))
+        pred = self.model.predict(np.array([input_board]).reshape(1,-1))[0]
+        
+        for move in game.get_invalid_locations(color):
+            flat_idx = move.to_flat_idx(game.size)
+            pred[flat_idx] = -1
         max_idx = np.argmax(pred)
-        if max_idx is 81:
+        if max_idx == 81:
             return Move(is_pass=True)
         else:
-            board = pred[0][0:81] # strip away the pass class at pos 82
-            # set all invalid locations to -1 to avoid them being chosen
-            for move in game.get_invalid_locations(color):
-                flat_idx = move.to_flat_idx(game.size)
-                board[flat_idx] = -1
-            max_idx = np.argmax(board)
-
-            # if all moves are invalid, play pass
-            if board[max_idx] == -1:
+            if pred[max_idx] == -1:
                 return Move(is_pass=True)
-
             return Move.from_flat_idx(max_idx)
