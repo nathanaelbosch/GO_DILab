@@ -1,4 +1,5 @@
 import sqlite3
+import random
 
 import numpy as np
 import pandas as pd
@@ -24,11 +25,14 @@ class Learn():
             LIMIT ?'''
         self.db = sqlite3.connect(DB_PATH)
 
-        self.print_every = kwargs.get('print_every', 1000)
         self.epochs = kwargs.get('epochs', 5)
         self.batch_size = kwargs.get('batch_size', 100)
+        self.print_every = kwargs.get('print_every',
+            int(self.training_size*0.8/self.batch_size))
         self.conv_depth = kwargs.get('conv_depth', 5)
         self.no_cuda = kwargs.get('no_cuda', False)
+        self.symmetries = kwargs.get('symmetries', False)
+        self.test = kwargs.get('test', True)
 
     def get_data(self):
         data = pd.read_sql_query(
@@ -50,8 +54,13 @@ class Learn():
         X = X[~passes]
         y = y[~passes]
         assert X.shape[0] == y.shape[0], 'Something went wrong with the shapes'
+        assert (X.sum(axis=0).sum(axis=0) == X.shape[0]).all()
         print('X.shape:', X.shape, 'X.dtype:', X.dtype)
         print('y.shape:', y.shape, 'y.dtype:', y.dtype)
+
+        example = random.choice(range(X.shape[0]))
+        print('Example input:', X[example])
+        print('Example output:', y[example])
 
         return X, y
 
@@ -60,8 +69,10 @@ class Learn():
         rot = rot % 360
         if flip:
             board = np.fliplr(board)
+            move = np.fliplr(move)
         for i in range(0, rot, 90):
             board = np.rot90(board, axes=(2, 3))
+            move = np.rot90(move, axes=(1, 2))
         return board, move
 
     @staticmethod
@@ -100,17 +111,18 @@ class Learn():
             total = 0
             for i, data in enumerate(data_loader, 0):
 
-                optimizer.zero_grad()
-
                 # Handle symmetries
                 _inputs, _labels = data
                 _inp, _lab = _inputs.numpy(), _labels.numpy()
+                _syms = 8 if self.symmetries else 1
+                for j in range(_syms):
 
-                for i in range(8):
+                    optimizer.zero_grad()
+
                     moves = self.label_to_board(_lab)
                     inputs, moves = self.transform(
                         _inp, moves,
-                        rot=i*90, flip=i>=360)
+                        rot=j*90, flip=j>=360)
                     labels = self.board_to_label(moves)
                     inputs, labels = inputs.copy(), labels.copy()
                     inputs, labels, _, _ = self.to_pytorch(
@@ -129,16 +141,17 @@ class Learn():
                     loss = criterion(outputs, labels)
                     loss.backward()
 
-                optimizer.step()
+                    optimizer.step()
 
-                _, predicted = torch.max(outputs.data, 1)
-                total += labels.size(0)
-                correct += (predicted == labels.data).sum()
-                accuracy = (100 * correct / total)
+                    _, predicted = torch.max(outputs.data, 1)
+                    total += labels.size(0)
+                    correct += (predicted == labels.data).sum()
+                    accuracy = (100 * correct / total)
+
+                    running_loss += loss.data[0]
 
                 # print statistics
-                running_loss += loss.data[0]
-                if i % self.print_every == self.print_every-1:
+                if i % self.print_every == self.print_every - 1:
                     print('[{:d}, {:5d}]  loss: {:.3f}  accuracy: {:.3f}%'.
                           format(epoch + 1, i + 1,
                                  running_loss / self.print_every,
@@ -146,15 +159,21 @@ class Learn():
                     running_loss = 0.0
                     correct = 0
                     total = 0
-            self.test_model()
+            if self.test:
+                self.test_model()
         print('Finished Training')
 
-    def to_pytorch(self, X_train, y_train, X_test, y_test):
-        return (
-            torch.from_numpy(X_train).float(),
-            torch.from_numpy(y_train),
-            torch.from_numpy(X_test).float(),
-            torch.from_numpy(y_test))
+    def to_pytorch(self, X_train, y_train, X_test=None, y_test=None):
+        if X_test is not None and y_test is not None:
+            return (
+                torch.from_numpy(X_train).float(),
+                torch.from_numpy(y_train),
+                torch.from_numpy(X_test).float(),
+                torch.from_numpy(y_test))
+        else:
+            return (
+                torch.from_numpy(X_train).float(),
+                torch.from_numpy(y_train))
 
     def train_test_split(self, X, y, p=0.9):
         msk = np.random.rand(X.shape[0]) < 0.9
@@ -186,15 +205,19 @@ class Learn():
         data = self.get_data()
         X, y = self.format_data(data)
 
-        X_train, y_train, X_test, y_test = self.train_test_split(X, y)
-        X_train, y_train, X_test, y_test = self.to_pytorch(
-            X_train, y_train, X_test, y_test)
+        if self.test:
+            X_train, y_train, X_test, y_test = self.train_test_split(X, y)
+            X_train, y_train, X_test, y_test = self.to_pytorch(
+                X_train, y_train, X_test, y_test)
+            self.X_train, self.y_train, self.X_test, self.y_test = (
+                X_train, y_train, X_test, y_test)
+        else:
+            self.X_train, self.y_train = self.to_pytorch(X, y)
 
-        self.X_train, self.y_train, self.X_test, self.y_test = (
-            X_train, y_train, X_test, y_test)
-        self.model = ConvNet(X_train.size(), y_test.size())
+        self.model = ConvNet(self.X_train.size(), self.y_train.size())
         self.train_model()
-        self.test_model()
+        if self.test:
+            self.test_model()
         print('Save model')
         torch.save(self.model, 'src/learn/conv/convnet.pt')
 
@@ -203,9 +226,9 @@ def test():
     _l = Learn(
         training_size=10,
         batch_size=1,
-        print_every=1,
+        # print_every=1,
         epochs=3,
-        conv_depth=1,
+        conv_depth=2,
         no_cuda=True,
     )
     _l.data_retrieval_command = '''
@@ -219,10 +242,11 @@ def overfit():
     _l = Learn(
         training_size=10,
         batch_size=1,
-        print_every=9,
-        epochs=100,
-        conv_depth=1,
+        epochs=1000,
+        conv_depth=2,
         no_cuda=True,
+        test=False,
+        symmetries=True,
     )
     _l.data_retrieval_command = '''
         SELECT *
@@ -233,15 +257,16 @@ def overfit():
 
 def main():
     Learn(
-        training_size=100000,
-        batch_size=1000,
-        print_every=100,
-        epochs=1000,
+        training_size=1000000,
+        batch_size=3000,
+        print_every=50,
+        epochs=5000,
         conv_depth=2,
+        # symmetries=True,
     ).run()
 
 
 if __name__ == '__main__':
-    # main()
-    test()
+    main()
+    # test()
     # overfit()
