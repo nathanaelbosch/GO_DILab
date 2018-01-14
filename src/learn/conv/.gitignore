@@ -1,6 +1,8 @@
 *.pt
+*.pth
 *.h5
 *.json
 
 statistics
 nets
+saved_nets
