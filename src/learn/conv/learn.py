@@ -1,17 +1,28 @@
+import os
 import sqlite3
 import random
 
 import numpy as np
 import pandas as pd
+from tqdm import tqdm
 import torch
 from torch.autograd import Variable
 import torch.utils.data as Data
 
 import src.learn.bots.utils as utils
-from .model import ConvNet
+from .model_zero import ConvNet
 
 
 DB_PATH = 'data/db.sqlite'
+CONV_DIR = 'src/learn/conv'
+MODELS_DIR = os.path.join(CONV_DIR, 'nets')
+STATISTICS_DIR = os.path.join(CONV_DIR, 'statistics')
+if not os.path.exists(MODELS_DIR):
+    os.makedirs(MODELS_DIR)
+if not os.path.exists(STATISTICS_DIR):
+    os.makedirs(STATISTICS_DIR)
+for old_model in os.listdir(MODELS_DIR):
+    os.remove(os.path.join(MODELS_DIR, old_model))
 
 
 class Learn():
@@ -27,10 +38,10 @@ class Learn():
 
         self.epochs = kwargs.get('epochs', 5)
         self.batch_size = kwargs.get('batch_size', 100)
-        self.print_every = kwargs.get('print_every',
-            int(self.training_size*0.8/self.batch_size))
         self.conv_depth = kwargs.get('conv_depth', 5)
-        self.no_cuda = kwargs.get('no_cuda', False)
+        no_cuda = kwargs.get('no_cuda', False)
+        self.use_cuda = (
+            False if no_cuda or not torch.cuda.is_available() else True)
         self.symmetries = kwargs.get('symmetries', False)
         self.test = kwargs.get('test', True)
 
@@ -44,23 +55,34 @@ class Learn():
     def format_data(self, data):
         boards = data[data.columns[3:-2]].as_matrix()
 
-        passes = data['move'] == -1
-        y = data['move']
-        y[passes] = 81
-        y = y.values
+        # Input
         X = utils.encode_board(boards, data['color'])
         X = X.reshape(-1, 3, 9, 9).astype(float)
 
-        X = X[~passes]
-        y = y[~passes]
+        # Policy Output
+        passes = data['move'] == -1
+        policy_y = data['move']
+        policy_y[passes] = 81
+        policy_y = policy_y.values
+
+        # Value Output
+        value_y = utils.value_output(data['result'], data['color'])
+        value_y = value_y[:, 0]
+
+        y = np.concatenate(
+            (policy_y.reshape(-1, 1), value_y.reshape(-1, 1)), axis=1)
+        # X = X[~passes]
+        # y = y[~passes]
         assert X.shape[0] == y.shape[0], 'Something went wrong with the shapes'
         assert (X.sum(axis=0).sum(axis=0) == X.shape[0]).all()
         print('X.shape:', X.shape, 'X.dtype:', X.dtype)
         print('y.shape:', y.shape, 'y.dtype:', y.dtype)
+        print('Policy Ouput shape:', policy_y.shape)
+        print('Value Ouput shape:', value_y.shape)
 
-        example = random.choice(range(X.shape[0]))
-        print('Example input:', X[example])
-        print('Example output:', y[example])
+        # example = random.choice(range(X.shape[0]))
+        # print('Example input:', X[example])
+        # print('Example output:', y[example])
 
         return X, y
 
@@ -92,75 +114,160 @@ class Learn():
     def train_model(self):
         model = self.model
         X, y = self.X_train, self.y_train
-        criterion = torch.nn.CrossEntropyLoss()
+        policy_criterion = torch.nn.CrossEntropyLoss()
+        value_criterion = torch.nn.MSELoss()
         optimizer = torch.optim.Adam(model.parameters())
 
-        if not self.no_cuda and torch.cuda.is_available():
+        if self.use_cuda:
             print('Using cuda')
             model.cuda()
-            # criterion.cuda()
+            policy_criterion.cuda()
+            value_criterion.cuda()
 
-        dataset = Data.TensorDataset(data_tensor=X, target_tensor=y)
-        data_loader = Data.DataLoader(
-            dataset, batch_size=self.batch_size, shuffle=True)
+        trainset = Data.TensorDataset(data_tensor=X, target_tensor=y)
+        train_loader = Data.DataLoader(
+            trainset, batch_size=self.batch_size, shuffle=True)
+        testset = Data.TensorDataset(
+            data_tensor=self.X_test, target_tensor=self.y_test)
+        val_loader = Data.DataLoader(
+            testset, batch_size=self.batch_size, shuffle=True)
+
+        results = {
+            'policy_loss': [],
+            'value_loss': [],
+            'train_policy_acc': [],
+            'val_policy_acc': [],
+            'train_value_acc': [],
+            'val_value_acc': [],
+        }
 
         print('Start training')
-        for epoch in range(self.epochs):
-            running_loss = 0.0
-            correct = 0
-            total = 0
-            for i, data in enumerate(data_loader, 0):
+        for epoch in range(1, self.epochs + 1):
+            train_bar = tqdm(train_loader)
+            running_results = {
+                'batch_sizes': 0,
+                'policy_loss': 0, 'policy_correct': 0, 'policy_accuracy': 0,
+                'value_loss': 0, 'value_correct': 0, 'value_accuracy': 0}
 
-                # Handle symmetries
-                _inputs, _labels = data
-                _inp, _lab = _inputs.numpy(), _labels.numpy()
-                _syms = 8 if self.symmetries else 1
-                for j in range(_syms):
+            model.train()
+            for data, targets in train_bar:
+                batch_size = data.size(0)
+                running_results['batch_sizes'] += batch_size
 
-                    optimizer.zero_grad()
+                data = Variable(data)
+                targets = Variable(targets)
+                if self.use_cuda:
+                    data = data.cuda()
+                    targets = targets.cuda()
+                policy_target, value_target = targets[:, 0], targets[:, 1]
 
-                    moves = self.label_to_board(_lab)
-                    inputs, moves = self.transform(
-                        _inp, moves,
-                        rot=j*90, flip=j>=360)
-                    labels = self.board_to_label(moves)
-                    inputs, labels = inputs.copy(), labels.copy()
-                    inputs, labels, _, _ = self.to_pytorch(
-                        inputs, labels, inputs, labels)
+                model.zero_grad()
+                policy_output, value_output = model(data)
+                policy_loss = policy_criterion(policy_output, policy_target)
+                value_loss = value_criterion(
+                    value_output, value_target.float())
+                loss = policy_loss + 0.01 * value_loss
+                loss.backward()
+                optimizer.step()
 
-                    if not self.no_cuda and torch.cuda.is_available():
-                        inputs = Variable(inputs.cuda())
-                        labels = Variable(labels.cuda())
-                    else:
-                        inputs, labels = Variable(inputs), Variable(labels)
+                _, predicted_move = torch.max(policy_output.data, 1)
+                running_results['policy_loss'] += (
+                    policy_loss.data[0] * batch_size)
+                running_results['policy_correct'] += (
+                    predicted_move == policy_target.data).sum()
+                running_results['policy_accuracy'] = (
+                    100 * running_results['policy_correct'] /
+                    running_results['batch_sizes'])
 
-                    # print('Inputs in cuda:', inputs.is_cuda)
-                    # print('Model in cutorch.from_numpy(boards.copy()))da:', next(model.parameters()).is_cuda)
-                    outputs = model(inputs)
+                predicted_result = torch.round(value_output.data).view(-1)
+                running_results['value_loss'] += (
+                    value_loss.data[0] * batch_size)
+                running_results['value_correct'] += (
+                    predicted_result == value_target.data.float()).sum()
+                running_results['value_accuracy'] = (
+                    100 * running_results['value_correct'] /
+                    running_results['batch_sizes'])
 
-                    loss = criterion(outputs, labels)
-                    loss.backward()
+                total_seen = running_results['batch_sizes']
+                train_bar.set_description(
+                    desc=('[{:d}/{:d}] Policy-Loss: {:.4f} ' +
+                          'Value-Loss: {:.4f} Policy-Accuracy: {:.2f}% ' +
+                          'Value-Accuracy: {:.2f}%').format(
+                              epoch, self.epochs,
+                              running_results['policy_loss'] / total_seen,
+                              running_results['value_loss'] / total_seen,
+                              running_results['policy_accuracy'],
+                              running_results['value_accuracy']))
 
-                    optimizer.step()
+            model.eval()
+            # val_bar = tqdm(val_loader)
+            val_results = {
+                'policy_correct': 0, 'policy_accuracy': 0, 'batch_sizes': 0,
+                'value_correct': 0, 'value_accuracy': 0}
+            for data, target in val_loader:
+                batch_size = data.size(0)
+                val_results['batch_sizes'] += batch_size
 
-                    _, predicted = torch.max(outputs.data, 1)
-                    total += labels.size(0)
-                    correct += (predicted == labels.data).sum()
-                    accuracy = (100 * correct / total)
+                data = Variable(data, volatile=True)
+                target = Variable(target, volatile=True)
+                if self.use_cuda:
+                    data = data.cuda()
+                    target = target.cuda()
+                policy_target, value_target = target[:, 0], target[:, 1]
 
-                    running_loss += loss.data[0]
+                policy_output, value_output = model(data)
 
-                # print statistics
-                if i % self.print_every == self.print_every - 1:
-                    print('[{:d}, {:5d}]  loss: {:.3f}  accuracy: {:.3f}%'.
-                          format(epoch + 1, i + 1,
-                                 running_loss / self.print_every,
-                                 accuracy))
-                    running_loss = 0.0
-                    correct = 0
-                    total = 0
-            if self.test:
-                self.test_model()
+                _, predicted_move = torch.max(policy_output.data, 1)
+                val_results['policy_correct'] += (
+                    predicted_move == policy_target.data).sum()
+                val_results['policy_accuracy'] = (
+                    100 * val_results['policy_correct'] /
+                    val_results['batch_sizes'])
+
+                predicted_result = torch.round(value_output.data).view(-1)
+                val_results['value_correct'] += (
+                    predicted_result == value_target.data.float()).sum()
+                val_results['value_accuracy'] = (
+                    100 * val_results['value_correct'] /
+                    val_results['batch_sizes'])
+
+            print('[Validation] Policy-accuracy: {:.2f} Value-accuracy {:.2f}'
+                  .format(val_results['policy_accuracy'],
+                          val_results['value_accuracy']))
+
+            # Save model parameters
+            torch.save(
+                model.state_dict(),
+                os.path.join(MODELS_DIR, 'convnet_epoch_{}.pth'.format(epoch)))
+
+            # Save statistics
+            total_seen = running_results['batch_sizes']
+            results['policy_loss'].append(
+                running_results['policy_loss'] / total_seen)
+            results['value_loss'].append(
+                running_results['value_loss'] / total_seen)
+            results['train_policy_acc'].append(
+                running_results['policy_accuracy'])
+            results['train_value_acc'].append(
+                running_results['value_accuracy'])
+            results['val_policy_acc'].append(
+                val_results['policy_accuracy'])
+            results['val_value_acc'].append(
+                val_results['value_accuracy'])
+            if epoch % 1 == 0 and epoch != 0:
+                data_frame = pd.DataFrame(
+                    data={'policy_loss': results['policy_loss'],
+                          'value_loss': results['value_loss'],
+                          'val_policy_acc': results['val_policy_acc'],
+                          'val_value_acc': results['val_value_acc'],
+                          'train_policy_acc': results['train_policy_acc'],
+                          'train_value_acc': results['train_value_acc'],
+                          },
+                    index=range(1, epoch + 1))
+                filename = 'train_results.csv'
+                filepath = os.path.join(STATISTICS_DIR, filename)
+                data_frame.to_csv(filepath, index_label='epoch')
+
         print('Finished Training')
 
     def to_pytorch(self, X_train, y_train, X_test=None, y_test=None):
@@ -179,28 +286,6 @@ class Learn():
         msk = np.random.rand(X.shape[0]) < 0.9
         return X[msk], y[msk], X[~msk], y[~msk]
 
-    def test_model(self):
-        dataset = Data.TensorDataset(
-            data_tensor=self.X_test, target_tensor=self.y_test)
-        test_loader = Data.DataLoader(
-            dataset, batch_size=self.batch_size, shuffle=True)
-        correct = 0
-        total = 0
-        for data in test_loader:
-            inputs, labels = data
-            if not self.no_cuda and torch.cuda.is_available():
-                inputs = Variable(inputs.cuda())
-                labels = Variable(labels.cuda())
-            else:
-                inputs, labels = Variable(inputs), Variable(labels)
-            outputs = self.model(inputs)
-            _, predicted = torch.max(outputs.data, 1)
-            total += labels.size(0)
-            correct += (predicted == labels.data).sum()
-
-        print('Test Accuracy: {:.3f}%'.format(
-            100 * correct / total))
-
     def run(self):
         data = self.get_data()
         X, y = self.format_data(data)
@@ -214,22 +299,21 @@ class Learn():
         else:
             self.X_train, self.y_train = self.to_pytorch(X, y)
 
-        self.model = ConvNet(self.X_train.size(), self.y_train.size())
+        self.model = ConvNet(
+            self.X_train.size(),
+            self.y_train.size(),
+            self.batch_size)
+
         self.train_model()
-        if self.test:
-            self.test_model()
-        print('Save model')
-        torch.save(self.model, 'src/learn/conv/convnet.pt')
 
 
 def test():
     _l = Learn(
         training_size=10,
         batch_size=1,
-        # print_every=1,
         epochs=3,
         conv_depth=2,
-        no_cuda=True,
+        # no_cuda=True,
     )
     _l.data_retrieval_command = '''
         SELECT *
@@ -240,13 +324,13 @@ def test():
 
 def overfit():
     _l = Learn(
-        training_size=10,
-        batch_size=1,
+        training_size=100,
+        batch_size=10,
         epochs=1000,
-        conv_depth=2,
+        conv_depth=9,
         no_cuda=True,
-        test=False,
-        symmetries=True,
+        # test=False,
+        # symmetries=True,
     )
     _l.data_retrieval_command = '''
         SELECT *
@@ -256,13 +340,14 @@ def overfit():
 
 
 def main():
+    # 1m training size for 8GB machine
+    # 2.5m for 16GB
     Learn(
-        training_size=1000000,
-        batch_size=3000,
-        print_every=50,
+        training_size=2500000,
+        batch_size=1000,
         epochs=5000,
-        conv_depth=2,
-        # symmetries=True,
+        conv_depth=19,
+        symmetries=True,
     ).run()
 
 
