@@ -1,3 +1,6 @@
 *.pt
 *.h5
 *.json
+
+statistics
+nets
