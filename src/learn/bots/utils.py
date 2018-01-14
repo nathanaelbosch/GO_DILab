@@ -7,7 +7,7 @@ multiple bots.
 """
 import numpy as np
 from scipy import ndimage
-from keras.utils import to_categorical
+# from keras.utils import to_categorical
 
 from src.play.model.Game import BLACK, WHITE, EMPTY
 
@@ -61,7 +61,8 @@ def value_output(results, colors):
 
 def policy_output(moves):
     moves[moves==-1] = 81
-    out = to_categorical(moves, num_classes=82)
+    out = moves.argmax(axis=1)
+    # out = to_categorical(moves, num_classes=82)
     assert out.shape[1] == 82
     assert (out.sum(axis=1) == 1).all()
 
