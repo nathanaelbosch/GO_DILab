@@ -10,14 +10,14 @@ class ConvNet(nn.Module):
     with a single 1x1 convolution at the end (while having a different bias
     for each entry)
     """
-    def __init__(self, input_dim, output_dim, batch_size, conv_depth=5):
+    def __init__(self, in_channels, conv_depth=9):
         super(ConvNet, self).__init__()
 
-        _, in_channels, in1, in2 = input_dim
+        # _, in_channels, in1, in2 = input_dim
         n_filters = 64
 
         self.conv_block = ConvolutionalBlock(in_channels, n_filters)
-        residual_blocks = [ResidualBlock(n_filters, n_filters, batch_size)
+        residual_blocks = [ResidualBlock(n_filters, n_filters)
                            for _ in range(conv_depth)]
         self.residual_blocks = nn.Sequential(*residual_blocks)
 
@@ -51,7 +51,7 @@ class ConvolutionalBlock(nn.Module):
 
 
 class ResidualBlock(nn.Module):
-    def __init__(self, in_channels, n_filters, batch_size):
+    def __init__(self, in_channels, n_filters):
         super(ResidualBlock, self).__init__()
         self.conv1 = nn.Conv2d(
             in_channels=in_channels,
@@ -112,7 +112,7 @@ class ValueHead(nn.Module):
         self.fc1 = nn.Linear(9*9, hidden_units)
         self.relu2 = nn.ReLU()
         self.fc2 = nn.Linear(hidden_units, 1)
-        self.sigmoid = nn.Sigmoid()
+        self.tanh = nn.Tanh()
 
     def forward(self, x):
         x = self.conv(x)
@@ -122,5 +122,5 @@ class ValueHead(nn.Module):
         x = self.fc1(x)
         x = self.relu2(x)
         x = self.fc2(x)
-        x = self.sigmoid(x)
+        x = self.tanh(x)
         return x
