@@ -19,6 +19,7 @@ keras
 tensorflow
     # save_weights from keras requires this
 h5py
+tqdm
 
 
 # PLAY
