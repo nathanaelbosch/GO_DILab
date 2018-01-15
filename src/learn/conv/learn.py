@@ -9,7 +9,8 @@ import torch
 from torch.autograd import Variable
 import torch.utils.data as Data
 
-import src.learn.bots.utils as utils
+from .utils import (encode_board, value_output, policy_output_categorical,
+                    network_input)
 from .model_zero import ConvNet
 
 
@@ -53,36 +54,30 @@ class Learn():
         return data
 
     def format_data(self, data):
-        boards = data[data.columns[3:-2]].as_matrix()
+        boards = data[data.columns[3:-2]].as_matrix().reshape(-1, 9, 9)
 
         # Input
-        X = utils.encode_board(boards, data['color'])
-        X = X.reshape(-1, 3, 9, 9).astype(float)
+        colors = data['color'].values
+        X = network_input(boards, colors)
 
         # Policy Output
-        passes = data['move'] == -1
-        policy_y = data['move']
-        policy_y[passes] = 81
-        policy_y = policy_y.values
+        policy_y = policy_output_categorical(data['move'].values)
 
         # Value Output
-        value_y = utils.value_output(data['result'], data['color'])
-        value_y = value_y[:, 0]
+        value_y = value_output(data['result'], data['color'].values)
 
-        y = np.concatenate(
-            (policy_y.reshape(-1, 1), value_y.reshape(-1, 1)), axis=1)
-        # X = X[~passes]
-        # y = y[~passes]
+        y = np.column_stack((policy_y, value_y))
+
         assert X.shape[0] == y.shape[0], 'Something went wrong with the shapes'
-        assert (X.sum(axis=0).sum(axis=0) == X.shape[0]).all()
-        print('X.shape:', X.shape, 'X.dtype:', X.dtype)
-        print('y.shape:', y.shape, 'y.dtype:', y.dtype)
+
+        print('X.shape:', X.shape, '\tX.dtype:', X.dtype)
+        print('y.shape:', y.shape, '\ty.dtype:', y.dtype)
         print('Policy Ouput shape:', policy_y.shape)
         print('Value Ouput shape:', value_y.shape)
 
-        # example = random.choice(range(X.shape[0]))
-        # print('Example input:', X[example])
-        # print('Example output:', y[example])
+        example = random.choice(range(X.shape[0]))
+        print('Example input:', X[example])
+        print('Example output:', y[example])
 
         return X, y
 
@@ -179,7 +174,7 @@ class Learn():
                     100 * running_results['policy_correct'] /
                     running_results['batch_sizes'])
 
-                predicted_result = torch.round(value_output.data).view(-1)
+                predicted_result = torch.sign(value_output.data).view(-1)
                 running_results['value_loss'] += (
                     value_loss.data[0] * batch_size)
                 running_results['value_correct'] += (
@@ -224,7 +219,7 @@ class Learn():
                     100 * val_results['policy_correct'] /
                     val_results['batch_sizes'])
 
-                predicted_result = torch.round(value_output.data).view(-1)
+                predicted_result = torch.sign(value_output.data).view(-1)
                 val_results['value_correct'] += (
                     predicted_result == value_target.data.float()).sum()
                 val_results['value_accuracy'] = (
@@ -299,20 +294,18 @@ class Learn():
         else:
             self.X_train, self.y_train = self.to_pytorch(X, y)
 
-        self.model = ConvNet(
-            self.X_train.size(),
-            self.y_train.size(),
-            self.batch_size)
+        in_channels = self.X_train.size(1)
+        self.model = ConvNet(in_channels, conv_depth=19)
 
         self.train_model()
 
 
 def test():
     _l = Learn(
-        training_size=10,
-        batch_size=1,
+        training_size=100,
+        batch_size=10,
         epochs=3,
-        conv_depth=2,
+        conv_depth=19,
         # no_cuda=True,
     )
     _l.data_retrieval_command = '''
@@ -340,13 +333,13 @@ def overfit():
 
 
 def main():
-    # 1m training size for 8GB machine
-    # 2.5m for 16GB
+    # Training Size: 8GB:1m, 16GB:2m
+    # Batch Size: TitanX:15000, 1050:
     Learn(
-        training_size=2500000,
-        batch_size=1000,
+        training_size=2000000,
+        batch_size=15000,
         epochs=5000,
-        conv_depth=19,
+        conv_depth=9,
         symmetries=True,
     ).run()
 
