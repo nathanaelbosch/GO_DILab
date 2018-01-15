@@ -25,6 +25,7 @@ from src.learn.bots._22.bot import Bot_22
 from src.learn.bots._31.bot import Bot_31
 from src.learn.bots._32.bot import Bot_32
 from src.learn.mcts.MCTSBot import MCTSBot
+from src.learn.conv.bot import ConvBot_value, ConvBot_policy
 
 
 def parse_args():
@@ -46,7 +47,7 @@ def parse_args():
     parser.add_argument(
         '-s', '--sleep',
         help='time in seconds to sleep at the end of each turn',
-        default='0.2')
+        default='0')
     return parser.parse_args()
 
 
@@ -76,6 +77,8 @@ def main():
         '32': Bot_32,
         'dev_nn_kar': LibertyNNBot,
         'mcts': MCTSBot,
+        'conv_value': ConvBot_value,
+        'conv_policy': ConvBot_policy,
     }
     player1type = player_types[args.player1].__name__
     player2type = player_types[args.player2].__name__
