@@ -78,10 +78,10 @@ class GTPcontroller(threading.Thread):
 
         self.broadcast('quit')
         print('\n' + self.game.__str__())
-        if self.view is not None:
-            self.view.game_ended()
-        else:
-            print('Final result:', self.game.evaluate_points())
+        # if self.view is not None:
+        #     self.view.game_ended()
+        # else:
+        print('Final result:', self.game.evaluate_points())
         sys.exit(0)
 
     def handle_input_from_engine(self, engine, input):
