@@ -1,8 +1,11 @@
 import copy
 
 import numpy as np
-import torch
-from torch.autograd import Variable
+try:
+    import torch
+    from torch.autograd import Variable
+except Exception:
+    pass
 
 from src.play.model.Move import Move
 from src.play.model.Game import BLACK, WHITE

@@ -1,5 +1,8 @@
-import torch
-from torch import nn
+try:
+    import torch
+    from torch import nn
+except Exception:
+    pass
 # import torch.nn.functional as F
 
 
