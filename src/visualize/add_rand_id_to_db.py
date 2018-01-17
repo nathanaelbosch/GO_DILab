@@ -6,11 +6,14 @@ import numpy as np
 DB_PATH = 'data/db.sqlite'
 conn = sqlite3.connect(DB_PATH)
 
+print('[#1] Get data')
 data = pd.read_sql_query('''SELECT *
                             FROM elo_ordered_games''', conn)
 
+print('[#2] Add ids')
 data['rand_id'] = np.random.permutation(len(data))
 
+print('[#3] Write table')
 data.to_sql('elo_ordered_games', con=conn)
 
 """
