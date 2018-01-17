@@ -56,7 +56,7 @@ def main():
     model.compile(loss='mse', optimizer=rms)
 
 
-    epochs = 50000
+    epochs = 100000
     gamma = 0.975
     epsilon = 1
     batchSize = 50
@@ -144,11 +144,11 @@ def main():
         if epsilon > 0.1:
             epsilon -= (1 / epochs)
             #print ('epsilon : ' + str(epsilon))
-        if i % 5000 == 0:
-            name = 'hard_atari_' + str(i) + '.h5'
+        if i % 20000 == 0 and i > 0:
+            name = 'src/learn/RL_Atari/hard_atari_' + str(i) + '.h5'
             model.save(name)
 
-    model.save('test_model_2.h5')
+    model.save('src/learn/RL_Atari/test_model_final.h5')
     #print (col_coord,row_coord)
     # game = Game()
     # game = init_game(game,col_coord,row_coord)
