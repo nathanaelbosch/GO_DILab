@@ -14,9 +14,9 @@ from keras.layers.core import Dense, Dropout, Activation
 from keras.optimizers import RMSprop
 
 def main():
-    model = keras.models.load_model('hard_atari2.h5')
+    model = keras.models.load_model('test_model_1.h5')
     game = Game()
-    col_coord, row_coord = 1,0
+    col_coord, row_coord = 1,6
     game = init_game(game,col_coord,row_coord)
     print('new game')
     print(game)

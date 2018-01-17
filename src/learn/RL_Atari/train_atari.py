@@ -115,7 +115,7 @@ def main():
             epsilon -= (1 / epochs)
             #print ('epsilon : ' + str(epsilon))
 
-    model.save('test_model.h5')
+    model.save('test_model_1.h5')
     #print (col_coord,row_coord)
     # game = Game()
     # game = init_game(game,col_coord,row_coord)
