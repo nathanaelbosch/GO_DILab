@@ -25,7 +25,7 @@ class ConvNet(nn.Module):
         self.residual_blocks = nn.Sequential(*residual_blocks)
 
         self.policy_head = PolicyHead(n_filters)
-        self.value_head = ValueHead(n_filters)
+        self.value_head = ValueHead(n_filters, hidden_units=n_filters)
 
     def forward(self, x):
         x = self.conv_block(x)
@@ -104,7 +104,7 @@ class PolicyHead(nn.Module):
 
 
 class ValueHead(nn.Module):
-    def __init__(self, in_channels, hidden_units=64):
+    def __init__(self, in_channels, hidden_units=256):
         super(ValueHead, self).__init__()
         self.conv = nn.Conv2d(
             in_channels=in_channels,

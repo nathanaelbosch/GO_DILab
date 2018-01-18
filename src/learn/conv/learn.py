@@ -32,8 +32,8 @@ class Learn():
         self.training_size = kwargs.get('training_size', 1000)
         self.data_retrieval_command = '''
             SELECT *
-            FROM elo_ordered_games
-            ORDER BY RANDOM()
+            FROM games_to_use
+            ORDER BY rand_id
             LIMIT ?'''
         self.db = sqlite3.connect(DB_PATH)
 
@@ -54,7 +54,7 @@ class Learn():
         return data
 
     def format_data(self, data):
-        boards = data[data.columns[3:-2]].as_matrix().reshape(-1, 9, 9)
+        boards = data[data.columns[3:-3]].as_matrix().reshape(-1, 9, 9)
 
         # Input
         colors = data['color'].values
@@ -333,14 +333,20 @@ def overfit():
 
 
 def main():
-    # Training Size: 8GB:1m, 16GB:2m
-    # Batch Size: TitanX:15000, 1050:
+    titanx_16ram_kwargs = {
+        'training_size': 2000000,
+        'batch_size': 1000,
+    }
+    nv1050_8ram_kwargs = {
+        'training_size': 1000000,
+        'batch_size': 2000,
+    }
+
     Learn(
-        training_size=2000000,
-        batch_size=15000,
+        **titanx_16ram_kwargs,
+        # **nv1050_8ram_kwargs,
         epochs=5000,
-        conv_depth=9,
-        symmetries=True,
+        conv_depth=19,
     ).run()
 
 
