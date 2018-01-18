@@ -13,11 +13,11 @@ class ConvNet(nn.Module):
     with a single 1x1 convolution at the end (while having a different bias
     for each entry)
     """
-    def __init__(self, in_channels, conv_depth=9):
+    def __init__(self, in_channels, conv_depth=9, n_filters=64):
         super(ConvNet, self).__init__()
 
         # _, in_channels, in1, in2 = input_dim
-        n_filters = 64
+        n_filters = n_filters
 
         self.conv_block = ConvolutionalBlock(in_channels, n_filters)
         residual_blocks = [ResidualBlock(n_filters, n_filters)

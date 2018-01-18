@@ -1,17 +1,30 @@
 import os
 import sqlite3
 import random
+import logging
 
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
-import torch
-from torch.autograd import Variable
-import torch.utils.data as Data
+try:
+    import torch
+    from torch.autograd import Variable
+    import torch.utils.data as Data
+except Exception:
+    pass
 
 from .utils import (encode_board, value_output, policy_output_categorical,
                     network_input)
 from .model_zero import ConvNet
+
+
+logging.basicConfig(
+    level=logging.INFO,
+    # format='%(asctime)s|%(levelname)s|%(name)s|%(message)s',
+    format='%(levelname)s|%(name)s|%(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S')
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 
 DB_PATH = 'data/db.sqlite'
@@ -32,14 +45,14 @@ class Learn():
         self.training_size = kwargs.get('training_size', 1000)
         self.data_retrieval_command = '''
             SELECT *
-            FROM games_to_use
-            ORDER BY rand_id
+            FROM games
             LIMIT ?'''
         self.db = sqlite3.connect(DB_PATH)
 
         self.epochs = kwargs.get('epochs', 5)
         self.batch_size = kwargs.get('batch_size', 100)
         self.conv_depth = kwargs.get('conv_depth', 5)
+        self.n_filters = kwargs.get('n_filters', 64)
         no_cuda = kwargs.get('no_cuda', False)
         self.use_cuda = (
             False if no_cuda or not torch.cuda.is_available() else True)
@@ -54,7 +67,11 @@ class Learn():
         return data
 
     def format_data(self, data):
-        boards = data[data.columns[3:-3]].as_matrix().reshape(-1, 9, 9)
+
+        # Get boards
+        _bi = 4               # Board column index start
+        assert data.columns[_bi] == 'loc_0_0_0'
+        boards = data[data.columns[_bi:(_bi+81)]].as_matrix().reshape(-1, 9, 9)
 
         # Input
         colors = data['color'].values
@@ -70,14 +87,14 @@ class Learn():
 
         assert X.shape[0] == y.shape[0], 'Something went wrong with the shapes'
 
-        print('X.shape:', X.shape, '\tX.dtype:', X.dtype)
-        print('y.shape:', y.shape, '\ty.dtype:', y.dtype)
-        print('Policy Ouput shape:', policy_y.shape)
-        print('Value Ouput shape:', value_y.shape)
+        logger.debug('X.shape:', X.shape, '\tX.dtype:', X.dtype)
+        logger.debug('y.shape:', y.shape, '\ty.dtype:', y.dtype)
+        logger.debug('Policy Ouput shape:', policy_y.shape)
+        logger.debug('Value Ouput shape:', value_y.shape)
 
         example = random.choice(range(X.shape[0]))
-        print('Example input:', X[example])
-        print('Example output:', y[example])
+        logger.debug('Example input:', X[example])
+        logger.debug('Example output:', y[example])
 
         return X, y
 
@@ -115,6 +132,9 @@ class Learn():
 
         if self.use_cuda:
             print('Using cuda')
+            if torch.cuda.device_count() > 1:
+                print("Let's use", torch.cuda.device_count(), "GPUs!")
+                model = torch.nn.DataParallel(model)
             model.cuda()
             policy_criterion.cuda()
             value_criterion.cuda()
@@ -282,7 +302,9 @@ class Learn():
         return X[msk], y[msk], X[~msk], y[~msk]
 
     def run(self):
+        logger.info('[0] Get data from db')
         data = self.get_data()
+        logger.info('[1] Format data')
         X, y = self.format_data(data)
 
         if self.test:
@@ -295,28 +317,28 @@ class Learn():
             self.X_train, self.y_train = self.to_pytorch(X, y)
 
         in_channels = self.X_train.size(1)
-        self.model = ConvNet(in_channels, conv_depth=19)
+        logger.info('[2] Create model')
+        self.model = ConvNet(
+            in_channels,
+            conv_depth=self.conv_depth,
+            n_filters=self.n_filters)
 
+        logger.info('[3] Start the training')
         self.train_model()
 
 
 def test():
-    _l = Learn(
+    Learn(
         training_size=100,
         batch_size=10,
         epochs=3,
         conv_depth=19,
         # no_cuda=True,
-    )
-    _l.data_retrieval_command = '''
-        SELECT *
-        FROM elo_ordered_games
-        LIMIT ?'''
-    _l.run()
+    ).run()
 
 
 def overfit():
-    _l = Learn(
+    Learn(
         training_size=100,
         batch_size=10,
         epochs=1000,
@@ -324,29 +346,43 @@ def overfit():
         no_cuda=True,
         # test=False,
         # symmetries=True,
-    )
-    _l.data_retrieval_command = '''
-        SELECT *
-        FROM elo_ordered_games
-        LIMIT ?'''
-    _l.run()
+    ).run()
+
+
+"""
+Notes on training size:
+10m: 15GB
+nolimit: 42
+"""
 
 
 def main():
-    titanx_16ram_kwargs = {
-        'training_size': 2000000,
-        'batch_size': 1000,
-    }
-    nv1050_8ram_kwargs = {
-        'training_size': 1000000,
-        'batch_size': 2000,
+    SETUPS = {
+        'google_cloud': {
+            'training_size': 1,
+            'batch_size': 1
+        },
+        'dgx1': {
+            'training_size': 1000000,
+            'batch_size': 8*1000
+        },
+        'titanx_16ram_kwargs': {
+            'training_size': 2000000,
+            # Batch size depends on model size: BIG:1000, normal:10000
+            'batch_size': 1000,
+        },
+        'nv1050_8ram_kwargs': {
+            'training_size': 1000000,
+            'batch_size': 2000,
+        }
     }
 
     Learn(
-        **titanx_16ram_kwargs,
+        **SETUPS['dgx1'],
         # **nv1050_8ram_kwargs,
         epochs=5000,
         conv_depth=19,
+        n_filters=256,
     ).run()
 
 
