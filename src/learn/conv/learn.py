@@ -364,7 +364,7 @@ def main():
         },
         'dgx1': {
             'training_size': 20000000,
-            'batch_size': 8*2000
+            'batch_size': 8*1000
         },
         'titanx_16ram_kwargs': {
             'training_size': 2000000,
