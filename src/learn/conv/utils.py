@@ -48,6 +48,13 @@ def network_input(boards, player_values):
     return X
 
 
+def minimal_network_input(boards, player_values):
+    """Stronglyer inspired by AlphaGO"""
+    encoded_boards = encode_board(boards, player_values).astype(float)
+    X = encoded_boards[:, :2, :, :]
+    return X
+
+
 def policy_output_categorical(moves):
     moves[moves==-1] = 81
     return moves
