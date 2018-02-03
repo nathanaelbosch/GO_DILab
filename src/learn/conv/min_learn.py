@@ -14,7 +14,7 @@ except Exception:
     pass
 
 from .utils import policy_output_categorical, minimal_network_input
-from .min_model import ConvNet
+from .our_model import ConvNet
 
 
 logging.basicConfig(
