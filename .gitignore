@@ -1,3 +1,5 @@
+.DS_Store
+
 # Don't git data
 data/
 !data/some_game.sgf
