@@ -19,7 +19,7 @@ class Learn(BaseLearn):
 
     def __init__(self):
         super().__init__()
-        self.training_size = 500000
+        self.training_size = 1000000
         self.data_retrieval_command = '''SELECT games.*
                                          FROM games, meta
                                          WHERE games.id == meta.id
@@ -60,15 +60,15 @@ class Learn(BaseLearn):
     def setup_and_compile_model(self):
         model = Sequential()
         model.add( Dense(200, kernel_initializer=initializers.RandomNormal(stddev=1 / math.sqrt(82)), bias_initializer='normal', input_dim=82, activation='relu'))
-        model.add(Dense(200, kernel_initializer=initializers.RandomNormal(stddev=1 / math.sqrt(200)), bias_initializer='normal', activation='relu'))        
+        model.add( Dense(400, kernel_initializer=initializers.RandomNormal(stddev=1 / math.sqrt(200)), bias_initializer='normal', activation='relu'))
+        model.add( Dense(200, kernel_initializer=initializers.RandomNormal(stddev=1 / math.sqrt(400)), bias_initializer='normal', activation='relu'))
         model.add(Dense(82, kernel_initializer=initializers.RandomNormal(stddev=1/math.sqrt(200)), bias_initializer='normal', activation='softmax'))
-        # sgd = optimizers.SGD(lr=0.1, decay=1e-6, momentum=0.9, nesterov=True)
         # softmax guarantees a probability distribution over the 81 locations and pass
         model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
         return model
 
     def train(self, model, X, Y):
-        model.fit(X, Y, epochs=100, batch_size=1000)
+        model.fit(X, Y, epochs=200, batch_size=1000)
 
 
     def get_path_to_self(self):

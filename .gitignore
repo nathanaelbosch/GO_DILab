@@ -28,6 +28,7 @@ ringmaster
 *.games/
 gomill*
 
+.venv-linux
 
 ##################################################################
 # All the rest here is the preset python .gitignore from github ;)
