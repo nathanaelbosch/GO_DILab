@@ -2,6 +2,7 @@ import os
 import sqlite3
 import random
 import logging
+import argparse
 
 import numpy as np
 import pandas as pd
@@ -295,7 +296,7 @@ class Learn():
         self.train_model()
 
 
-def test():
+def test_run():
     Learn(
         training_size=100,
         batch_size=10,
@@ -306,31 +307,8 @@ def test():
     ).run()
 
 
-def overfit():
-    Learn(
-        training_size=100,
-        batch_size=10,
-        epochs=1000,
-        conv_depth=9,
-        no_cuda=True,
-        # test=False,
-        # symmetries=True,
-    ).run()
-
-
-"""
-Notes on training size:
-10m: 15GB
-nolimit: 42
-"""
-
-
-def main():
+def run(setup):
     SETUPS = {
-        'google_cloud': {
-            'training_size': 1,
-            'batch_size': 1
-        },
         'dgx1': {
             'training_size': 20000000,
             'batch_size': 8*1000
@@ -350,15 +328,27 @@ def main():
     }
 
     Learn(
-        **SETUPS['titanx_16ram'],
-        # **nv1050_8ram_kwargs,
+        **SETUPS[setup],
         epochs=5000,
         conv_depth=9,
         n_filters=256,
     ).run()
 
 
+def main():
+    parser = argparse.ArgumentParser(description='Process some integers.')
+    parser.add_argument('--test', action='store_true')
+    parser.add_argument(
+        '--run', type=str, help='Which PC setup to take, e.g. dgx1')
+    args = parser.parse_args()
+
+    if args.test:
+        test_run()
+    elif args.run:
+        run(args.run)
+    else:
+        print('Declare test run or setup for real run')
+
+
 if __name__ == '__main__':
     main()
-    # test()
-    # overfit()
