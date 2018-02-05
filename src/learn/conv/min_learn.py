@@ -313,6 +313,10 @@ def run(setup):
             'training_size': 200000000,
             'batch_size': 8*1000
         },
+        'dgx1_smaller': {
+            'training_size': 5000000,
+            'batch_size': 8*1000
+        },
         'titanx_16ram': {
             'training_size': 1700000,
             # Batch size depends on model size:
@@ -321,7 +325,7 @@ def run(setup):
             # 9depth32filter:8000
             'batch_size': 8000,
         },
-        'nv1050_8ram_kwargs': {
+        'nv1050_8ram': {
             'training_size': 1000000,
             'batch_size': 2000,
         }
