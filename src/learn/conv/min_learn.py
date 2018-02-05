@@ -296,14 +296,14 @@ class Learn():
         self.train_model()
 
 
-def test_run(training_size=100):
+def test_run(training_size=100, no_cuda=False):
     Learn(
         training_size=training_size,
         batch_size=10,
         epochs=3,
         conv_depth=1,
         n_filters=3,
-        no_cuda=True,
+        no_cuda=no_cuda,
     ).run()
 
 
@@ -338,6 +338,7 @@ def run(setup):
 def main():
     parser = argparse.ArgumentParser(description='Process some integers.')
     parser.add_argument('--test', action='store_true')
+    parser.add_argument('--cuda', action='store_true')
     parser.add_argument(
         '--run', type=str, help='Which PC setup to take, e.g. dgx1')
     parser.add_argument(
@@ -346,7 +347,7 @@ def main():
     args = parser.parse_args()
 
     if args.test:
-        test_run(args.training_size)
+        test_run(args.training_size, ~args.cuda)
     elif args.run:
         run(args.run)
     else:
