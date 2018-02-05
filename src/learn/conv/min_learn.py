@@ -50,6 +50,8 @@ class Learn():
         self.symmetries = kwargs.get('symmetries', False)
         self.test = kwargs.get('test', True)
 
+        self.single_gpu = kwargs.get('single_gpu', False)
+
         self.dir_setup()
 
     def dir_setup(self):
@@ -133,18 +135,20 @@ class Learn():
         policy_criterion = torch.nn.CrossEntropyLoss()
         optimizer = torch.optim.Adam(model.parameters())
 
+        gpus_used = 1
         if self.use_cuda:
             print('Using cuda')
-            if torch.cuda.device_count() > 1:
+            if torch.cuda.device_count() > 1 and not self.single_gpu:
                 print("Let's use", torch.cuda.device_count(), "GPUs!")
                 model = torch.nn.DataParallel(model)
+                gpus_used = torch.cuda.device_count()
             model.cuda()
             policy_criterion.cuda()
 
         trainset = Data.TensorDataset(data_tensor=X, target_tensor=y)
         train_loader = Data.DataLoader(
             trainset, batch_size=self.batch_size, shuffle=True,
-            num_workers=4*torch.cuda.device_count() if self.use_cuda else 4)
+            num_workers=4*gpus_used)
         testset = Data.TensorDataset(
             data_tensor=self.X_test, target_tensor=self.y_test)
         val_loader = Data.DataLoader(
@@ -307,7 +311,7 @@ def test_run(training_size=100, no_cuda=True):
     ).run()
 
 
-def run(setup):
+def run(setup, single_gpu=False):
     SETUPS = {
         'dgx1': {
             'training_size': 200000000,
@@ -336,6 +340,7 @@ def run(setup):
         epochs=5000,
         conv_depth=9,
         n_filters=256,
+        single_gpu=single_gpu,
     ).run()
 
 
@@ -343,6 +348,7 @@ def main():
     parser = argparse.ArgumentParser(description='Process some integers.')
     parser.add_argument('--test', action='store_true')
     parser.add_argument('--cuda', action='store_true')
+    parser.add_argument('--single-gpu', action='store_true')
     parser.add_argument(
         '--run', type=str, help='Which PC setup to take, e.g. dgx1')
     parser.add_argument(
@@ -353,7 +359,7 @@ def main():
     if args.test:
         test_run(args.training_size, ~args.cuda)
     elif args.run:
-        run(args.run)
+        run(args.run, args.single_gpu)
     else:
         print('Declare test run or setup for real run')
 
