@@ -19,30 +19,19 @@ from .our_model import ConvNet
 
 
 ###############################################################################
-# Logger
-###############################################################################
-logging.basicConfig(
-    level=logging.INFO,
-    # format='%(asctime)s|%(levelname)s|%(name)s|%(message)s',
-    format='%(levelname)s|%(name)s|%(message)s',
-    datefmt='%Y-%m-%d %H:%M:%S')
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
-logger.info('Logger set up')
-
-###############################################################################
 # Parse args
 ###############################################################################
-logger.info('Parse args')
 parser = argparse.ArgumentParser(description='PyTorch Example')
 parser.add_argument('--no-cuda', action='store_true',
                     help='Disable CUDA')
 parser.add_argument('--single-gpu', action='store_true',
                     help='Only use a signle gpu')
-parser.add_argument('--epochs', type=int, default=1000,
+parser.add_argument('-e', '--epochs', type=int, default=1000,
                     help='Epochs to train')
+parser.add_argument('--logger-level', type=str, default='info',
+                    help='Logging level')
 parser.add_argument('-n', '--training-size', type=int, default=1000)
-parser.add_argument('--batch-size', type=int, default=1000)
+parser.add_argument('-b', '--batch-size', type=int, default=1000)
 parser.add_argument('-d', '--depth', type=int, default=9,
                     help='Number of residual blocks')
 parser.add_argument('-f', '--filters', type=int, default=256,
@@ -51,6 +40,18 @@ parser.add_argument('-f', '--filters', type=int, default=256,
 args = parser.parse_args()
 args.cuda = not args.no_cuda and torch.cuda.is_available()
 args.num_gpu = 0 if not args.cuda else (1 if args.single_gpu else torch.cuda.device_count())
+
+
+###############################################################################
+# Logger
+###############################################################################
+logging.basicConfig(
+    level=logging.INFO,
+    # format='%(asctime)s|%(levelname)s|%(name)s|%(message)s',
+    format='%(levelname)s|%(name)s|%(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S')
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.getLevelName(args.logger_level.upper()))
 
 
 ###############################################################################
@@ -129,6 +130,9 @@ X, y, X_test, y_test = (
 # Create model
 ###############################################################################
 logger.info('Create model')
+logger.debug(
+    'Model with : {} channels, {} residual blocks, {} conv filters'.format(
+        X.size(1), args.depth, args.filters))
 model = ConvNet(
     X.size(1),
     conv_depth=args.depth,
@@ -138,7 +142,7 @@ model = ConvNet(
 ###############################################################################
 # Train
 ###############################################################################
-logger.info('Start training')
+logger.info('Prepare training')
 policy_criterion = torch.nn.CrossEntropyLoss()
 optimizer = torch.optim.Adam(model.parameters())
 
@@ -168,7 +172,7 @@ results = {
     'val_value_acc': [],
 }
 
-print('Start training')
+logger.info('Start training loop')
 for epoch in range(1, args.epochs + 1):
     train_bar = tqdm(train_loader)
     running_results = {
