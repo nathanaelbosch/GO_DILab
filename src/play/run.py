@@ -26,6 +26,7 @@ from src.learn.bots._31.bot import Bot_31
 from src.learn.bots._32.bot import Bot_32
 from src.learn.mcts.MCTSBot import MCTSBot
 from src.learn.conv.bot import ConvBot_value, ConvBot_policy
+from src.learn.conv.bot2 import NewBot
 
 
 def parse_args():
@@ -79,6 +80,7 @@ def main():
         'mcts': MCTSBot,
         'conv_value': ConvBot_value,
         'conv_policy': ConvBot_policy,
+        'new_bot': NewBot,
     }
     player1type = player_types[args.player1].__name__
     player2type = player_types[args.player2].__name__
