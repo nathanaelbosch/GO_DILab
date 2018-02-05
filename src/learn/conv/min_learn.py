@@ -296,9 +296,9 @@ class Learn():
         self.train_model()
 
 
-def test_run():
+def test_run(training_size=100):
     Learn(
-        training_size=100,
+        training_size=training_size,
         batch_size=10,
         epochs=3,
         conv_depth=1,
@@ -310,7 +310,7 @@ def test_run():
 def run(setup):
     SETUPS = {
         'dgx1': {
-            'training_size': 20000000,
+            'training_size': 200000000,
             'batch_size': 8*1000
         },
         'titanx_16ram': {
@@ -340,10 +340,13 @@ def main():
     parser.add_argument('--test', action='store_true')
     parser.add_argument(
         '--run', type=str, help='Which PC setup to take, e.g. dgx1')
+    parser.add_argument(
+        '-n', '--training-size', type=int, default=100,
+        help='Which PC setup to take, e.g. dgx1')
     args = parser.parse_args()
 
     if args.test:
-        test_run()
+        test_run(args.training_size)
     elif args.run:
         run(args.run)
     else:
