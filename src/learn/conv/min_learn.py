@@ -296,7 +296,7 @@ class Learn():
         self.train_model()
 
 
-def test_run(training_size=100, no_cuda=False):
+def test_run(training_size=100, no_cuda=True):
     Learn(
         training_size=training_size,
         batch_size=10,
