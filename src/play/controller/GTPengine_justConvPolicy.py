@@ -25,7 +25,7 @@ class GTPengine:
             sys.exit(1)
 
         print('player type: ' + player_type_str);
-        self.bot = ConvBot_policy
+        self.bot = ConvBot_policy()
         self.controller = None
         self.stdin = None
         self.stdout = None
