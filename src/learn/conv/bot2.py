@@ -19,7 +19,7 @@ class NewBot():
 
         # original saved file with DataParallel
         self.model = ConvNet(in_channels=2, conv_depth=9, n_filters=256)
-        file = 'src/learn/conv/9depth_256filters_5.0mtsize/nets/epoch8.pth'
+        file = 'src/learn/conv/saved/9depth_256filters_15.0mtsize/nets/epoch15.pth'
         state_dict = torch.load(
             file, map_location=lambda storage, loc: storage)
         # create new OrderedDict that does not contain `module.`
