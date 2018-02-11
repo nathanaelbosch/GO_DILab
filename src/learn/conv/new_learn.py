@@ -144,7 +144,9 @@ model = ConvNet(
 ###############################################################################
 logger.info('Prepare training')
 policy_criterion = torch.nn.CrossEntropyLoss()
-optimizer = torch.optim.Adam(model.parameters())
+optimizer = torch.optim.Adam(
+    model.parameters(),
+    weight_decay=10e-4)
 
 if args.cuda:
     print('Using cuda')
@@ -174,7 +176,7 @@ results = {
 
 logger.info('Start training loop')
 for epoch in range(1, args.epochs + 1):
-    train_bar = tqdm(train_loader)
+    train_bar = tqdm(train_loader, dynamic_ncols=True)
     running_results = {
         'batch_sizes': 0,
         'policy_loss': 0, 'policy_correct': 0, 'policy_accuracy': 0}
@@ -214,7 +216,7 @@ for epoch in range(1, args.epochs + 1):
                       running_results['policy_accuracy']))
 
     model.eval()
-    # val_bar = tqdm(val_loader)
+    # val_bar = (val_loader)
     val_results = {
         'policy_correct': 0, 'policy_accuracy': 0, 'batch_sizes': 0,
         'value_correct': 0, 'value_accuracy': 0}
