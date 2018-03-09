@@ -64,10 +64,13 @@ class CommonLearn(BaseLearn):
     def setup_and_compile_model(self):
         model = Sequential()
         DROPOUT = 0
+        # 100
         model.add(Dense(200, input_dim=self.input_dim, activation='relu'))
         model.add(Dropout(DROPOUT))
+        # 200
         model.add(Dense(400, input_dim=self.input_dim, activation='relu'))
         model.add(Dropout(DROPOUT))
+        # 100
         model.add(Dense(200, input_dim=self.input_dim, activation='relu'))
         model.add(Dropout(DROPOUT))
         # model.add(Dense(100, input_dim=self.input_dim, activation='relu'))

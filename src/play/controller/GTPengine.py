@@ -24,6 +24,7 @@ from src.learn.bots._31.bot import Bot_31
 from src.learn.bots._32.bot import Bot_32
 from src.learn.mcts.MCTSBot import MCTSBot
 from src.learn.conv.bot import ConvBot_value, ConvBot_policy
+from src.learn.conv.bot2 import NewBot
 
 
 class GTPengine:
@@ -51,6 +52,7 @@ class GTPengine:
             MCTSBot,
             ConvBot_value,
             ConvBot_policy,
+            NewBot
         ]
         for player_type in player_types_arr:
             self.player_types[player_type.__name__.lower()] = player_type

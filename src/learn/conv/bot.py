@@ -30,7 +30,8 @@ class ConvBot():
 
         self.verbose = verbose
 
-    def generate_input(self, board, player_value):
+    @staticmethod
+    def generate_input(board, player_value):
         X = network_input(board.reshape(1, 9, 9), np.array([player_value]))
         X = Variable(torch.from_numpy(X.astype(float)).float(), volatile=True)
         return X

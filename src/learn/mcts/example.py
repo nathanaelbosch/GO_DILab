@@ -8,14 +8,18 @@ from math import log, sqrt
 import copy
 
 import numpy as np
-import keras
+try:
+    import torch
+    from torch.autograd import Variable
+except Exception:
+    pass
 
 from src import Utils
 from src.play.model.Game import Game, BLACK, WHITE, EMPTY
 from src.play.model.Board import Board as _Board
 
-from src.learn.bots._21.bot import Bot_21
-from src.learn.bots._22.bot import Bot_22
+from src.learn.conv.bot import ConvBot
+from src.learn.conv.model_zero import ConvNet
 
 
 class Board(Game):
@@ -128,21 +132,14 @@ class MonteCarlo(object):
 
         self.C = kwargs.get('C', 1.4)
 
-        Utils.set_keras_backend('theano')
-
         # Value Network
-        _arch = 'src/learn/bots/_21/model_architecture.json'
-        _weights = 'src/learn/bots/_21/model_weights.h5'
-        with open(_arch, 'r') as f:
-            self.value_net = keras.models.model_from_json(f.read())
-        self.value_net.load_weights(_weights)
-
-        # Policy Network
-        _arch = 'src/learn/bots/_22/model_architecture.json'
-        _weights = 'src/learn/bots/_22/model_weights.h5'
-        with open(_arch, 'r') as f:
-            self.policy_net = keras.models.model_from_json(f.read())
-        self.policy_net.load_weights(_weights)
+        self.model = ConvNet(in_channels=4, conv_depth=5)
+        self.model.load_state_dict(torch.load(
+            'src/learn/conv/saved_nets/5depth_2.5m_tanh.pth',
+            map_location=lambda storage, loc: storage))
+        for param in self.model.parameters():
+            param.requires_grad = False
+        self.model.eval()
 
     def update(self, state):
         # Takes a game state, and appends it to the history.
@@ -157,12 +154,12 @@ class MonteCarlo(object):
         color = WHITE if state[1] == 2 else BLACK
 
         # 2. board to input
-        inp = Bot_21.generate_nn_input(flat_board, color)
+        inp = ConvBot.generate_input(flat_board, color)
         # print(inp)
 
         # 3. input to predicted outcome
-        pred = self.value_net.predict(inp)[0]
-        if np.argmax(pred) == 0:
+        _, value_output = self.model(inp)
+        if float(value_output) > 0:
             winner = 1 if color == BLACK else 2
         else:
             winner = 2 if color == BLACK else 1
@@ -170,6 +167,9 @@ class MonteCarlo(object):
 
     @staticmethod
     def _weighted_choice(choices):
+        min_value = min(w for c, w in choices)
+        # print(min_value)
+        choices = [(c, w-min_value) for c, w in choices]
         total = sum(w for c, w in choices)
         r = random.uniform(0, total)
         upto = 0
@@ -177,6 +177,7 @@ class MonteCarlo(object):
             if upto + w >= r:
                 return c
             upto += w
+        print(total, upto)
         assert False, "Shouldn't get here"
 
     def policy_weighted_choice(self, state, choices):
@@ -184,8 +185,9 @@ class MonteCarlo(object):
         flat_board = np.array(board).flatten()
         flat_board = flat_board.reshape(1, len(flat_board))
         color = WHITE if player == 2 else BLACK
-        inp = Bot_22.generate_nn_input(flat_board, color)
-        pred = self.policy_net.predict(inp)[0]
+        inp = ConvBot.generate_input(flat_board, color)
+        policy_output, _ = self.model(inp)
+        pred = policy_output.data.numpy()[0]
         # print(pred)
         # print(pred.shape)
         weights = []
@@ -286,6 +288,7 @@ class MonteCarlo(object):
             # Do a sampling according to the policy network
             # print(self.policy_weighted_choice(state, moves_states))
             move, state = self.policy_weighted_choice(state, moves_states)
+            # print('Trying', move)
 
             states_copy.append(state)
 

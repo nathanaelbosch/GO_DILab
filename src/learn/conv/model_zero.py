@@ -13,11 +13,11 @@ class ConvNet(nn.Module):
     with a single 1x1 convolution at the end (while having a different bias
     for each entry)
     """
-    def __init__(self, in_channels, conv_depth=9):
+    def __init__(self, in_channels, conv_depth=9, n_filters=64):
         super(ConvNet, self).__init__()
 
         # _, in_channels, in1, in2 = input_dim
-        n_filters = 64
+        n_filters = n_filters
 
         self.conv_block = ConvolutionalBlock(in_channels, n_filters)
         residual_blocks = [ResidualBlock(n_filters, n_filters)
@@ -25,7 +25,7 @@ class ConvNet(nn.Module):
         self.residual_blocks = nn.Sequential(*residual_blocks)
 
         self.policy_head = PolicyHead(n_filters)
-        self.value_head = ValueHead(n_filters)
+        self.value_head = ValueHead(n_filters, hidden_units=n_filters)
 
     def forward(self, x):
         x = self.conv_block(x)
@@ -104,7 +104,7 @@ class PolicyHead(nn.Module):
 
 
 class ValueHead(nn.Module):
-    def __init__(self, in_channels, hidden_units=64):
+    def __init__(self, in_channels, hidden_units=256):
         super(ValueHead, self).__init__()
         self.conv = nn.Conv2d(
             in_channels=in_channels,
